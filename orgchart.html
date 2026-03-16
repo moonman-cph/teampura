@@ -924,6 +924,71 @@
     opacity: 0; margin: 0 16px;
   }
   #add-emp-modal-backdrop.visible #add-emp-modal-panel { transform: translateY(0) scale(1); opacity: 1; }
+
+  /* Department Settings modal */
+  #dept-settings-modal-backdrop {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 1000;
+    display: flex; align-items: center; justify-content: center;
+    opacity: 0; pointer-events: none; transition: opacity 0.18s ease;
+  }
+  #dept-settings-modal-backdrop.visible { opacity: 1; pointer-events: all; }
+  #dept-settings-modal-panel {
+    background: var(--surface); border-radius: 14px; width: 100%; max-width: 500px;
+    max-height: 88vh; display: flex; flex-direction: column;
+    box-shadow: 0 20px 60px rgba(16,24,40,0.18), 0 4px 16px rgba(16,24,40,0.08);
+    transform: translateY(10px) scale(0.98);
+    transition: transform 0.18s ease, opacity 0.18s ease;
+    opacity: 0; margin: 0 16px;
+  }
+  #dept-settings-modal-backdrop.visible #dept-settings-modal-panel {
+    transform: translateY(0) scale(1); opacity: 1;
+  }
+  #dept-settings-modal-panel .modal-body { overflow-y: auto; flex: 1; }
+
+  /* Title editor section */
+  .title-section-divider {
+    border: none; border-top: 1px solid var(--border); margin: 4px 0 12px;
+  }
+  .title-section-heading {
+    font-size: 11px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase;
+    color: var(--text-muted); margin-bottom: 10px;
+  }
+  .title-level-group { margin-bottom: 14px; }
+  .title-level-header {
+    display: flex; align-items: baseline; gap: 8px; margin-bottom: 6px;
+  }
+  .title-level-label { font-size: 12px; font-weight: 600; color: var(--text-secondary); }
+  .title-level-band {
+    font-size: 11px; color: var(--text-muted);
+    font-variant-numeric: tabular-nums;
+  }
+  .title-item-list { display: flex; flex-direction: column; gap: 4px; margin-bottom: 6px; }
+  .title-item {
+    display: flex; align-items: center; gap: 6px;
+    padding: 5px 8px; border-radius: 6px; background: var(--bg);
+    border: 1px solid var(--border);
+  }
+  .title-text { flex: 1; font-size: 12.5px; color: var(--text-primary); }
+  .title-remove-btn {
+    flex-shrink: 0; width: 18px; height: 18px; border-radius: 4px; border: none;
+    background: transparent; color: var(--text-muted); cursor: pointer; font-size: 11px;
+    display: flex; align-items: center; justify-content: center; line-height: 1;
+    transition: background 0.1s, color 0.1s;
+  }
+  .title-remove-btn:hover { background: #fee2e2; color: #ef4444; }
+  .title-add-row { display: flex; gap: 6px; }
+  .title-add-row .form-control { font-size: 12.5px; padding: 6px 10px; }
+  .title-add-row .btn { flex-shrink: 0; padding: 6px 12px; font-size: 12px; white-space: nowrap; }
+
+  /* Gear icon on dept header */
+  .dept-settings-btn {
+    flex-shrink: 0; width: 22px; height: 22px; border-radius: 5px; border: none;
+    background: transparent; color: var(--text-muted); cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    opacity: 0; transition: opacity 0.1s, background 0.1s;
+  }
+  .dept-header:hover .dept-settings-btn { opacity: 1; }
+  .dept-settings-btn:hover { background: var(--bg); color: var(--text-secondary); }
 </style>
 </head>
 <body>
@@ -1012,6 +1077,12 @@
           <path d="M8 1v1.5M8 13.5V15M1 8h1.5M13.5 8H15M3.05 3.05l1.06 1.06M11.89 11.89l1.06 1.06M3.05 12.95l1.06-1.06M11.89 4.11l1.06-1.06"/>
         </svg>
         Settings
+      </a>
+      <a class="nav-item" href="#" id="reset-data-btn" style="color:var(--danger,#e05252);">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M1 1l14 14M1 8a7 7 0 0 1 12-4.9M15 8a7 7 0 0 1-12 4.9"/>
+        </svg>
+        Reset Data
       </a>
     </div>
   </div>
@@ -1193,44 +1264,182 @@
   </div>
 </div>
 
+<div id="dept-settings-modal-backdrop">
+  <div id="dept-settings-modal-panel">
+    <div class="modal-header">
+      <span class="modal-title" id="dept-settings-modal-title">Department Settings</span>
+      <button class="modal-close" id="dept-settings-close-btn" title="Close">&#x2715;</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">Name <span style="color:#ef4444">*</span></label>
+        <input type="text" id="dept-settings-name" class="form-control" maxlength="40" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Description <span style="color:var(--text-muted);font-weight:400">(optional)</span></label>
+        <input type="text" id="dept-settings-desc" class="form-control" maxlength="80" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Color</label>
+        <div class="dept-color-swatches" id="dept-settings-color-swatches"></div>
+      </div>
+      <hr class="title-section-divider" />
+      <div class="title-section-heading">Titles by Level</div>
+      <div id="dept-settings-titles-body"></div>
+      <div class="modal-warning" id="dept-settings-warning"></div>
+    </div>
+    <div class="modal-footer" style="display:flex">
+      <button class="btn btn-ghost" id="dept-settings-cancel-btn">Cancel</button>
+      <button class="btn btn-primary" id="dept-settings-save-btn">Save</button>
+    </div>
+  </div>
+</div>
+
 <script>
 // ── Data ─────────────────────────────────────────────────────────────────────
 
 const departments = [
-  { id: 'engineering', name: 'Engineering', color: '#6366f1', description: '' },
-  { id: 'sales',       name: 'Sales',       color: '#10b981', description: '' },
-  { id: 'hr',          name: 'HR',          color: '#f59e0b', description: '' },
+  { id: 'engineering',      name: 'Engineering',      color: '#6366f1', description: '' },
+  { id: 'product',          name: 'Product',          color: '#8b5cf6', description: '' },
+  { id: 'design',           name: 'Design',           color: '#ec4899', description: '' },
+  { id: 'sales',            name: 'Sales',            color: '#10b981', description: '' },
+  { id: 'marketing',        name: 'Marketing',        color: '#f97316', description: '' },
+  { id: 'customer-success', name: 'Customer Success', color: '#06b6d4', description: '' },
+  { id: 'hr',               name: 'People & HR',      color: '#f59e0b', description: '' },
+  { id: 'finance',          name: 'Finance',          color: '#84cc16', description: '' },
+  { id: 'legal',            name: 'Legal',            color: '#94a3b8', description: '' },
 ];
 
 let employees = [
-  // Engineering (10)
-  { id: 1,  name: 'Diana Chen',      title: 'Director of Engineering', department: 'engineering', managerId: null, level: 'L7', salary: 18500, salaryReviewNeeded: false },
-  { id: 2,  name: 'Marcus Webb',     title: 'Engineering Manager',     department: 'engineering', managerId: 1,    level: 'L5', salary: 11200, salaryReviewNeeded: false },
-  { id: 3,  name: 'Priya Nair',      title: 'Engineering Manager',     department: 'engineering', managerId: 1,    level: 'L5', salary: 14800, salaryReviewNeeded: true  },
-  { id: 4,  name: 'Alex Turner',     title: 'Senior Developer',        department: 'engineering', managerId: 2,    level: 'L3', salary: 5700,  salaryReviewNeeded: false },
-  { id: 5,  name: 'Sofia Reyes',     title: 'Developer',               department: 'engineering', managerId: 2,    level: 'L2', salary: 4900,  salaryReviewNeeded: false },
-  { id: 6,  name: 'Jake Morrison',   title: 'Developer',               department: 'engineering', managerId: 2,    level: 'L2', salary: 3800,  salaryReviewNeeded: true  },
-  { id: 7,  name: 'Lena Fischer',    title: 'Senior Developer',        department: 'engineering', managerId: 3,    level: 'L3', salary: 7200,  salaryReviewNeeded: false },
-  { id: 8,  name: 'Omar Khalid',     title: 'Developer',               department: 'engineering', managerId: 3,    level: 'L2', salary: 5100,  salaryReviewNeeded: false },
-  { id: 9,  name: 'Nadia Russo',     title: 'Developer',               department: 'engineering', managerId: 3,    level: 'L2', salary: 4700,  salaryReviewNeeded: false },
-  { id: 10, name: 'Ben Castillo',    title: 'Junior Developer',        department: 'engineering', managerId: 3,    level: 'L1', salary: 3300,  salaryReviewNeeded: false },
-  // Sales (9)
-  { id: 11, name: 'Victor Huang',    title: 'Director of Sales',       department: 'sales', managerId: null, level: 'L7', salary: 19500, salaryReviewNeeded: false },
-  { id: 12, name: 'Rachel Kim',      title: 'Sales Manager',           department: 'sales', managerId: 11,   level: 'L5', salary: 23500, salaryReviewNeeded: true  },
-  { id: 13, name: 'Chris Adeyemi',   title: 'Sales Manager',           department: 'sales', managerId: 11,   level: 'L5', salary: 12400, salaryReviewNeeded: false },
-  { id: 14, name: 'Tanya Brooks',    title: 'Senior Sales Rep',        department: 'sales', managerId: 12,   level: 'L3', salary: 6800,  salaryReviewNeeded: false },
-  { id: 15, name: 'Paulo Mendes',    title: 'Sales Rep',               department: 'sales', managerId: 12,   level: 'L2', salary: 5000,  salaryReviewNeeded: false },
-  { id: 16, name: 'Emma Johansson',  title: 'Sales Rep',               department: 'sales', managerId: 12,   level: 'L2', salary: 4600,  salaryReviewNeeded: false },
-  { id: 17, name: 'Derek Stone',     title: 'Senior Sales Rep',        department: 'sales', managerId: 13,   level: 'L3', salary: 5500,  salaryReviewNeeded: false },
-  { id: 18, name: 'Iris Nakamura',   title: 'Sales Rep',               department: 'sales', managerId: 13,   level: 'L2', salary: 4800,  salaryReviewNeeded: false },
-  { id: 19, name: 'Leo Petrov',      title: 'Sales Rep',               department: 'sales', managerId: 13,   level: 'L2', salary: 4600,  salaryReviewNeeded: false },
-  // HR (6)
-  { id: 20, name: 'Angela Foster',   title: 'Director of HR',          department: 'hr', managerId: null, level: 'L7', salary: 17200, salaryReviewNeeded: false },
-  { id: 21, name: 'Samuel Okafor',   title: 'HR Manager',              department: 'hr', managerId: 20,   level: 'L5', salary: 11800, salaryReviewNeeded: false },
-  { id: 22, name: 'Chloe Dupont',    title: 'HR Coordinator',          department: 'hr', managerId: 21,   level: 'L1', salary: 3400,  salaryReviewNeeded: false },
-  { id: 23, name: 'Raj Patel',       title: 'HR Coordinator',          department: 'hr', managerId: 21,   level: 'L1', salary: 3200,  salaryReviewNeeded: false },
-  { id: 24, name: 'Mia Larsson',     title: 'HR Coordinator',          department: 'hr', managerId: 21,   level: 'L1', salary: 3500,  salaryReviewNeeded: false },
-  { id: 25, name: 'Tom Nguyen',      title: 'Recruiting Coordinator',  department: 'hr', managerId: 21,   level: 'L1', salary: 3300,  salaryReviewNeeded: false },
+  // ── Engineering (35, IDs 1–35) ───────────────────────────────────────────────
+  { id: 1,  name: 'Sarah Mitchell',    title: 'Director of Engineering',      department: 'engineering', managerId: null, level: 'L7', salary: 19500, salaryReviewNeeded: false },
+  { id: 2,  name: 'James Park',        title: 'Senior Engineering Manager',   department: 'engineering', managerId: 1,    level: 'L6', salary: 15500, salaryReviewNeeded: false },
+  { id: 3,  name: 'Priya Nair',        title: 'Senior Engineering Manager',   department: 'engineering', managerId: 1,    level: 'L6', salary: 14800, salaryReviewNeeded: true  },
+  { id: 4,  name: 'Marcus Webb',       title: 'Engineering Manager',          department: 'engineering', managerId: 2,    level: 'L5', salary: 11200, salaryReviewNeeded: false },
+  { id: 5,  name: 'Lena Fischer',      title: 'Engineering Manager',          department: 'engineering', managerId: 2,    level: 'L5', salary: 11800, salaryReviewNeeded: false },
+  { id: 6,  name: 'Omar Khalid',       title: 'Engineering Manager',          department: 'engineering', managerId: 3,    level: 'L5', salary: 12000, salaryReviewNeeded: true  },
+  { id: 7,  name: 'Nina Rodriguez',    title: 'QA Manager',                   department: 'engineering', managerId: 3,    level: 'L5', salary: 11500, salaryReviewNeeded: false },
+  { id: 8,  name: 'Alex Turner',       title: 'Tech Lead',                    department: 'engineering', managerId: 4,    level: 'L4', salary: 9200,  salaryReviewNeeded: false },
+  { id: 9,  name: 'Sofia Reyes',       title: 'Staff Engineer',               department: 'engineering', managerId: 4,    level: 'L4', salary: 8800,  salaryReviewNeeded: false },
+  { id: 10, name: 'David Kim',         title: 'Tech Lead',                    department: 'engineering', managerId: 5,    level: 'L4', salary: 9500,  salaryReviewNeeded: false },
+  { id: 11, name: 'Jake Morrison',     title: 'Principal Engineer',           department: 'engineering', managerId: 5,    level: 'L4', salary: 9000,  salaryReviewNeeded: false },
+  { id: 12, name: 'Aisha Okonkwo',     title: 'Tech Lead',                    department: 'engineering', managerId: 6,    level: 'L4', salary: 8600,  salaryReviewNeeded: true  },
+  { id: 13, name: 'Ryan Torres',       title: 'Tech Lead',                    department: 'engineering', managerId: 7,    level: 'L4', salary: 8400,  salaryReviewNeeded: false },
+  { id: 14, name: 'Elena Vasquez',     title: 'Senior Developer',             department: 'engineering', managerId: 8,    level: 'L3', salary: 7100,  salaryReviewNeeded: false },
+  { id: 15, name: 'Ben Castillo',      title: 'Senior Developer',             department: 'engineering', managerId: 8,    level: 'L3', salary: 6800,  salaryReviewNeeded: false },
+  { id: 16, name: 'Fatima Hassan',     title: 'Senior QA Engineer',           department: 'engineering', managerId: 9,    level: 'L3', salary: 6500,  salaryReviewNeeded: false },
+  { id: 17, name: 'Lucas Martin',      title: 'Senior Developer',             department: 'engineering', managerId: 10,   level: 'L3', salary: 7200,  salaryReviewNeeded: false },
+  { id: 18, name: 'Mei Chen',          title: 'Senior Developer',             department: 'engineering', managerId: 10,   level: 'L3', salary: 6900,  salaryReviewNeeded: false },
+  { id: 19, name: 'Yuki Tanaka',       title: 'Senior Developer',             department: 'engineering', managerId: 11,   level: 'L3', salary: 7000,  salaryReviewNeeded: false },
+  { id: 20, name: 'Carlos Diaz',       title: 'Senior Developer',             department: 'engineering', managerId: 11,   level: 'L3', salary: 6700,  salaryReviewNeeded: false },
+  { id: 21, name: 'Amara Nkosi',       title: 'Senior QA Engineer',           department: 'engineering', managerId: 12,   level: 'L3', salary: 6600,  salaryReviewNeeded: false },
+  { id: 22, name: 'Patrick O\'Brien',  title: 'Senior Developer',             department: 'engineering', managerId: 12,   level: 'L3', salary: 7300,  salaryReviewNeeded: true  },
+  { id: 23, name: 'Hana Sato',         title: 'Senior Developer',             department: 'engineering', managerId: 13,   level: 'L3', salary: 6800,  salaryReviewNeeded: false },
+  { id: 24, name: 'Tom Nguyen',        title: 'Developer',                    department: 'engineering', managerId: 14,   level: 'L2', salary: 5200,  salaryReviewNeeded: false },
+  { id: 25, name: 'Zara Ahmed',        title: 'Developer',                    department: 'engineering', managerId: 14,   level: 'L2', salary: 4900,  salaryReviewNeeded: false },
+  { id: 26, name: 'Felix Wagner',      title: 'Developer',                    department: 'engineering', managerId: 16,   level: 'L2', salary: 5100,  salaryReviewNeeded: false },
+  { id: 27, name: 'Ingrid Larsson',    title: 'QA Engineer',                  department: 'engineering', managerId: 16,   level: 'L2', salary: 4800,  salaryReviewNeeded: false },
+  { id: 28, name: 'Sam Cooper',        title: 'Developer',                    department: 'engineering', managerId: 17,   level: 'L2', salary: 5300,  salaryReviewNeeded: false },
+  { id: 29, name: 'Nadia Russo',       title: 'Developer',                    department: 'engineering', managerId: 19,   level: 'L2', salary: 4700,  salaryReviewNeeded: false },
+  { id: 30, name: 'Kwame Mensah',      title: 'Developer',                    department: 'engineering', managerId: 21,   level: 'L2', salary: 5000,  salaryReviewNeeded: false },
+  { id: 31, name: 'Ana Lima',          title: 'Developer',                    department: 'engineering', managerId: 23,   level: 'L2', salary: 4800,  salaryReviewNeeded: false },
+  { id: 32, name: 'Chloe Dupont',      title: 'Junior Developer',             department: 'engineering', managerId: 24,   level: 'L1', salary: 3400,  salaryReviewNeeded: false },
+  { id: 33, name: 'Raj Patel',         title: 'Junior Developer',             department: 'engineering', managerId: 24,   level: 'L1', salary: 3200,  salaryReviewNeeded: false },
+  { id: 34, name: 'Mia Schmidt',       title: 'Junior QA Engineer',           department: 'engineering', managerId: 26,   level: 'L1', salary: 3300,  salaryReviewNeeded: false },
+  { id: 35, name: 'Leo Petrov',        title: 'Junior Developer',             department: 'engineering', managerId: 28,   level: 'L1', salary: 3100,  salaryReviewNeeded: false },
+  // ── Product (12, IDs 36–47) ──────────────────────────────────────────────────
+  { id: 36, name: 'Diana Chen',        title: 'Director of Product',          department: 'product', managerId: null, level: 'L7', salary: 20000, salaryReviewNeeded: false },
+  { id: 37, name: 'Victor Huang',      title: 'Product Lead',                 department: 'product', managerId: 36,   level: 'L5', salary: 12500, salaryReviewNeeded: false },
+  { id: 38, name: 'Rachel Kim',        title: 'Product Lead',                 department: 'product', managerId: 36,   level: 'L5', salary: 11800, salaryReviewNeeded: false },
+  { id: 39, name: 'Chris Adeyemi',     title: 'Senior Product Manager',       department: 'product', managerId: 37,   level: 'L4', salary: 9200,  salaryReviewNeeded: false },
+  { id: 40, name: 'Tanya Brooks',      title: 'Senior Product Manager',       department: 'product', managerId: 37,   level: 'L4', salary: 8800,  salaryReviewNeeded: true  },
+  { id: 41, name: 'Paulo Mendes',      title: 'Senior Product Manager',       department: 'product', managerId: 38,   level: 'L4', salary: 9500,  salaryReviewNeeded: false },
+  { id: 42, name: 'Emma Johansson',    title: 'Product Manager',              department: 'product', managerId: 39,   level: 'L3', salary: 7000,  salaryReviewNeeded: false },
+  { id: 43, name: 'Derek Stone',       title: 'Product Manager',              department: 'product', managerId: 39,   level: 'L3', salary: 6800,  salaryReviewNeeded: false },
+  { id: 44, name: 'Iris Nakamura',     title: 'Technical Product Manager',    department: 'product', managerId: 40,   level: 'L3', salary: 7200,  salaryReviewNeeded: false },
+  { id: 45, name: 'Yuna Park',         title: 'Product Manager',              department: 'product', managerId: 41,   level: 'L3', salary: 6900,  salaryReviewNeeded: false },
+  { id: 46, name: 'Finn O\'Connor',    title: 'Product Analyst',              department: 'product', managerId: 42,   level: 'L2', salary: 4700,  salaryReviewNeeded: false },
+  { id: 47, name: 'Leila Moradi',      title: 'Product Analyst',              department: 'product', managerId: 44,   level: 'L2', salary: 4600,  salaryReviewNeeded: false },
+  // ── Design (8, IDs 48–55) ────────────────────────────────────────────────────
+  { id: 48, name: 'Angela Foster',     title: 'Director of Design',           department: 'design', managerId: null, level: 'L7', salary: 18000, salaryReviewNeeded: false },
+  { id: 49, name: 'Samuel Okafor',     title: 'Design Manager',               department: 'design', managerId: 48,   level: 'L5', salary: 11500, salaryReviewNeeded: false },
+  { id: 50, name: 'Giulia Romano',     title: 'Lead UX Designer',             department: 'design', managerId: 49,   level: 'L4', salary: 9100,  salaryReviewNeeded: false },
+  { id: 51, name: 'Ahmed Farouk',      title: 'Lead Visual Designer',         department: 'design', managerId: 49,   level: 'L4', salary: 8700,  salaryReviewNeeded: false },
+  { id: 52, name: 'Maya Patel',        title: 'Senior UX Designer',           department: 'design', managerId: 50,   level: 'L3', salary: 7100,  salaryReviewNeeded: false },
+  { id: 53, name: 'Tobias Müller',     title: 'Senior UI Designer',           department: 'design', managerId: 50,   level: 'L3', salary: 6900,  salaryReviewNeeded: false },
+  { id: 54, name: 'Serena Williams',   title: 'Senior UX Designer',           department: 'design', managerId: 51,   level: 'L3', salary: 7000,  salaryReviewNeeded: false },
+  { id: 55, name: 'James Liu',         title: 'UX Designer',                  department: 'design', managerId: 52,   level: 'L2', salary: 4900,  salaryReviewNeeded: false },
+  // ── Sales (20, IDs 56–75) ────────────────────────────────────────────────────
+  { id: 56, name: 'Michael Torres',    title: 'Director of Sales',            department: 'sales', managerId: null, level: 'L7', salary: 21000, salaryReviewNeeded: false },
+  { id: 57, name: 'Sandra Lee',        title: 'Senior Sales Manager',         department: 'sales', managerId: 56,   level: 'L6', salary: 15000, salaryReviewNeeded: false },
+  { id: 58, name: 'Brian Foster',      title: 'Sales Manager',                department: 'sales', managerId: 57,   level: 'L5', salary: 12500, salaryReviewNeeded: false },
+  { id: 59, name: 'Keiko Yamamoto',    title: 'Sales Manager',                department: 'sales', managerId: 57,   level: 'L5', salary: 12000, salaryReviewNeeded: true  },
+  { id: 60, name: 'Diego Martinez',    title: 'Regional Sales Manager',       department: 'sales', managerId: 56,   level: 'L5', salary: 11800, salaryReviewNeeded: false },
+  { id: 61, name: 'Claire Dubois',     title: 'Account Executive',            department: 'sales', managerId: 58,   level: 'L4', salary: 9000,  salaryReviewNeeded: false },
+  { id: 62, name: 'Tariq Hassan',      title: 'Senior Account Executive',     department: 'sales', managerId: 58,   level: 'L4', salary: 8800,  salaryReviewNeeded: false },
+  { id: 63, name: 'Natalie Cho',       title: 'Account Executive',            department: 'sales', managerId: 59,   level: 'L4', salary: 9200,  salaryReviewNeeded: false },
+  { id: 64, name: 'Robert Walsh',      title: 'Account Executive',            department: 'sales', managerId: 60,   level: 'L4', salary: 8600,  salaryReviewNeeded: false },
+  { id: 65, name: 'Grace Kim',         title: 'Senior Sales Rep',             department: 'sales', managerId: 61,   level: 'L3', salary: 6800,  salaryReviewNeeded: false },
+  { id: 66, name: 'Andrés Rojas',      title: 'Senior Sales Rep',             department: 'sales', managerId: 61,   level: 'L3', salary: 7000,  salaryReviewNeeded: false },
+  { id: 67, name: 'Freya Hansen',      title: 'Senior Sales Rep',             department: 'sales', managerId: 62,   level: 'L3', salary: 7200,  salaryReviewNeeded: false },
+  { id: 68, name: 'Will Johnson',      title: 'Senior Account Rep',           department: 'sales', managerId: 63,   level: 'L3', salary: 6900,  salaryReviewNeeded: false },
+  { id: 69, name: 'Mei Lin',           title: 'Senior Sales Rep',             department: 'sales', managerId: 64,   level: 'L3', salary: 6700,  salaryReviewNeeded: false },
+  { id: 70, name: 'Javier Ortiz',      title: 'Senior Sales Rep',             department: 'sales', managerId: 64,   level: 'L3', salary: 7100,  salaryReviewNeeded: false },
+  { id: 71, name: 'Chidi Eze',         title: 'Sales Rep',                    department: 'sales', managerId: 65,   level: 'L2', salary: 5100,  salaryReviewNeeded: true  },
+  { id: 72, name: 'Petra Novak',       title: 'Sales Rep',                    department: 'sales', managerId: 67,   level: 'L2', salary: 4900,  salaryReviewNeeded: false },
+  { id: 73, name: 'Nia Osei',          title: 'Account Rep',                  department: 'sales', managerId: 68,   level: 'L2', salary: 5200,  salaryReviewNeeded: false },
+  { id: 74, name: 'Robin Park',        title: 'Sales Rep',                    department: 'sales', managerId: 69,   level: 'L2', salary: 4800,  salaryReviewNeeded: false },
+  { id: 75, name: 'Hassan Al-Amin',    title: 'Sales Rep',                    department: 'sales', managerId: 70,   level: 'L2', salary: 5000,  salaryReviewNeeded: false },
+  // ── Marketing (12, IDs 76–87) ────────────────────────────────────────────────
+  { id: 76, name: 'Catherine Walsh',   title: 'Director of Marketing',        department: 'marketing', managerId: null, level: 'L7', salary: 19000, salaryReviewNeeded: false },
+  { id: 77, name: 'Jack Sterling',     title: 'Marketing Manager',            department: 'marketing', managerId: 76,   level: 'L5', salary: 11500, salaryReviewNeeded: false },
+  { id: 78, name: 'Isabel Fontaine',   title: 'Growth Marketing Manager',     department: 'marketing', managerId: 76,   level: 'L5', salary: 11000, salaryReviewNeeded: false },
+  { id: 79, name: 'Dmitri Volkov',     title: 'Lead Content Strategist',      department: 'marketing', managerId: 77,   level: 'L4', salary: 9000,  salaryReviewNeeded: false },
+  { id: 80, name: 'Preethi Kumar',     title: 'Lead Growth Marketer',         department: 'marketing', managerId: 77,   level: 'L4', salary: 8800,  salaryReviewNeeded: false },
+  { id: 81, name: 'Zahra Hosseini',    title: 'Lead Brand Designer',          department: 'marketing', managerId: 78,   level: 'L4', salary: 9200,  salaryReviewNeeded: false },
+  { id: 82, name: 'Olga Petersen',     title: 'Senior Content Marketer',      department: 'marketing', managerId: 79,   level: 'L3', salary: 6900,  salaryReviewNeeded: false },
+  { id: 83, name: 'Carlos Reyes',      title: 'Senior SEO Specialist',        department: 'marketing', managerId: 79,   level: 'L3', salary: 6700,  salaryReviewNeeded: false },
+  { id: 84, name: 'Anya Kovacs',       title: 'Senior Growth Analyst',        department: 'marketing', managerId: 80,   level: 'L3', salary: 7000,  salaryReviewNeeded: false },
+  { id: 85, name: 'Sven Andersen',     title: 'Senior Brand Marketer',        department: 'marketing', managerId: 81,   level: 'L3', salary: 6800,  salaryReviewNeeded: false },
+  { id: 86, name: 'Tolu Adeyemi',      title: 'Marketing Specialist',         department: 'marketing', managerId: 82,   level: 'L2', salary: 4900,  salaryReviewNeeded: true  },
+  { id: 87, name: 'Yemi Fadahunsi',    title: 'Marketing Analyst',            department: 'marketing', managerId: 84,   level: 'L2', salary: 4700,  salaryReviewNeeded: false },
+  // ── Customer Success (15, IDs 88–102) ────────────────────────────────────────
+  { id: 88,  name: 'Laura Bergmann',   title: 'Director of Customer Success', department: 'customer-success', managerId: null, level: 'L7', salary: 18500, salaryReviewNeeded: false },
+  { id: 89,  name: 'Kenneth Moore',    title: 'CS Manager',                   department: 'customer-success', managerId: 88,   level: 'L5', salary: 11800, salaryReviewNeeded: false },
+  { id: 90,  name: 'Aiko Suzuki',      title: 'CS Manager',                   department: 'customer-success', managerId: 88,   level: 'L5', salary: 11500, salaryReviewNeeded: false },
+  { id: 91,  name: 'Pedro Alves',      title: 'Senior CSM',                   department: 'customer-success', managerId: 89,   level: 'L4', salary: 8800,  salaryReviewNeeded: false },
+  { id: 92,  name: 'Thea Erikson',     title: 'Senior CSM',                   department: 'customer-success', managerId: 89,   level: 'L4', salary: 9000,  salaryReviewNeeded: false },
+  { id: 93,  name: 'Maya Okonjo',      title: 'Senior CSM',                   department: 'customer-success', managerId: 90,   level: 'L4', salary: 8600,  salaryReviewNeeded: false },
+  { id: 94,  name: 'Joel Rivera',      title: 'Customer Success Manager',     department: 'customer-success', managerId: 91,   level: 'L3', salary: 6800,  salaryReviewNeeded: false },
+  { id: 95,  name: 'Layla Ahmad',      title: 'Customer Success Manager',     department: 'customer-success', managerId: 91,   level: 'L3', salary: 6600,  salaryReviewNeeded: true  },
+  { id: 96,  name: 'Brendan Walsh',    title: 'Customer Success Manager',     department: 'customer-success', managerId: 92,   level: 'L3', salary: 7000,  salaryReviewNeeded: false },
+  { id: 97,  name: 'Fatou Diallo',     title: 'Customer Success Manager',     department: 'customer-success', managerId: 93,   level: 'L3', salary: 6700,  salaryReviewNeeded: false },
+  { id: 98,  name: 'Mikael Holm',      title: 'Customer Success Manager',     department: 'customer-success', managerId: 93,   level: 'L3', salary: 6900,  salaryReviewNeeded: false },
+  { id: 99,  name: 'Sophie Turner',    title: 'Customer Success Specialist',  department: 'customer-success', managerId: 94,   level: 'L2', salary: 4800,  salaryReviewNeeded: false },
+  { id: 100, name: 'Emmanuel Osei',    title: 'Customer Success Specialist',  department: 'customer-success', managerId: 95,   level: 'L2', salary: 4600,  salaryReviewNeeded: false },
+  { id: 101, name: 'Hannah Clarke',    title: 'Customer Success Specialist',  department: 'customer-success', managerId: 96,   level: 'L2', salary: 4900,  salaryReviewNeeded: false },
+  { id: 102, name: 'Jin-ho Lee',       title: 'Customer Success Specialist',  department: 'customer-success', managerId: 98,   level: 'L2', salary: 4700,  salaryReviewNeeded: false },
+  // ── People & HR (8, IDs 103–110) ─────────────────────────────────────────────
+  { id: 103, name: 'Monica Rivera',    title: 'Director of People',           department: 'hr', managerId: null, level: 'L7', salary: 17500, salaryReviewNeeded: false },
+  { id: 104, name: 'Frank Kowalski',   title: 'HR Manager',                   department: 'hr', managerId: 103,  level: 'L5', salary: 11200, salaryReviewNeeded: false },
+  { id: 105, name: 'Sarah Nkemelu',    title: 'HR Business Partner',          department: 'hr', managerId: 104,  level: 'L4', salary: 8500,  salaryReviewNeeded: false },
+  { id: 106, name: 'Tarkan Özdemir',   title: 'HR Business Partner',          department: 'hr', managerId: 104,  level: 'L4', salary: 8300,  salaryReviewNeeded: false },
+  { id: 107, name: 'Beth Chen',        title: 'Senior HR Specialist',         department: 'hr', managerId: 105,  level: 'L3', salary: 6600,  salaryReviewNeeded: false },
+  { id: 108, name: 'Omar Bello',       title: 'Senior Recruiter',             department: 'hr', managerId: 105,  level: 'L3', salary: 6800,  salaryReviewNeeded: false },
+  { id: 109, name: 'Vera Santos',      title: 'HR Specialist',                department: 'hr', managerId: 107,  level: 'L2', salary: 4600,  salaryReviewNeeded: true  },
+  { id: 110, name: 'Adem Yildiz',      title: 'Recruiter',                    department: 'hr', managerId: 108,  level: 'L2', salary: 4800,  salaryReviewNeeded: false },
+  // ── Finance (6, IDs 111–116) ─────────────────────────────────────────────────
+  { id: 111, name: 'Richard Holt',     title: 'Director of Finance',          department: 'finance', managerId: null, level: 'L7', salary: 20000, salaryReviewNeeded: false },
+  { id: 112, name: 'Jean-Pierre Blanc',title: 'Finance Manager',              department: 'finance', managerId: 111,  level: 'L5', salary: 12000, salaryReviewNeeded: false },
+  { id: 113, name: 'Aditi Shah',       title: 'Senior Financial Analyst',     department: 'finance', managerId: 112,  level: 'L4', salary: 8800,  salaryReviewNeeded: false },
+  { id: 114, name: 'Claus Becker',     title: 'Senior Financial Analyst',     department: 'finance', managerId: 112,  level: 'L4', salary: 9000,  salaryReviewNeeded: false },
+  { id: 115, name: 'Amina Touré',      title: 'Financial Analyst',            department: 'finance', managerId: 113,  level: 'L3', salary: 6500,  salaryReviewNeeded: false },
+  { id: 116, name: 'Xavier Fontaine',  title: 'Financial Analyst',            department: 'finance', managerId: 114,  level: 'L3', salary: 6700,  salaryReviewNeeded: true  },
+  // ── Legal (4, IDs 117–120) ───────────────────────────────────────────────────
+  { id: 117, name: 'Rebecca Stone',    title: 'Director of Legal',            department: 'legal', managerId: null, level: 'L7', salary: 21500, salaryReviewNeeded: false },
+  { id: 118, name: 'Yusuf Arslan',     title: 'Senior Counsel',               department: 'legal', managerId: 117,  level: 'L5', salary: 13500, salaryReviewNeeded: false },
+  { id: 119, name: 'Charlotte Petit',  title: 'Counsel',                      department: 'legal', managerId: 118,  level: 'L4', salary: 9200,  salaryReviewNeeded: false },
+  { id: 120, name: 'Dayo Afolabi',     title: 'Counsel',                      department: 'legal', managerId: 118,  level: 'L4', salary: 8800,  salaryReviewNeeded: false },
 ];
 
 // ── Level & Title Config ──────────────────────────────────────────────────────
@@ -1268,6 +1477,26 @@ const TITLES = {
     L7: ['Director of Engineering', 'Director of Technology'],
     L8: ['VP of Engineering', 'CTO'],
   },
+  product: {
+    L1: ['Associate PM', 'Junior Product Manager'],
+    L2: ['Product Analyst', 'Junior PM'],
+    L3: ['Product Manager', 'Technical Product Manager'],
+    L4: ['Senior Product Manager', 'Group Product Manager'],
+    L5: ['Product Lead', 'Product Manager Lead'],
+    L6: ['Senior Product Lead'],
+    L7: ['Director of Product', 'Director of Product Management'],
+    L8: ['VP of Product', 'Chief Product Officer'],
+  },
+  design: {
+    L1: ['Junior Designer', 'Design Coordinator'],
+    L2: ['UX Designer', 'UI Designer', 'Visual Designer'],
+    L3: ['Senior UX Designer', 'Senior UI Designer', 'Senior Visual Designer'],
+    L4: ['Lead UX Designer', 'Lead Visual Designer', 'Design Technologist'],
+    L5: ['Design Manager', 'UX Manager'],
+    L6: ['Senior Design Manager'],
+    L7: ['Director of Design', 'Head of Design'],
+    L8: ['VP of Design', 'Chief Design Officer'],
+  },
   sales: {
     L1: ['Sales Development Rep', 'Junior Sales Rep'],
     L2: ['Sales Rep', 'Account Rep'],
@@ -1278,6 +1507,26 @@ const TITLES = {
     L7: ['Director of Sales', 'Director of Revenue'],
     L8: ['VP of Sales', 'Chief Revenue Officer'],
   },
+  marketing: {
+    L1: ['Marketing Coordinator', 'Content Coordinator'],
+    L2: ['Marketing Specialist', 'Marketing Analyst', 'Content Marketer'],
+    L3: ['Senior Content Marketer', 'Senior SEO Specialist', 'Senior Growth Analyst', 'Senior Brand Marketer'],
+    L4: ['Lead Content Strategist', 'Lead Growth Marketer', 'Lead Brand Designer'],
+    L5: ['Marketing Manager', 'Growth Marketing Manager'],
+    L6: ['Senior Marketing Manager'],
+    L7: ['Director of Marketing', 'Director of Growth'],
+    L8: ['VP of Marketing', 'Chief Marketing Officer'],
+  },
+  'customer-success': {
+    L1: ['CS Associate', 'Support Specialist'],
+    L2: ['Customer Success Specialist', 'CS Specialist'],
+    L3: ['Customer Success Manager', 'CSM'],
+    L4: ['Senior CSM', 'Senior Customer Success Manager'],
+    L5: ['CS Manager', 'Customer Success Team Lead'],
+    L6: ['Senior CS Manager'],
+    L7: ['Director of Customer Success', 'Head of Customer Success'],
+    L8: ['VP of Customer Success'],
+  },
   hr: {
     L1: ['HR Coordinator', 'Recruiting Coordinator'],
     L2: ['HR Specialist', 'Recruiter'],
@@ -1285,8 +1534,28 @@ const TITLES = {
     L4: ['HR Business Partner', 'Lead Recruiter'],
     L5: ['HR Manager', 'Talent Acquisition Manager'],
     L6: ['Senior HR Manager'],
-    L7: ['Director of HR', 'Director of People'],
-    L8: ['VP of HR', 'Chief People Officer'],
+    L7: ['Director of People', 'Director of HR'],
+    L8: ['VP of People', 'Chief People Officer'],
+  },
+  finance: {
+    L1: ['Finance Coordinator', 'Junior Accountant'],
+    L2: ['Financial Analyst', 'Accountant'],
+    L3: ['Senior Accountant', 'Financial Analyst II'],
+    L4: ['Senior Financial Analyst', 'Finance Controller'],
+    L5: ['Finance Manager', 'Accounting Manager'],
+    L6: ['Senior Finance Manager'],
+    L7: ['Director of Finance', 'Chief Financial Officer'],
+    L8: ['VP of Finance', 'CFO'],
+  },
+  legal: {
+    L1: ['Legal Coordinator', 'Paralegal'],
+    L2: ['Legal Analyst', 'Junior Counsel'],
+    L3: ['Associate Counsel', 'Legal Analyst II'],
+    L4: ['Counsel', 'Associate General Counsel'],
+    L5: ['Senior Counsel', 'Senior Associate Counsel'],
+    L6: ['Senior Legal Counsel'],
+    L7: ['Director of Legal', 'General Counsel'],
+    L8: ['VP of Legal', 'Chief Legal Officer'],
   },
 };
 
@@ -1608,6 +1877,11 @@ function renderDeptColumn(dept) {
         <path d="M6 7v5M10 7v5"/><rect x="4" y="4" width="8" height="10" rx="1"/>
       </svg>
     </button>
+    <button class="dept-settings-btn" data-dept-id="${dept.id}" title="Department settings">
+      <svg width="13" height="13" viewBox="0 0 20 20" fill="currentColor">
+        <path fill-rule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z" clip-rule="evenodd"/>
+      </svg>
+    </button>
   `;
 
   if (deptEmps.length === 0) {
@@ -1620,6 +1894,11 @@ function renderDeptColumn(dept) {
       }
     });
   }
+
+  header.querySelector('.dept-settings-btn').addEventListener('click', e => {
+    e.stopPropagation();
+    openDeptSettingsModal(dept.id);
+  });
 
   // Drop on header
   header.addEventListener('dragover', e => {
@@ -1680,6 +1959,7 @@ function renderDeptColumn(dept) {
 }
 
 function render() {
+  saveToStorage();
   const columns = document.getElementById('columns');
   columns.innerHTML = '';
   departments.forEach(dept => columns.appendChild(renderDeptColumn(dept)));
@@ -2015,7 +2295,9 @@ document.getElementById('modal-name').addEventListener('input', () => {
 // ESC closes modal
 document.addEventListener('keydown', e => {
   if (e.key === 'Escape') {
-    if (document.getElementById('add-emp-modal-backdrop').classList.contains('visible')) {
+    if (document.getElementById('dept-settings-modal-backdrop').classList.contains('visible')) {
+      closeDeptSettingsModal();
+    } else if (document.getElementById('add-emp-modal-backdrop').classList.contains('visible')) {
       closeAddEmpModal();
     } else if (document.getElementById('dept-modal-backdrop').classList.contains('visible')) {
       closeDeptModal();
@@ -2205,8 +2487,195 @@ document.getElementById('add-emp-dept').addEventListener('change', () => {
 });
 document.getElementById('add-emp-level').addEventListener('change', addEmpRebuildTitleDropdown);
 
+// ── Department Settings Modal ────────────────────────────────────────────────
+
+let editingDeptId = null;
+let selectedSettingsColor = null;
+
+function buildTitleSection(deptId) {
+  const container = document.getElementById('dept-settings-titles-body');
+  container.innerHTML = '';
+  LEVELS.forEach(lvl => {
+    const titles = (TITLES[deptId] && TITLES[deptId][lvl.id]) || [];
+    const band = SALARY_BANDS[lvl.id];
+    const bandLabel = band
+      ? `${formatSalary(band.min).replace('/mo','')} – ${formatSalary(band.max)}`
+      : '';
+
+    const group = document.createElement('div');
+    group.className = 'title-level-group';
+
+    const hdr = document.createElement('div');
+    hdr.className = 'title-level-header';
+    hdr.innerHTML = `<span class="title-level-label">${lvl.label}</span><span class="title-level-band">${bandLabel}</span>`;
+
+    const list = document.createElement('div');
+    list.className = 'title-item-list';
+    list.dataset.level = lvl.id;
+
+    function addTitleItem(title) {
+      const row = document.createElement('div');
+      row.className = 'title-item';
+      row.innerHTML = `<span class="title-text">${title}</span><button class="title-remove-btn" title="Remove">&#x2715;</button>`;
+      row.querySelector('.title-remove-btn').addEventListener('click', () => row.remove());
+      list.appendChild(row);
+    }
+    titles.forEach(addTitleItem);
+
+    const addRow = document.createElement('div');
+    addRow.className = 'title-add-row';
+    const addInput = document.createElement('input');
+    addInput.type = 'text';
+    addInput.className = 'form-control title-add-input';
+    addInput.placeholder = 'New title…';
+    addInput.maxLength = 60;
+    const addBtn = document.createElement('button');
+    addBtn.className = 'btn btn-ghost';
+    addBtn.textContent = '+ Add';
+
+    function doAdd() {
+      const v = addInput.value.trim();
+      if (!v) return;
+      addTitleItem(v);
+      addInput.value = '';
+      addInput.focus();
+    }
+    addBtn.addEventListener('click', doAdd);
+    addInput.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); doAdd(); } });
+
+    addRow.append(addInput, addBtn);
+    group.append(hdr, list, addRow);
+    container.appendChild(group);
+  });
+}
+
+function openDeptSettingsModal(deptId) {
+  editingDeptId = deptId;
+  const dept = departments.find(d => d.id === deptId);
+  if (!dept) return;
+
+  document.getElementById('dept-settings-modal-title').textContent = `Settings — ${dept.name}`;
+  document.getElementById('dept-settings-name').value = dept.name;
+  document.getElementById('dept-settings-desc').value = dept.description || '';
+
+  selectedSettingsColor = dept.color;
+  const swatchContainer = document.getElementById('dept-settings-color-swatches');
+  swatchContainer.innerHTML = '';
+  DEPT_COLOR_PALETTE.forEach(color => {
+    const s = document.createElement('div');
+    s.className = 'dept-color-swatch' + (color === selectedSettingsColor ? ' selected' : '');
+    s.style.background = color;
+    s.dataset.color = color;
+    s.addEventListener('click', () => {
+      selectedSettingsColor = color;
+      swatchContainer.querySelectorAll('.dept-color-swatch')
+        .forEach(sw => sw.classList.toggle('selected', sw.dataset.color === color));
+    });
+    swatchContainer.appendChild(s);
+  });
+
+  const warn = document.getElementById('dept-settings-warning');
+  warn.textContent = ''; warn.classList.remove('visible');
+
+  buildTitleSection(deptId);
+
+  document.getElementById('dept-settings-modal-backdrop').classList.add('visible');
+  setTimeout(() => document.getElementById('dept-settings-name').focus(), 50);
+}
+
+function closeDeptSettingsModal() {
+  document.getElementById('dept-settings-modal-backdrop').classList.remove('visible');
+  editingDeptId = null;
+}
+
+function saveDeptSettingsModal() {
+  const dept = departments.find(d => d.id === editingDeptId);
+  if (!dept) { closeDeptSettingsModal(); return; }
+
+  const name = document.getElementById('dept-settings-name').value.trim();
+  const warn = document.getElementById('dept-settings-warning');
+  if (!name) {
+    warn.textContent = 'Department name is required.';
+    warn.classList.add('visible');
+    document.getElementById('dept-settings-name').focus();
+    return;
+  }
+
+  dept.name = name;
+  dept.description = document.getElementById('dept-settings-desc').value.trim();
+  dept.color = selectedSettingsColor || dept.color;
+
+  // Collect titles from DOM
+  if (!TITLES[editingDeptId]) TITLES[editingDeptId] = {};
+  document.querySelectorAll('#dept-settings-titles-body .title-item-list').forEach(listEl => {
+    const levelId = listEl.dataset.level;
+    TITLES[editingDeptId][levelId] = [...listEl.querySelectorAll('.title-text')]
+      .map(el => el.textContent.trim()).filter(Boolean);
+  });
+
+  closeDeptSettingsModal();
+  render();
+}
+
+document.getElementById('dept-settings-close-btn').addEventListener('click', closeDeptSettingsModal);
+document.getElementById('dept-settings-cancel-btn').addEventListener('click', closeDeptSettingsModal);
+document.getElementById('dept-settings-save-btn').addEventListener('click', saveDeptSettingsModal);
+document.getElementById('dept-settings-modal-backdrop').addEventListener('click', e => {
+  if (e.target === document.getElementById('dept-settings-modal-backdrop')) closeDeptSettingsModal();
+});
+document.getElementById('dept-settings-name').addEventListener('keydown', e => {
+  if (e.key === 'Enter') saveDeptSettingsModal();
+});
+
+// ── Reset ─────────────────────────────────────────────────────────────────────
+
+document.getElementById('reset-data-btn').addEventListener('click', e => {
+  e.preventDefault();
+  if (confirm('Reset all data to defaults? This cannot be undone.')) {
+    localStorage.removeItem(STORAGE_KEY);
+    location.reload();
+  }
+});
+
+// ── Persistence ───────────────────────────────────────────────────────────────
+
+const STORAGE_KEY = 'orgchart_data';
+
+function saveToStorage() {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({
+      departments,
+      employees,
+      titles: TITLES,
+    }));
+  } catch (e) {
+    // quota exceeded or private browsing — silently ignore
+  }
+}
+
+function loadFromStorage() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return;
+    const { departments: d, employees: e, titles: t } = JSON.parse(raw);
+
+    // departments is const — replace contents in place
+    departments.splice(0, departments.length, ...d);
+
+    // employees is let — reassign
+    employees = e;
+
+    // TITLES is const — replace keys in place
+    Object.keys(TITLES).forEach(k => delete TITLES[k]);
+    Object.assign(TITLES, t);
+  } catch (e) {
+    // corrupt data — leave defaults intact
+  }
+}
+
 // ── Init ──────────────────────────────────────────────────────────────────────
 
+loadFromStorage();
 render();
 </script>
 </body>
