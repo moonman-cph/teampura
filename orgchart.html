@@ -1146,11 +1146,13 @@
   }
   #reparent-role-modal-backdrop.visible #reparent-role-modal-panel { transform: translateY(0) scale(1); opacity: 1; }
 
-  /* Split role card */
-  .emp-card.split { border-left: 3px solid #f59e0b; }
-  .split-pct-badge {
-    font-size: 10px; font-weight: 700; color: #92400e;
-    background: #fef3c7; border-radius: 5px; padding: 1px 5px; flex-shrink: 0;
+  /* FTE badge on partial / over-allocated cards */
+  .fte-badge {
+    font-size: 10px; font-weight: 700; padding: 1px 5px; border-radius: 3px;
+    background: #fef3c7; color: #92400e; border: 1px solid #fcd34d; flex-shrink: 0;
+  }
+  .fte-badge.over {
+    background: #fee2e2; color: #991b1b; border-color: #fca5a5;
   }
   /* Assign person picker */
   .assign-pct-input {
@@ -1282,6 +1284,28 @@
   }
   .dept-header:hover .dept-add-role-btn { opacity: 1; }
   .dept-add-role-btn:hover { background: var(--bg); color: var(--text-secondary); }
+
+  /* ── Add to role modal ───────────────────────────────────────── */
+  #add-to-role-modal-backdrop {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 1000;
+    display: flex; align-items: center; justify-content: center;
+    opacity: 0; pointer-events: none; transition: opacity 0.18s ease;
+  }
+  #add-to-role-modal-backdrop.visible { opacity: 1; pointer-events: all; }
+  #add-to-role-modal-panel {
+    background: var(--surface); border-radius: 14px; width: 100%; max-width: 400px;
+    box-shadow: 0 20px 60px rgba(16,24,40,0.18), 0 4px 16px rgba(16,24,40,0.08);
+    transform: translateY(10px) scale(0.98);
+    transition: transform 0.18s ease, opacity 0.18s ease;
+    opacity: 0; margin: 0 16px;
+  }
+  #add-to-role-modal-backdrop.visible #add-to-role-modal-panel { transform: translateY(0) scale(1); opacity: 1; }
+  .add-to-role-row {
+    display: flex; align-items: center; gap: 8px; padding: 7px 10px;
+    border-radius: 7px; cursor: pointer; transition: background 0.1s;
+  }
+  .add-to-role-row:hover { background: var(--bg); }
+  .add-to-role-row.selected { background: var(--accent-light); }
 
   /* ── Assign person picker ────────────────────────────────────── */
   #assign-person-modal-backdrop {
@@ -1575,8 +1599,9 @@
       <div id="modal-person-role-info" class="modal-comp-section" style="display:none">
         <div style="font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px;">Roles</div>
         <div id="modal-person-roles-list"></div>
-        <div id="modal-person-overalloc-warn" style="display:none;font-size:11px;color:#d97706;margin-top:4px;">&#9888; Over 100% allocated</div>
+        <div id="modal-person-overalloc-warn" style="display:none;font-size:11px;color:#ef4444;margin-top:4px;font-weight:600;">&#9888; Over 100% allocated</div>
       </div>
+      <button class="btn btn-ghost" id="modal-person-add-role-btn" style="width:100%;margin-bottom:4px;display:none">+ Add to another role</button>
       <button class="btn btn-ghost" id="modal-person-remove-btn" style="color:#ef4444;border-color:#fca5a5;width:100%;display:none">Remove from position</button>
       <button class="btn btn-ghost" id="modal-person-fire-btn" style="color:#ef4444;border-color:#fca5a5;width:100%;display:none">Let go</button>
       <div class="modal-warning" id="modal-warning"></div>
@@ -1607,10 +1632,6 @@
         <label class="form-label">Team</label>
         <div class="role-view" id="modal-role-team-view"></div>
         <select id="modal-role-team" class="form-control role-edit"></select>
-      </div>
-      <div id="modal-role-multirole" class="modal-review-toggle flag-purple role-edit">
-        <span class="modal-review-toggle-label">Multiple role position</span>
-        <div class="modal-review-toggle-check">✓</div>
       </div>
       <div class="modal-comp-section" style="font-size:12.5px;">
         Assigned to: <span id="modal-role-person-name" style="font-weight:600"></span>
@@ -1740,6 +1761,28 @@
     <div class="modal-body">
       <div id="assign-person-list"></div>
       <button class="btn btn-ghost" id="assign-person-create-btn" style="width:100%;margin-top:8px">+ Create new person</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add to Role Modal -->
+<div id="add-to-role-modal-backdrop">
+  <div id="add-to-role-modal-panel">
+    <div class="modal-header">
+      <span class="modal-title" id="add-to-role-modal-title">Add to a role</span>
+      <button class="modal-close" id="add-to-role-close-btn" title="Close">&#x2715;</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">Department</label>
+        <select id="add-to-role-dept" class="form-control"></select>
+      </div>
+      <div id="add-to-role-list" style="max-height:240px;overflow-y:auto;margin-bottom:8px"></div>
+      <div class="modal-warning" id="add-to-role-warning"></div>
+    </div>
+    <div class="modal-footer" style="display:flex">
+      <button class="btn btn-ghost" id="add-to-role-cancel-btn">Cancel</button>
+      <button class="btn btn-primary" id="add-to-role-save-btn">Add to role</button>
     </div>
   </div>
 </div>
@@ -2562,10 +2605,12 @@ function renderCard(role, isOrphaned = false) {
   const person = getPersonForRole(role.id);
   const isVacant = !person;
   const assignment = isVacant ? null : getAssignmentForRole(role.id);
-  const isSplit = !isVacant && assignment && (assignment.percentage < 100 || getAssignmentsForPerson(person.id).length > 1);
+  const totalAlloc = person ? getTotalAllocationForPerson(person.id) : 0;
+  const isPartial = !isVacant && assignment && assignment.percentage < 100;
+  const isOver = !isVacant && totalAlloc > 100;
 
   const card = document.createElement('div');
-  card.className = 'emp-card' + (isVacant ? ' vacant' : '') + (isOrphaned ? ' orphaned' : '') + (isSplit ? ' split' : '');
+  card.className = 'emp-card' + (isVacant ? ' vacant' : '') + (isOrphaned ? ' orphaned' : '');
   card.dataset.roleId = role.id;
 
   if (!isVacant) {
@@ -2604,6 +2649,16 @@ function renderCard(role, isOrphaned = false) {
   badge.textContent = role.level;
 
   card.append(avatar, info, badge);
+
+  if (isPartial || isOver) {
+    const fteBadge = document.createElement('span');
+    fteBadge.className = 'fte-badge' + (isOver ? ' over' : '');
+    fteBadge.textContent = isOver ? `${totalAlloc}% ⚠` : `${assignment.percentage}%`;
+    fteBadge.title = isOver
+      ? `Over-allocated: ${totalAlloc}% total across all roles`
+      : `${assignment.percentage}% FTE on this role`;
+    card.appendChild(fteBadge);
+  }
 
   if (hasLevelMismatch(role.id)) {
     const warn = document.createElement('div');
@@ -3307,9 +3362,11 @@ function openCombinedModal(roleId, defaultTab) {
       document.getElementById('modal-person-role-info').style.display = '';
       document.getElementById('modal-person-remove-btn').style.display = role ? '' : 'none';
       if (role) document.getElementById('modal-person-remove-btn').textContent = `Remove from ${role.title}`;
+      document.getElementById('modal-person-add-role-btn').style.display = (!settings.viewOnly && total < 100) ? '' : 'none';
     } else {
       document.getElementById('modal-person-role-info').style.display = 'none';
       document.getElementById('modal-person-remove-btn').style.display = 'none';
+      document.getElementById('modal-person-add-role-btn').style.display = 'none';
     }
   }
 
@@ -3333,7 +3390,6 @@ function openCombinedModal(roleId, defaultTab) {
     rebuildRoleTitleDropdown(role.level, role.department, role.title);
     rebuildRoleManagerDropdown(roleId, role.department, role.managerRoleId);
     rebuildRoleTeamDropdown(role.department, role.teamId || null, 'modal-role-team');
-    document.getElementById('modal-role-multirole').classList.toggle('active', !!role.multipleRole);
     document.getElementById('modal-role-person-name').textContent = person ? person.name : 'Vacant';
     const assignBtn = document.getElementById('modal-role-assign-btn');
     assignBtn.style.display = person ? 'none' : '';
@@ -3436,23 +3492,7 @@ function saveModal() {
       role.managerRoleId = mgrVal ? parseInt(mgrVal, 10) : null;
       const teamVal = document.getElementById('modal-role-team').value;
       role.teamId = teamVal ? parseInt(teamVal, 10) : null;
-      const oldRoleMultiRole = role.multipleRole;
-      const newRoleMultiRole = document.getElementById('modal-role-multirole').classList.contains('active');
-      if (oldRoleMultiRole && !newRoleMultiRole) {
-        const assigned = roleAssignments.filter(a => a.roleId === role.id);
-        if (assigned.length >= 2) {
-          const confirmed = confirm(`This position has ${assigned.length} people assigned. Turning off Multiple Role Position will remove all but one assignment. Continue?`);
-          if (!confirmed) {
-            document.getElementById('modal-role-multirole').classList.add('active');
-            return;
-          }
-          const kept = assigned[0];
-          roleAssignments.splice(0, roleAssignments.length,
-            ...roleAssignments.filter(a => a.roleId !== role.id || a.personId === kept.personId)
-          );
-        }
-      }
-      role.multipleRole = newRoleMultiRole;
+
     }
   }
   closeModal();
@@ -3489,8 +3529,10 @@ document.getElementById('modal-role-edit-btn').addEventListener('click', () => {
   }
 });
 
-document.getElementById('modal-role-multirole').addEventListener('click', () => {
-  document.getElementById('modal-role-multirole').classList.toggle('active');
+
+document.getElementById('modal-person-add-role-btn').addEventListener('click', () => {
+  const personId = state.editingPersonId;
+  if (personId !== null) { closeModal(); openAddToRoleModal(personId); }
 });
 
 document.getElementById('modal-person-remove-btn').addEventListener('click', () => {
@@ -3548,9 +3590,8 @@ document.getElementById('modal-cancel-btn').addEventListener('click', closeModal
 document.getElementById('modal-role-assign-btn').addEventListener('click', () => {
   const roleId = state.editingRoleId;
   if (roleId !== null) {
-    const toggleActive = document.getElementById('modal-role-multirole').classList.contains('active');
     closeModal();
-    openAssignPersonPicker(roleId, toggleActive);
+    openAssignPersonPicker(roleId);
   }
 });
 document.getElementById('modal-role-delete-btn').addEventListener('click', () => {
@@ -3577,52 +3618,68 @@ document.getElementById('modal-backdrop').addEventListener('click', e => { if (e
 
 let assigningRoleId = null;
 
-function openAssignPersonPicker(roleId, multiRoleOverride) {
+function openAssignPersonPicker(roleId) {
   assigningRoleId = roleId;
   const list = document.getElementById('assign-person-list');
   list.innerHTML = '';
-  const assigningRole = roles.find(r => r.id === roleId);
   const alreadyPersonId = (getAssignmentForRole(roleId) || {}).personId;
-  const isMultiRole = multiRoleOverride !== undefined ? multiRoleOverride : !!(assigningRole && assigningRole.multipleRole);
-  let available;
-  if (isMultiRole) {
-    // Multi-role position: only show persons flagged as multiple role profiles
-    available = persons.filter(p => p.id !== alreadyPersonId && getTotalAllocationForPerson(p.id) < 100);
-  } else {
-    // Normal position: only show fully unassigned persons
-    available = getUnassignedPersons().filter(p => p.id !== alreadyPersonId);
+
+  // Show all persons with remaining capacity (< 100% total), excluding already-assigned
+  const available = persons.filter(p =>
+    !p.noLongerHired && p.id !== alreadyPersonId && getTotalAllocationForPerson(p.id) < 100
+  );
+  const unassigned = available.filter(p => getTotalAllocationForPerson(p.id) === 0);
+  const partial = available.filter(p => getTotalAllocationForPerson(p.id) > 0);
+
+  function renderPersonRow(person) {
+    const totalAlloc = getTotalAllocationForPerson(person.id);
+    const suggested = Math.max(1, Math.min(100, 100 - totalAlloc));
+    const freeLabel = totalAlloc > 0 ? ` · ${100 - totalAlloc}% free` : '';
+    const row = document.createElement('div');
+    row.className = 'assign-person-row';
+    row.style.cssText = 'display:flex;align-items:center;gap:8px;padding:8px 12px;cursor:default;border-radius:8px;transition:background 0.12s';
+    row.innerHTML = `
+      <div style="width:30px;height:30px;border-radius:50%;background:${nameToColor(person.name)};display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:white;flex-shrink:0">${getInitials(person.name)}</div>
+      <div style="flex:1;min-width:0">
+        <div style="font-size:12.5px;font-weight:600;color:var(--text-primary)">${person.name}</div>
+        <div style="font-size:11px;color:var(--text-muted)">${formatSalary(person.salary)}${freeLabel}</div>
+      </div>
+      <input type="number" class="assign-pct-input form-control" value="${suggested}" min="1" max="100" title="Allocation %" />
+      <button class="btn btn-primary" style="padding:5px 10px;font-size:12px">Assign</button>
+    `;
+    row.addEventListener('mouseenter', () => row.style.background = 'var(--bg)');
+    row.addEventListener('mouseleave', () => row.style.background = '');
+    row.querySelector('.btn').addEventListener('click', e => {
+      e.stopPropagation();
+      const pctInput = row.querySelector('.assign-pct-input');
+      const pct = Math.min(100, Math.max(1, parseInt(pctInput.value, 10) || 100));
+      const newTotal = totalAlloc + pct;
+      if (newTotal > 100 && !confirm(`${person.name} will be ${newTotal}% allocated (over 100%). Continue?`)) return;
+      roleAssignments.push({ personId: person.id, roleId: assigningRoleId, percentage: pct });
+      closeAssignPersonModal(); render();
+    });
+    return row;
   }
+
   if (available.length === 0) {
     list.innerHTML = '<div style="text-align:center;color:var(--text-muted);padding:16px;font-size:13px">No available persons</div>';
   } else {
-    available.forEach(person => {
-      const totalAlloc = getTotalAllocationForPerson(person.id);
-      const suggested = Math.max(1, Math.min(100, 100 - totalAlloc));
-      const row = document.createElement('div');
-      row.className = 'assign-person-row';
-      row.style.cssText = 'display:flex;align-items:center;gap:8px;padding:8px 12px;cursor:default;border-radius:8px;transition:background 0.12s';
-      row.innerHTML = `
-        <div style="width:30px;height:30px;border-radius:50%;background:${nameToColor(person.name)};display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:white;flex-shrink:0">${getInitials(person.name)}</div>
-        <div style="flex:1;min-width:0">
-          <div style="font-size:12.5px;font-weight:600;color:var(--text-primary)">${person.name}</div>
-          <div style="font-size:11px;color:var(--text-muted)">${formatSalary(person.salary)} · ${totalAlloc}% allocated</div>
-        </div>
-        <input type="number" class="assign-pct-input form-control" value="${suggested}" min="1" max="100" title="Allocation %" />
-        <button class="btn btn-primary" style="padding:5px 10px;font-size:12px">Assign</button>
-      `;
-      row.addEventListener('mouseenter', () => row.style.background = 'var(--bg)');
-      row.addEventListener('mouseleave', () => row.style.background = '');
-      row.querySelector('.btn').addEventListener('click', e => {
-        e.stopPropagation();
-        const pctInput = row.querySelector('.assign-pct-input');
-        const pct = Math.min(100, Math.max(1, parseInt(pctInput.value, 10) || 100));
-        const newTotal = totalAlloc + pct;
-        if (newTotal > 100 && !confirm(`${person.name} will be ${newTotal}% allocated (over 100%). Continue?`)) return;
-        roleAssignments.push({ personId: person.id, roleId: assigningRoleId, percentage: pct });
-        closeAssignPersonModal(); render();
-      });
-      list.appendChild(row);
-    });
+    if (unassigned.length > 0) {
+      if (partial.length > 0) {
+        const lbl = document.createElement('div');
+        lbl.style.cssText = 'font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:0.4px;color:var(--text-muted);padding:4px 12px 2px';
+        lbl.textContent = 'Unassigned';
+        list.appendChild(lbl);
+      }
+      unassigned.forEach(p => list.appendChild(renderPersonRow(p)));
+    }
+    if (partial.length > 0) {
+      const lbl = document.createElement('div');
+      lbl.style.cssText = 'font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:0.4px;color:var(--text-muted);padding:8px 12px 2px';
+      lbl.textContent = 'Partially allocated';
+      list.appendChild(lbl);
+      partial.forEach(p => list.appendChild(renderPersonRow(p)));
+    }
   }
   document.getElementById('assign-person-modal-backdrop').classList.add('visible');
 }
@@ -3635,6 +3692,120 @@ function closeAssignPersonModal() {
 document.getElementById('assign-person-close-btn').addEventListener('click', closeAssignPersonModal);
 document.getElementById('assign-person-modal-backdrop').addEventListener('click', e => { if (e.target === document.getElementById('assign-person-modal-backdrop')) closeAssignPersonModal(); });
 document.getElementById('assign-person-create-btn').addEventListener('click', () => { closeAssignPersonModal(); openAddPersonModal(assigningRoleId); });
+
+// ── Add to Role Modal ──────────────────────────────────────────────────────────
+
+let addToRolePersonId = null;
+let addToRoleSelectedRoleId = null;
+
+function openAddToRoleModal(personId) {
+  addToRolePersonId = personId;
+  addToRoleSelectedRoleId = null;
+  const person = persons.find(p => p.id === personId);
+  if (!person) return;
+
+  document.getElementById('add-to-role-modal-title').textContent = `Add ${person.name} to a role`;
+  document.getElementById('add-to-role-warning').textContent = '';
+  document.getElementById('add-to-role-warning').classList.remove('visible');
+
+  // Populate dept filter
+  const deptSel = document.getElementById('add-to-role-dept');
+  deptSel.innerHTML = '<option value="">All departments</option>';
+  departments.forEach(d => {
+    const opt = document.createElement('option'); opt.value = d.id; opt.textContent = d.name;
+    deptSel.appendChild(opt);
+  });
+
+  populateAddToRoleList(personId, '');
+  deptSel.onchange = () => populateAddToRoleList(personId, deptSel.value);
+
+  document.getElementById('add-to-role-modal-backdrop').classList.add('visible');
+}
+
+function populateAddToRoleList(personId, deptFilter) {
+  const list = document.getElementById('add-to-role-list');
+  list.innerHTML = '';
+  addToRoleSelectedRoleId = null;
+
+  // Already-assigned role IDs for this person
+  const assignedRoleIds = new Set(getAssignmentsForPerson(personId).map(a => a.roleId));
+
+  // Vacant roles (no current assignment) not already held by this person
+  const vacantRoles = roles.filter(r =>
+    !assignedRoleIds.has(r.id) &&
+    !getAssignmentForRole(r.id) &&
+    (!deptFilter || r.department === deptFilter)
+  );
+
+  if (vacantRoles.length === 0) {
+    list.innerHTML = '<div style="text-align:center;color:var(--text-muted);padding:12px;font-size:12.5px">No vacant roles found</div>';
+    return;
+  }
+
+  vacantRoles.forEach(r => {
+    const dept = departments.find(d => d.id === r.department);
+    const row = document.createElement('div');
+    row.className = 'add-to-role-row';
+    row.dataset.roleId = r.id;
+
+    const pctInput = document.createElement('input');
+    pctInput.type = 'number';
+    pctInput.className = 'assign-pct-input form-control';
+    pctInput.min = 1; pctInput.max = 100;
+    const totalAlloc = getTotalAllocationForPerson(personId);
+    pctInput.value = Math.max(1, Math.min(100, 100 - totalAlloc));
+    pctInput.title = 'FTE %';
+    pctInput.style.cssText = 'width:52px;flex-shrink:0';
+    pctInput.addEventListener('click', e => e.stopPropagation());
+
+    row.innerHTML = `
+      <div style="flex:1;min-width:0">
+        <div style="font-size:12.5px;font-weight:600;color:var(--text-primary);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r.title}</div>
+        <div style="font-size:11px;color:var(--text-muted)">${dept ? dept.name : r.department} · <span class="level-badge ${levelTierClass(r.level)}" style="font-size:10px;padding:1px 4px">${r.level}</span></div>
+      </div>
+    `;
+    row.appendChild(pctInput);
+
+    row.addEventListener('click', () => {
+      list.querySelectorAll('.add-to-role-row').forEach(el => el.classList.remove('selected'));
+      row.classList.add('selected');
+      addToRoleSelectedRoleId = r.id;
+    });
+
+    list.appendChild(row);
+  });
+}
+
+function saveAddToRoleModal() {
+  const warn = document.getElementById('add-to-role-warning');
+  if (!addToRoleSelectedRoleId) {
+    warn.textContent = 'Please select a role.';
+    warn.classList.add('visible');
+    return;
+  }
+  const selectedRow = document.querySelector(`.add-to-role-row[data-role-id="${addToRoleSelectedRoleId}"]`);
+  const pct = Math.min(100, Math.max(1, parseInt(selectedRow.querySelector('.assign-pct-input').value, 10) || 100));
+  const totalAlloc = getTotalAllocationForPerson(addToRolePersonId);
+  const newTotal = totalAlloc + pct;
+  if (newTotal > 100) {
+    const person = persons.find(p => p.id === addToRolePersonId);
+    if (!confirm(`${person ? person.name : 'This person'} will be ${newTotal}% allocated (over 100%). Continue?`)) return;
+  }
+  roleAssignments.push({ personId: addToRolePersonId, roleId: addToRoleSelectedRoleId, percentage: pct });
+  closeAddToRoleModal();
+  render();
+}
+
+function closeAddToRoleModal() {
+  document.getElementById('add-to-role-modal-backdrop').classList.remove('visible');
+  addToRolePersonId = null;
+  addToRoleSelectedRoleId = null;
+}
+
+document.getElementById('add-to-role-close-btn').addEventListener('click', closeAddToRoleModal);
+document.getElementById('add-to-role-cancel-btn').addEventListener('click', closeAddToRoleModal);
+document.getElementById('add-to-role-save-btn').addEventListener('click', saveAddToRoleModal);
+document.getElementById('add-to-role-modal-backdrop').addEventListener('click', e => { if (e.target === document.getElementById('add-to-role-modal-backdrop')) closeAddToRoleModal(); });
 
 // ── Snapshots ──────────────────────────────────────────────────────────────────
 
@@ -4173,8 +4344,8 @@ function loadFromStorage() {
     }
     const saved = JSON.parse(raw);
     if (saved.departments) departments.splice(0, departments.length, ...saved.departments.map(d => ({ ...d, headRoleId: d.headRoleId ?? null })));
-    if (saved.roles) roles.splice(0, roles.length, ...saved.roles.map(r => ({ ...r, teamId: r.teamId || null, multipleRole: r.multipleRole ?? false })));
-    if (saved.persons) persons.splice(0, persons.length, ...saved.persons.map(p => ({ ...p, multipleRole: p.multipleRole ?? false })));
+    if (saved.roles) roles.splice(0, roles.length, ...saved.roles.map(r => ({ ...r, teamId: r.teamId || null })));
+    if (saved.persons) persons.splice(0, persons.length, ...saved.persons.map(p => ({ ...p })));
     if (saved.roleAssignments) {
       roleAssignments.splice(0, roleAssignments.length, ...saved.roleAssignments);
     } else if (saved.persons) {
