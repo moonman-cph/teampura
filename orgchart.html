@@ -537,6 +537,20 @@
     display: flex; align-items: center; justify-content: space-between;
     padding: 14px 24px; border-top: 1px solid var(--border); flex-shrink: 0;
   }
+  .import-section-label {
+    font-size: 10.5px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.08em; color: var(--text-muted);
+    margin: 14px 0 6px; padding-bottom: 4px;
+    border-bottom: 1px solid var(--border);
+  }
+  .import-preview-row.ok   { color: var(--text-primary); }
+  .import-preview-row.info { color: var(--text-secondary); }
+  .import-preview-row.warn { color: #92400e; }
+  .import-preview-row.skip { color: #b91c1c; }
+  .import-show-more {
+    font-size: 11.5px; color: var(--accent); cursor: pointer; padding: 3px 0; margin-top: 2px;
+  }
+  .import-show-more:hover { text-decoration: underline; }
 
   /* ── Team Settings Items ────────────────────────────────────── */
   .team-item {
@@ -5186,7 +5200,7 @@ function setImportStep(n) {
   const backBtn = document.getElementById('import-back-btn');
   const nextBtn = document.getElementById('import-next-btn');
   backBtn.style.visibility = n > 1 ? 'visible' : 'hidden';
-  nextBtn.textContent = n === 4 ? 'Import' : 'Next →';
+  if (n !== 4) nextBtn.textContent = 'Next →'; // Step 4 label set by buildPreview()
 }
 
 // ── Step 1: file handling ──
@@ -5258,26 +5272,73 @@ function buildPreview() {
   importState.preview = result;
   const el = document.getElementById('import-preview-content');
   const total = importState.rows.length;
-  const lines = [
-    { icon: '📋', text: `${total} row${total !== 1 ? 's' : ''} in file` },
-    result.personsCreated  > 0 ? { icon: '✓', text: `${result.personsCreated} employee${result.personsCreated !== 1 ? 's' : ''} will be added` } : null,
-    result.personsUpdated  > 0 ? { icon: '✓', text: `${result.personsUpdated} employee${result.personsUpdated !== 1 ? 's' : ''} will be updated` } : null,
-    result.rolesCreated    > 0 ? { icon: '✓', text: `${result.rolesCreated} new role${result.rolesCreated !== 1 ? 's' : ''} will be created` } : null,
-    result.deptsCreated    > 0 ? { icon: '✓', text: `${result.deptsCreated} new department${result.deptsCreated !== 1 ? 's' : ''} will be created` } : null,
-    result.teamsCreated    > 0 ? { icon: '✓', text: `${result.teamsCreated} new team${result.teamsCreated !== 1 ? 's' : ''} will be created` } : null,
-    result.skipped.length  > 0 ? { icon: '⚠', text: `${result.skipped.length} row${result.skipped.length !== 1 ? 's' : ''} skipped — ${result.skipped[0]}${result.skipped.length > 1 ? ` (+${result.skipped.length - 1} more)` : ''}` } : null,
-    importState.mode === 'replace' ? { icon: '⚠', text: 'All existing employees and roles will be deleted first' } : null,
-  ].filter(Boolean);
-  el.innerHTML = lines.map(l => `
-    <div class="import-preview-row">
-      <span class="import-preview-icon">${l.icon}</span>
-      <span style="font-size:13px;color:${l.icon==='⚠'?'#92400e':'var(--text-primary)'}">${l.text}</span>
-    </div>`).join('');
+  const hasIssues = result.warnings.length > 0 || result.skipped.length > 0;
+
+  // Update button label
+  document.getElementById('import-next-btn').textContent = hasIssues ? 'Import anyway →' : 'Import →';
+
+  function row(cls, icon, text) {
+    return `<div class="import-preview-row ${cls}"><span class="import-preview-icon">${icon}</span><span style="font-size:13px">${text}</span></div>`;
+  }
+  function section(label) {
+    return `<div class="import-section-label">${label}</div>`;
+  }
+
+  let html = '';
+
+  // ── Summary ──
+  html += section('Summary');
+  html += row('ok', '📋', `${total} row${total !== 1 ? 's' : ''} in file`);
+  if (result.personsCreated > 0) html += row('ok', '✓', `${result.personsCreated} employee${result.personsCreated !== 1 ? 's' : ''} will be added`);
+  if (result.personsUpdated > 0) html += row('ok', '✓', `${result.personsUpdated} employee${result.personsUpdated !== 1 ? 's' : ''} will be updated`);
+  if (result.rolesCreated   > 0) html += row('ok', '✓', `${result.rolesCreated} new role${result.rolesCreated !== 1 ? 's' : ''} will be created`);
+  if (result.deptsCreated   > 0) html += row('ok', '✓', `${result.deptsCreated} new department${result.deptsCreated !== 1 ? 's' : ''} will be created`);
+  if (result.teamsCreated   > 0) html += row('ok', '✓', `${result.teamsCreated} new team${result.teamsCreated !== 1 ? 's' : ''} will be created`);
+  if (importState.mode === 'replace') html += row('warn', '⚠', 'All existing employees and roles will be deleted first');
+
+  // ── Info ──
+  if (result.infoTopLevel > 0) {
+    html += section('Info');
+    html += row('info', 'ℹ', `${result.infoTopLevel} employee${result.infoTopLevel !== 1 ? 's have' : ' has'} no manager — will be placed at top level`);
+  }
+
+  // ── Warnings ──
+  const allWarnings = [...result.warnings];
+  if (result.missingGender > 0) allWarnings.push(`${result.missingGender} employee${result.missingGender !== 1 ? 's have' : ' has'} no gender data (will be blank)`);
+  if (result.missingSalary > 0) allWarnings.push(`${result.missingSalary} employee${result.missingSalary !== 1 ? 's have' : ' has'} no salary data (will be 0)`);
+  if (allWarnings.length > 0) {
+    html += section(`Warnings (${allWarnings.length})`);
+    const MAX_VISIBLE = 8;
+    allWarnings.slice(0, MAX_VISIBLE).forEach(w => { html += row('warn', '⚠', w); });
+    if (allWarnings.length > MAX_VISIBLE) {
+      html += `<div class="import-show-more" id="import-show-more-btn">… show ${allWarnings.length - MAX_VISIBLE} more</div>`;
+      html += `<div id="import-warnings-extra" style="display:none">` +
+        allWarnings.slice(MAX_VISIBLE).map(w => row('warn', '⚠', w)).join('') +
+        `</div>`;
+    }
+  }
+
+  // ── Skipped ──
+  if (result.skipped.length > 0) {
+    html += section(`Skipped (${result.skipped.length})`);
+    result.skipped.forEach(s => { html += row('skip', '✗', s); });
+  }
+
+  el.innerHTML = html;
+
+  // Wire "show more" toggle
+  const showMoreBtn = document.getElementById('import-show-more-btn');
+  if (showMoreBtn) {
+    showMoreBtn.addEventListener('click', () => {
+      document.getElementById('import-warnings-extra').style.display = '';
+      showMoreBtn.style.display = 'none';
+    });
+  }
 }
 
 // ── Core import engine ──
 function runImport(rows, mapping, mode, dryRun = false) {
-  const result = { personsCreated: 0, personsUpdated: 0, rolesCreated: 0, deptsCreated: 0, teamsCreated: 0, skipped: [] };
+  const result = { personsCreated: 0, personsUpdated: 0, rolesCreated: 0, deptsCreated: 0, teamsCreated: 0, skipped: [], warnings: [], infoTopLevel: 0, missingGender: 0, missingSalary: 0 };
   const get = (row, field) => (mapping[field] ? (row[mapping[field]] || '').trim() : '');
 
   // Working copies for dry-run
@@ -5358,9 +5419,14 @@ function runImport(rows, mapping, mode, dryRun = false) {
     rows.forEach((row, idx) => {
       const mgrName = get(row, 'managerName');
       const roleId = rowRoleIds[idx];
-      if (!mgrName || roleId === undefined) return;
+      if (roleId === undefined) return;
+      if (!mgrName) { result.infoTopLevel++; return; }
       const mgrRoleId = nameToRoleId[mgrName.toLowerCase()];
-      if (mgrRoleId !== undefined && mgrRoleId !== roleId) {
+      if (mgrRoleId === undefined) {
+        result.warnings.push(`Row ${idx + 2} · ${get(row, 'name') || '?'} — manager "${mgrName}" not found`);
+        return;
+      }
+      if (mgrRoleId !== roleId) {
         const role = wRoles.find(r => r.id === roleId);
         if (role) role.managerRoleId = mgrRoleId;
       }
@@ -5370,24 +5436,29 @@ function runImport(rows, mapping, mode, dryRun = false) {
   // Phase 4b: hierarchy by employee ID (two-pass, takes priority over name)
   if (mapping.managerEmployeeId) {
     const empIdToRoleId = {};
-    // From this import batch
     rows.forEach((row, idx) => {
       const empId = get(row, 'employeeId');
       if (empId && rowRoleIds[idx] !== undefined) empIdToRoleId[empId.toLowerCase()] = rowRoleIds[idx];
     });
-    // From existing persons already in the system
     wPersons.forEach(p => {
       if (p.employeeId) {
         const assignment = wAssignments.find(a => a.personId === p.id);
         if (assignment) empIdToRoleId[String(p.employeeId).toLowerCase()] = assignment.roleId;
       }
     });
+    // Reset infoTopLevel count (4b overrides 4a)
+    if (mapping.managerName) result.infoTopLevel = 0;
     rows.forEach((row, idx) => {
       const mgrEmpId = get(row, 'managerEmployeeId');
       const roleId = rowRoleIds[idx];
-      if (!mgrEmpId || roleId === undefined) return;
+      if (roleId === undefined) return;
+      if (!mgrEmpId) { result.infoTopLevel++; return; }
       const mgrRoleId = empIdToRoleId[mgrEmpId.toLowerCase()];
-      if (mgrRoleId !== undefined && mgrRoleId !== roleId) {
+      if (mgrRoleId === undefined) {
+        result.warnings.push(`Row ${idx + 2} · ${get(row, 'name') || '?'} — manager ID "${mgrEmpId}" not found`);
+        return;
+      }
+      if (mgrRoleId !== roleId) {
         const role = wRoles.find(r => r.id === roleId);
         if (role) role.managerRoleId = mgrRoleId;
       }
@@ -5403,6 +5474,9 @@ function runImport(rows, mapping, mode, dryRun = false) {
     const salary = salaryRaw ? Math.round(parseFloat(salaryRaw)) : 0;
     const genderRaw = get(row, 'gender').toLowerCase();
     const gender = genderRaw.startsWith('f') ? 'female' : genderRaw.startsWith('m') ? 'male' : '';
+
+    if (!gender) result.missingGender++;
+    if (!salary) result.missingSalary++;
 
     let person = null;
     if (mode === 'merge') {
