@@ -1864,6 +1864,7 @@
         <div class="import-map-row"><div class="import-map-label">Department</div><select class="form-control" id="imap-roleDept"></select></div>
         <div class="import-map-row"><div class="import-map-label">Team</div><select class="form-control" id="imap-roleTeam"></select></div>
         <div class="import-map-row"><div class="import-map-label">Manager name</div><select class="form-control" id="imap-managerName"></select></div>
+        <div class="import-map-row"><div class="import-map-label">Manager ID</div><select class="form-control" id="imap-managerEmployeeId"></select></div>
       </div>
     </div>
     <!-- Step 3: Options -->
@@ -5090,7 +5091,8 @@ const IMPORT_TARGET_FIELDS = [
   { id: 'roleLevel',   hints: ['level','grade','rang','tier'] },
   { id: 'roleDept',    hints: ['department','dept','afdeling','division','team dept'] },
   { id: 'roleTeam',    hints: ['team','gruppe','group','squad'] },
-  { id: 'managerName', hints: ['manager','leder','reports to','reportsto','supervisor','chef'] },
+  { id: 'managerName',       hints: ['manager','leder','reports to','reportsto','supervisor','chef'] },
+  { id: 'managerEmployeeId', hints: ['manager id','manager employee id','leder id','reports to id','supervisor id','mgr id'] },
 ];
 
 let importState = {
@@ -5346,7 +5348,7 @@ function runImport(rows, mapping, mode, dryRun = false) {
     }
   });
 
-  // Phase 4: hierarchy (two-pass) — build name→roleId map
+  // Phase 4a: hierarchy by name (two-pass)
   if (mapping.managerName) {
     const nameToRoleId = {};
     rows.forEach((row, idx) => {
@@ -5358,6 +5360,33 @@ function runImport(rows, mapping, mode, dryRun = false) {
       const roleId = rowRoleIds[idx];
       if (!mgrName || roleId === undefined) return;
       const mgrRoleId = nameToRoleId[mgrName.toLowerCase()];
+      if (mgrRoleId !== undefined && mgrRoleId !== roleId) {
+        const role = wRoles.find(r => r.id === roleId);
+        if (role) role.managerRoleId = mgrRoleId;
+      }
+    });
+  }
+
+  // Phase 4b: hierarchy by employee ID (two-pass, takes priority over name)
+  if (mapping.managerEmployeeId) {
+    const empIdToRoleId = {};
+    // From this import batch
+    rows.forEach((row, idx) => {
+      const empId = get(row, 'employeeId');
+      if (empId && rowRoleIds[idx] !== undefined) empIdToRoleId[empId.toLowerCase()] = rowRoleIds[idx];
+    });
+    // From existing persons already in the system
+    wPersons.forEach(p => {
+      if (p.employeeId) {
+        const assignment = wAssignments.find(a => a.personId === p.id);
+        if (assignment) empIdToRoleId[String(p.employeeId).toLowerCase()] = assignment.roleId;
+      }
+    });
+    rows.forEach((row, idx) => {
+      const mgrEmpId = get(row, 'managerEmployeeId');
+      const roleId = rowRoleIds[idx];
+      if (!mgrEmpId || roleId === undefined) return;
+      const mgrRoleId = empIdToRoleId[mgrEmpId.toLowerCase()];
       if (mgrRoleId !== undefined && mgrRoleId !== roleId) {
         const role = wRoles.find(r => r.id === roleId);
         if (role) role.managerRoleId = mgrRoleId;
