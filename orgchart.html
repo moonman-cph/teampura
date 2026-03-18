@@ -551,6 +551,37 @@
     font-size: 11.5px; color: var(--accent); cursor: pointer; padding: 3px 0; margin-top: 2px;
   }
   .import-show-more:hover { text-decoration: underline; }
+  .imap-sample {
+    font-size: 11px; color: var(--text-muted);
+    margin-left: 6px; white-space: nowrap;
+    overflow: hidden; text-overflow: ellipsis; max-width: 200px;
+    flex-shrink: 0;
+  }
+  .imap-vmap-btn {
+    font-size: 11px; padding: 2px 7px; margin-left: 6px;
+    border: 1px solid var(--border); border-radius: 4px;
+    background: var(--bg); color: var(--accent); cursor: pointer;
+    white-space: nowrap; flex-shrink: 0;
+  }
+  .imap-vmap-btn:hover { background: var(--accent-light); }
+  .imap-vmap-panel {
+    margin: 2px 0 8px 130px;
+    padding: 8px 10px;
+    background: var(--bg); border: 1px solid var(--border); border-radius: 6px;
+  }
+  .imap-vmap-row {
+    display: flex; align-items: center; gap: 8px; margin-bottom: 5px;
+  }
+  .imap-vmap-row:last-child { margin-bottom: 0; }
+  .imap-vmap-source {
+    font-size: 12px; font-family: monospace; color: var(--text-secondary);
+    min-width: 80px; flex-shrink: 0;
+  }
+  .imap-vmap-arrow { color: var(--text-muted); font-size: 12px; flex-shrink: 0; }
+  .imap-vmap-target { flex: 1; }
+  .import-ignored-cols {
+    font-size: 12px; color: var(--text-muted); line-height: 1.6; margin: 2px 0 4px;
+  }
 
   /* ── Team Settings Items ────────────────────────────────────── */
   .team-item {
@@ -1866,19 +1897,22 @@
     <div class="import-panel" id="import-panel-2">
       <div class="import-map-group">
         <div class="import-map-group-label">Person</div>
-        <div class="import-map-row"><div class="import-map-label">Full name <span>*</span></div><select class="form-control" id="imap-name"></select></div>
-        <div class="import-map-row"><div class="import-map-label">Employee ID</div><select class="form-control" id="imap-employeeId"></select></div>
-        <div class="import-map-row"><div class="import-map-label">Salary (monthly)</div><select class="form-control" id="imap-salary"></select></div>
-        <div class="import-map-row"><div class="import-map-label">Gender</div><select class="form-control" id="imap-gender"></select></div>
+        <div class="import-map-row"><div class="import-map-label">Full name <span>*</span></div><select class="form-control" id="imap-name"></select><span class="imap-sample" id="imap-sample-name"></span></div>
+        <div class="import-map-row"><div class="import-map-label">Employee ID</div><select class="form-control" id="imap-employeeId"></select><span class="imap-sample" id="imap-sample-employeeId"></span></div>
+        <div class="import-map-row"><div class="import-map-label">Salary (monthly)</div><select class="form-control" id="imap-salary"></select><span class="imap-sample" id="imap-sample-salary"></span></div>
+        <div class="import-map-row"><div class="import-map-label">Gender</div><select class="form-control" id="imap-gender"></select><span class="imap-sample" id="imap-sample-gender"></span><button class="imap-vmap-btn" id="imap-vmap-btn-gender" style="display:none">↔ Map values</button></div>
+        <div class="imap-vmap-panel" id="imap-vmap-gender" style="display:none"></div>
       </div>
       <div class="import-map-group">
         <div class="import-map-group-label">Role</div>
-        <div class="import-map-row"><div class="import-map-label">Job title <span>*</span></div><select class="form-control" id="imap-roleTitle"></select></div>
-        <div class="import-map-row"><div class="import-map-label">Level (L1–L8)</div><select class="form-control" id="imap-roleLevel"></select></div>
-        <div class="import-map-row"><div class="import-map-label">Department</div><select class="form-control" id="imap-roleDept"></select></div>
-        <div class="import-map-row"><div class="import-map-label">Team</div><select class="form-control" id="imap-roleTeam"></select></div>
-        <div class="import-map-row"><div class="import-map-label">Manager name</div><select class="form-control" id="imap-managerName"></select></div>
-        <div class="import-map-row"><div class="import-map-label">Manager ID</div><select class="form-control" id="imap-managerEmployeeId"></select></div>
+        <div class="import-map-row"><div class="import-map-label">Job title <span>*</span></div><select class="form-control" id="imap-roleTitle"></select><span class="imap-sample" id="imap-sample-roleTitle"></span></div>
+        <div class="import-map-row"><div class="import-map-label">Level (L1–L8)</div><select class="form-control" id="imap-roleLevel"></select><span class="imap-sample" id="imap-sample-roleLevel"></span><button class="imap-vmap-btn" id="imap-vmap-btn-roleLevel" style="display:none">↔ Map values</button></div>
+        <div class="imap-vmap-panel" id="imap-vmap-roleLevel" style="display:none"></div>
+        <div class="import-map-row"><div class="import-map-label">Department</div><select class="form-control" id="imap-roleDept"></select><span class="imap-sample" id="imap-sample-roleDept"></span></div>
+        <div class="import-map-row"><div class="import-map-label">Team</div><select class="form-control" id="imap-roleTeam"></select><span class="imap-sample" id="imap-sample-roleTeam"></span></div>
+        <div class="import-map-row"><div class="import-map-label">Manager name</div><select class="form-control" id="imap-managerName"></select><span class="imap-sample" id="imap-sample-managerName"></span></div>
+        <div class="import-map-row"><div class="import-map-label">Manager ID</div><select class="form-control" id="imap-managerEmployeeId"></select><span class="imap-sample" id="imap-sample-managerEmployeeId"></span></div>
+        <div class="import-map-row"><div class="import-map-label">Dotted-line mgr ID</div><select class="form-control" id="imap-dottedLineManagerId"></select><span class="imap-sample" id="imap-sample-dottedLineManagerId"></span></div>
       </div>
     </div>
     <!-- Step 3: Options -->
@@ -3123,9 +3157,10 @@ function renderCard(role, isOrphaned = false) {
   return card;
 }
 
-function renderTree(managerRoleId, deptId, excludeTeamRoles = false) {
+function renderTree(managerRoleId, deptId, excludeTeamRoles = false, restrictToTeamId = undefined) {
   let children = getChildRoles(managerRoleId, deptId);
   if (excludeTeamRoles) children = children.filter(r => !r.teamId);
+  if (restrictToTeamId !== undefined) children = children.filter(r => r.teamId === restrictToTeamId || !r.teamId);
   if (!children.length) return null;
   const container = document.createElement('div');
   container.className = 'tree-children';
@@ -3152,7 +3187,7 @@ function renderTree(managerRoleId, deptId, excludeTeamRoles = false) {
     const node = document.createElement('div');
     node.className = 'tree-node';
     node.appendChild(renderCard(childRole));
-    const subtree = renderTree(childRole.id, deptId);
+    const subtree = renderTree(childRole.id, deptId, false, restrictToTeamId);
     if (subtree) node.appendChild(subtree);
     container.appendChild(node);
   });
@@ -3336,7 +3371,7 @@ function renderDeptColumn(dept) {
           const rootNode = document.createElement('div');
           rootNode.className = 'tree-node';
           rootNode.appendChild(renderCard(teamRoot));
-          const subtree = renderTree(teamRoot.id, dept.id);
+          const subtree = renderTree(teamRoot.id, dept.id, false, team.id);
           if (subtree) rootNode.appendChild(subtree);
           tree.appendChild(rootNode);
         });
@@ -3867,8 +3902,10 @@ function saveModal() {
     if (role) {
       role.level = document.getElementById('modal-role-level').value;
       role.title = document.getElementById('modal-role-title').value;
-      const newDept = document.getElementById('modal-role-dept').value;
-      if (newDept !== role.department) {
+      const deptSelVal = document.getElementById('modal-role-dept').value;
+      const deptObj = departments.find(d => String(d.id) === deptSelVal);
+      const newDept = deptObj ? deptObj.id : deptSelVal; // preserve original type (string 'engineering' or number 101)
+      if (String(newDept) !== String(role.department)) {
         role.department = newDept;
         const newDirector = getDirectorRole(newDept);
         role.managerRoleId = newDirector ? newDirector.id : null;
@@ -5100,13 +5137,14 @@ const IMPORT_TARGET_FIELDS = [
   { id: 'name',        hints: ['name','full name','employee name','fullname','person','navn'] },
   { id: 'employeeId',  hints: ['id','emp id','employee id','staff id','medarbejder id','nr','number'] },
   { id: 'salary',      hints: ['salary','pay','løn','wage','monthly','compensation','comp'] },
-  { id: 'gender',      hints: ['gender','køn','sex'] },
+  { id: 'gender',      hints: ['gender','køn','sex'], enumValues: ['male','female','other'] },
   { id: 'roleTitle',   hints: ['title','job title','role','position','jobtitle','stilling','job'] },
-  { id: 'roleLevel',   hints: ['level','grade','rang','tier'] },
+  { id: 'roleLevel',   hints: ['level','grade','rang','tier'], enumValues: ['L1','L2','L3','L4','L5','L6','L7','L8'] },
   { id: 'roleDept',    hints: ['department','dept','afdeling','division','team dept'] },
   { id: 'roleTeam',    hints: ['team','gruppe','group','squad'] },
-  { id: 'managerName',       hints: ['manager','leder','reports to','reportsto','supervisor','chef'] },
-  { id: 'managerEmployeeId', hints: ['manager id','manager employee id','leder id','reports to id','supervisor id','mgr id'] },
+  { id: 'managerName',           hints: ['manager','leder','reports to','reportsto','supervisor','chef'] },
+  { id: 'managerEmployeeId',     hints: ['manager id','manager employee id','leder id','reports to id','supervisor id','mgr id'] },
+  { id: 'dottedLineManagerId',   hints: ['dotted line','dotted-line','also reporting to','secondary manager','matrix manager','dotted manager id'] },
 ];
 
 let importState = {
@@ -5116,6 +5154,7 @@ let importState = {
   mapping: {},
   mode: 'append',
   preview: null,
+  valueTransforms: {},
 };
 
 // ── CSV parser ──
@@ -5177,7 +5216,7 @@ function saveImportMapping(mapping) {
 
 // ── Modal open/close ──
 function openImportModal() {
-  importState = { step: 1, headers: [], rows: [], mapping: {}, mode: 'append', preview: null };
+  importState = { step: 1, headers: [], rows: [], mapping: {}, mode: 'append', preview: null, valueTransforms: {} };
   document.getElementById('import-file-input').value = '';
   document.getElementById('import-col-preview-area').style.display = 'none';
   document.getElementById('import-drop-zone').classList.remove('dragover');
@@ -5235,6 +5274,72 @@ dropZone.addEventListener('drop', e => { e.preventDefault(); dropZone.classList.
 document.getElementById('import-file-input').addEventListener('change', e => { if (e.target.files[0]) handleImportFile(e.target.files[0]); });
 
 // ── Step 2: populate mapping selects ──
+function updateSampleHint(fieldId) {
+  const sel = document.getElementById(`imap-${fieldId}`);
+  const el = document.getElementById(`imap-sample-${fieldId}`);
+  const btn = document.getElementById(`imap-vmap-btn-${fieldId}`);
+  if (!el || !sel) return;
+  const colName = sel.value;
+  if (!colName) {
+    el.textContent = '';
+    if (btn) { btn.style.display = 'none'; collapseVmap(fieldId); }
+    if (importState.valueTransforms[fieldId]) delete importState.valueTransforms[fieldId];
+    return;
+  }
+  const seen = new Set();
+  for (const row of importState.rows) {
+    const v = (row[colName] || '').trim();
+    if (v) seen.add(v);
+    if (seen.size >= 5) break;
+  }
+  el.textContent = seen.size ? 'e.g. ' + [...seen].map(v => `"${v}"`).join(', ') : '';
+  if (btn) btn.style.display = '';
+}
+
+function collapseVmap(fieldId) {
+  const panel = document.getElementById(`imap-vmap-${fieldId}`);
+  if (panel) { panel.style.display = 'none'; panel.innerHTML = ''; }
+}
+
+function renderValueMapPanel(fieldId) {
+  const panel = document.getElementById(`imap-vmap-${fieldId}`);
+  const field = IMPORT_TARGET_FIELDS.find(f => f.id === fieldId);
+  const colName = document.getElementById(`imap-${fieldId}`).value;
+  if (!panel || !field || !colName) return;
+
+  if (panel.style.display !== 'none') { panel.style.display = 'none'; return; }
+
+  const allValues = new Set();
+  for (const row of importState.rows) {
+    const v = (row[colName] || '').trim();
+    if (v) allValues.add(v);
+  }
+
+  if (!importState.valueTransforms[fieldId]) importState.valueTransforms[fieldId] = {};
+  const transforms = importState.valueTransforms[fieldId];
+
+  let html = '';
+  for (const srcVal of allValues) {
+    const optionsHtml = `<option value="">— as-is</option>` +
+      field.enumValues.map(ev => `<option value="${ev}" ${transforms[srcVal] === ev ? 'selected' : ''}>${ev}</option>`).join('');
+    html += `<div class="imap-vmap-row">
+      <span class="imap-vmap-source">"${srcVal}"</span>
+      <span class="imap-vmap-arrow">→</span>
+      <select class="form-control imap-vmap-target" data-src="${srcVal}">${optionsHtml}</select>
+    </div>`;
+  }
+  panel.innerHTML = html;
+  panel.style.display = '';
+
+  panel.querySelectorAll('.imap-vmap-target').forEach(sel => {
+    sel.addEventListener('change', () => {
+      const src = sel.dataset.src;
+      if (sel.value) transforms[src] = sel.value;
+      else delete transforms[src];
+    });
+  });
+}
+
 function populateMappingStep() {
   importState.mapping = autoSuggestMapping(importState.headers);
   IMPORT_TARGET_FIELDS.forEach(field => {
@@ -5246,6 +5351,13 @@ function populateMappingStep() {
       if (importState.mapping[field.id] === h) opt.selected = true;
       sel.appendChild(opt);
     });
+    sel.addEventListener('change', () => {
+      updateSampleHint(field.id);
+      collapseVmap(field.id);
+    });
+    updateSampleHint(field.id);
+    const btn = document.getElementById(`imap-vmap-btn-${field.id}`);
+    if (btn) btn.addEventListener('click', () => renderValueMapPanel(field.id));
   });
 }
 
@@ -5268,7 +5380,7 @@ document.querySelectorAll('input[name="import-mode"]').forEach(radio => {
 
 // ── Step 4: dry-run preview ──
 function buildPreview() {
-  const result = runImport(importState.rows, importState.mapping, importState.mode, true);
+  const result = runImport(importState.rows, importState.mapping, importState.mode, true, importState.valueTransforms);
   importState.preview = result;
   const el = document.getElementById('import-preview-content');
   const total = importState.rows.length;
@@ -5306,6 +5418,7 @@ function buildPreview() {
   const allWarnings = [...result.warnings];
   if (result.missingGender > 0) allWarnings.push(`${result.missingGender} employee${result.missingGender !== 1 ? 's have' : ' has'} no gender data (will be blank)`);
   if (result.missingSalary > 0) allWarnings.push(`${result.missingSalary} employee${result.missingSalary !== 1 ? 's have' : ' has'} no salary data (will be 0)`);
+  if (result.unmatchedLevels > 0) allWarnings.push(`${result.unmatchedLevels} row${result.unmatchedLevels !== 1 ? 's have' : ' has'} unrecognised level values (e.g. "A", "B") — defaulting to L3`);
   if (allWarnings.length > 0) {
     html += section(`Warnings (${allWarnings.length})`);
     const MAX_VISIBLE = 8;
@@ -5324,6 +5437,14 @@ function buildPreview() {
     result.skipped.forEach(s => { html += row('skip', '✗', s); });
   }
 
+  // ── Ignored columns ──
+  const mappedCols = new Set(Object.values(importState.mapping).filter(Boolean));
+  const ignoredCols = importState.headers.filter(h => !mappedCols.has(h));
+  if (ignoredCols.length > 0) {
+    html += section(`Ignored columns (${ignoredCols.length})`);
+    html += `<div class="import-ignored-cols">${ignoredCols.join(' · ')}</div>`;
+  }
+
   el.innerHTML = html;
 
   // Wire "show more" toggle
@@ -5337,9 +5458,14 @@ function buildPreview() {
 }
 
 // ── Core import engine ──
-function runImport(rows, mapping, mode, dryRun = false) {
-  const result = { personsCreated: 0, personsUpdated: 0, rolesCreated: 0, deptsCreated: 0, teamsCreated: 0, skipped: [], warnings: [], infoTopLevel: 0, missingGender: 0, missingSalary: 0 };
-  const get = (row, field) => (mapping[field] ? (row[mapping[field]] || '').trim() : '');
+function runImport(rows, mapping, mode, dryRun = false, valueTransforms = {}) {
+  const result = { personsCreated: 0, personsUpdated: 0, rolesCreated: 0, deptsCreated: 0, teamsCreated: 0, skipped: [], warnings: [], infoTopLevel: 0, missingGender: 0, missingSalary: 0, unmatchedLevels: 0 };
+  const get = (row, field) => {
+    if (!mapping[field]) return '';
+    const raw = (row[mapping[field]] || '').trim();
+    const xforms = valueTransforms[field];
+    return (xforms && xforms[raw] !== undefined) ? xforms[raw] : raw;
+  };
 
   // Working copies for dry-run
   let wDepts = dryRun ? departments.map(d => ({...d})) : departments;
@@ -5381,7 +5507,10 @@ function runImport(rows, mapping, mode, dryRun = false) {
   });
 
   // Phase 3: ensure roles, track rowIndex→roleId
+  // claimedRoleIds prevents two CSV rows from sharing the same role object —
+  // each row gets its own role so every imported person is individually visible.
   const rowRoleIds = {};
+  const claimedRoleIds = new Set();
   rows.forEach((row, idx) => {
     const name = get(row, 'name');
     const roleTitle = get(row, 'roleTitle');
@@ -5397,14 +5526,19 @@ function runImport(rows, mapping, mode, dryRun = false) {
 
     const levelRaw = get(row, 'roleLevel').toUpperCase();
     const level = LEVELS.find(l => l.id === levelRaw || levelRaw.startsWith(l.id)) ? levelRaw.match(/L[1-8]/)?.[0] : null;
+    if (get(row, 'roleLevel') && !level) result.unmatchedLevels++;
 
     if (roleTitle && deptId) {
-      let role = wRoles.find(r => r.title.toLowerCase() === roleTitle.toLowerCase() && r.department === deptId);
+      // Find a matching role that hasn't already been claimed by a prior row in this import
+      let role = wRoles.find(r => r.title.toLowerCase() === roleTitle.toLowerCase() && r.department === deptId && !claimedRoleIds.has(r.id));
       if (!role) {
         role = { id: nextWRoleId(), title: roleTitle, level: level || 'L3', department: deptId, managerRoleId: null, teamId: team ? team.id : null, secondaryManagerRoleIds: [] };
         wRoles.push(role);
         result.rolesCreated++;
+      } else if (team) {
+        role.teamId = team.id; // update teamId for reused pre-existing role
       }
+      claimedRoleIds.add(role.id);
       rowRoleIds[idx] = role.id;
     }
   });
@@ -5428,7 +5562,14 @@ function runImport(rows, mapping, mode, dryRun = false) {
       }
       if (mgrRoleId !== roleId) {
         const role = wRoles.find(r => r.id === roleId);
-        if (role) role.managerRoleId = mgrRoleId;
+        const mgrRole = wRoles.find(r => r.id === mgrRoleId);
+        if (role && mgrRole) {
+          if (mgrRole.department === role.department) {
+            role.managerRoleId = mgrRoleId;
+          } else {
+            result.infoTopLevel++;
+          }
+        }
       }
     });
   }
@@ -5460,7 +5601,45 @@ function runImport(rows, mapping, mode, dryRun = false) {
       }
       if (mgrRoleId !== roleId) {
         const role = wRoles.find(r => r.id === roleId);
-        if (role) role.managerRoleId = mgrRoleId;
+        const mgrRole = wRoles.find(r => r.id === mgrRoleId);
+        if (role && mgrRole) {
+          if (mgrRole.department === role.department) {
+            role.managerRoleId = mgrRoleId;
+          } else {
+            result.infoTopLevel++;
+          }
+        }
+      }
+    });
+  }
+
+  // Phase 4c: dotted-line (secondary) manager by employee ID
+  if (mapping.dottedLineManagerId) {
+    const empIdToRoleId2 = {};
+    rows.forEach((row, idx) => {
+      const empId = get(row, 'employeeId');
+      if (empId && rowRoleIds[idx] !== undefined) empIdToRoleId2[empId.toLowerCase()] = rowRoleIds[idx];
+    });
+    wPersons.forEach(p => {
+      if (p.employeeId) {
+        const assignment = wAssignments.find(a => a.personId === p.id);
+        if (assignment) empIdToRoleId2[String(p.employeeId).toLowerCase()] = assignment.roleId;
+      }
+    });
+    rows.forEach((row, idx) => {
+      const dottedEmpId = get(row, 'dottedLineManagerId');
+      const roleId = rowRoleIds[idx];
+      if (roleId === undefined || !dottedEmpId) return;
+      const dottedRoleId = empIdToRoleId2[dottedEmpId.toLowerCase()];
+      if (dottedRoleId === undefined) {
+        result.warnings.push(`Row ${idx + 2} · ${get(row, 'name') || '?'} — dotted-line manager ID "${dottedEmpId}" not found`);
+        return;
+      }
+      if (dottedRoleId !== roleId) {
+        const role = wRoles.find(r => r.id === roleId);
+        if (role && !role.secondaryManagerRoleIds.includes(dottedRoleId)) {
+          role.secondaryManagerRoleIds.push(dottedRoleId);
+        }
       }
     });
   }
@@ -5536,7 +5715,7 @@ document.getElementById('import-next-btn').addEventListener('click', () => {
     setImportStep(4);
   } else if (step === 4) {
     saveImportMapping(importState.mapping);
-    runImport(importState.rows, importState.mapping, importState.mode, false);
+    runImport(importState.rows, importState.mapping, importState.mode, false, importState.valueTransforms);
     closeImportModal();
   }
 });
