@@ -297,6 +297,29 @@
     padding-left: 14px;
     border-left: 1.5px solid #e4e7ec;
   }
+  .tree-collapse-btn {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 18px; height: 14px; margin-bottom: 3px;
+    background: none; border: 1px solid var(--border);
+    border-radius: 3px; cursor: pointer;
+    font-size: 8px; color: var(--text-muted); flex-shrink: 0;
+  }
+  .tree-collapse-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .collapsed-ghost {
+    font-size: 11px; color: var(--text-muted);
+    border: 1.5px dashed var(--border); border-radius: 6px;
+    padding: 4px 10px; margin: 2px 0;
+    cursor: pointer; text-align: center;
+  }
+  .collapsed-ghost:hover { border-color: var(--accent); color: var(--accent); }
+  .team-collapse-btn {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 16px; height: 14px;
+    background: none; border: 1px solid var(--border);
+    border-radius: 3px; cursor: pointer;
+    font-size: 8px; color: var(--text-muted); flex-shrink: 0;
+  }
+  .team-collapse-btn:hover { border-color: var(--accent); color: var(--accent); }
   .tree-children .tree-node,
   .dept-tree > .tree-node + .tree-node {
     margin-top: 5px;
@@ -2375,6 +2398,8 @@ let settings = { currency: 'DKK', hideSalaries: false, viewOnly: false };
 let snapshots = [];
 
 let hiddenDepts = new Set();
+let collapsedManagers = new Set(); // role IDs whose direct reports are collapsed
+let collapsedTeams = new Set();    // team IDs (or '__general__<deptId>') whose contents are collapsed
 
 // ── Utilities ─────────────────────────────────────────────────────────────────
 
@@ -2717,10 +2742,17 @@ function renderCard(role, isOrphaned = false) {
       if (draggedAssignments.some(a => descendants.has(a.roleId))) {
         state.draggedPersonId = null; render(); return;
       }
-      state.pendingDrop = { draggedPersonId: state.draggedPersonId, targetRoleId: role.id };
+      const person = getPersonForRole(role.id);
+      state.pendingDrop = {
+        draggedPersonId: state.draggedPersonId,
+        department: role.department,
+        managerRoleId: role.id,
+        teamId: role.teamId ?? null,
+        modalTitle: `Create role under ${person && !person.noLongerHired ? person.name : 'Employee #' + (person ? person.id : '?')}`,
+      };
       state.draggedPersonId = null;
       state.selectedRoleIds.clear();
-      openDropCreateRoleModal(draggedPerson, role);
+      openDropCreateRoleModal(draggedPerson, state.pendingDrop);
       render();
     });
   }
@@ -2734,6 +2766,25 @@ function renderTree(managerRoleId, deptId, excludeTeamRoles = false) {
   if (!children.length) return null;
   const container = document.createElement('div');
   container.className = 'tree-children';
+
+  if (managerRoleId !== null && collapsedManagers.has(managerRoleId)) {
+    const ghost = document.createElement('div');
+    ghost.className = 'collapsed-ghost';
+    ghost.textContent = `▶ ${children.length} direct report${children.length !== 1 ? 's' : ''} hidden — click to expand`;
+    ghost.addEventListener('click', () => { collapsedManagers.delete(managerRoleId); render(); });
+    container.appendChild(ghost);
+    return container;
+  }
+
+  if (managerRoleId !== null) {
+    const toggleBtn = document.createElement('button');
+    toggleBtn.className = 'tree-collapse-btn';
+    toggleBtn.textContent = '▼';
+    toggleBtn.title = 'Collapse direct reports';
+    toggleBtn.addEventListener('click', e => { e.stopPropagation(); collapsedManagers.add(managerRoleId); render(); });
+    container.appendChild(toggleBtn);
+  }
+
   children.forEach(childRole => {
     const node = document.createElement('div');
     node.className = 'tree-node';
@@ -2750,15 +2801,17 @@ function dropOnTeam(teamId, deptId) {
   const draggedPerson = persons.find(x => x.id === state.draggedPersonId);
   if (!draggedPerson) return;
   const team = teams.find(t => t.id === teamId);
-  if (confirm(`Move to new position in team "${team ? team.name : ''}"?`)) {
-    const firstA = getAssignmentsForPerson(draggedPerson.id)[0];
-    const oldRole = firstA ? roles.find(r => r.id === firstA.roleId) : null;
-    const newRole = { id: nextRoleId(), title: oldRole ? oldRole.title : 'New position', level: oldRole ? oldRole.level : 'L2', department: deptId, managerRoleId: null, teamId };
-    roles.push(newRole);
-    roleAssignments = roleAssignments.filter(a => a.personId !== draggedPerson.id);
-    roleAssignments.push({ personId: draggedPerson.id, roleId: newRole.id, percentage: 100 });
-  }
-  state.draggedPersonId = null; state.selectedRoleIds.clear(); render();
+  state.pendingDrop = {
+    draggedPersonId: state.draggedPersonId,
+    department: deptId,
+    managerRoleId: null,
+    teamId,
+    modalTitle: `Create role in ${team ? team.name : ''} team`,
+  };
+  state.draggedPersonId = null;
+  state.selectedRoleIds.clear();
+  openDropCreateRoleModal(draggedPerson, state.pendingDrop);
+  render();
 }
 
 function dropOnDept(deptId) {
@@ -2766,16 +2819,18 @@ function dropOnDept(deptId) {
   const draggedPerson = persons.find(x => x.id === state.draggedPersonId);
   if (!draggedPerson) return;
   const dept = departments.find(d => d.id === deptId);
-  if (confirm(`Move to new position in ${dept ? dept.name : deptId}?`)) {
-    const firstA = getAssignmentsForPerson(draggedPerson.id)[0];
-    const oldRole = firstA ? roles.find(r => r.id === firstA.roleId) : null;
-    const director = getDirectorRole(deptId);
-    const newRole = { id: nextRoleId(), title: oldRole ? oldRole.title : 'New position', level: oldRole ? oldRole.level : 'L2', department: deptId, managerRoleId: director ? director.id : null, teamId: null };
-    roles.push(newRole);
-    roleAssignments = roleAssignments.filter(a => a.personId !== draggedPerson.id);
-    roleAssignments.push({ personId: draggedPerson.id, roleId: newRole.id, percentage: 100 });
-  }
-  state.draggedPersonId = null; state.selectedRoleIds.clear(); render();
+  const director = getDirectorRole(deptId);
+  state.pendingDrop = {
+    draggedPersonId: state.draggedPersonId,
+    department: deptId,
+    managerRoleId: director ? director.id : null,
+    teamId: null,
+    modalTitle: `Create role in ${dept ? dept.name : deptId}`,
+  };
+  state.draggedPersonId = null;
+  state.selectedRoleIds.clear();
+  openDropCreateRoleModal(draggedPerson, state.pendingDrop);
+  render();
 }
 
 function renderDeptColumn(dept) {
@@ -2845,45 +2900,91 @@ function renderDeptColumn(dept) {
     if (deptRootRoles.length > 0) {
       const genHeader = document.createElement('div');
       genHeader.className = 'team-subheader first-team';
-      genHeader.innerHTML = `<span class="team-subheader-name">General</span>`;
-      tree.appendChild(genHeader);
-      deptRootRoles.forEach(deptDirector => {
-        const rootNode = document.createElement('div');
-        rootNode.className = 'tree-node';
-        rootNode.appendChild(renderCard(deptDirector));
-        const subtree = renderTree(deptDirector.id, dept.id, true);
-        if (subtree) rootNode.appendChild(subtree);
-        tree.appendChild(rootNode);
+      const genNameSpan = document.createElement('span');
+      genNameSpan.className = 'team-subheader-name';
+      genNameSpan.textContent = 'General';
+      genHeader.appendChild(genNameSpan);
+      const genKey = '__general__' + dept.id;
+      const genCollapseBtn = document.createElement('button');
+      genCollapseBtn.className = 'team-collapse-btn';
+      genCollapseBtn.textContent = collapsedTeams.has(genKey) ? '▶' : '▼';
+      genCollapseBtn.title = collapsedTeams.has(genKey) ? 'Expand' : 'Collapse';
+      genCollapseBtn.addEventListener('click', e => {
+        e.stopPropagation();
+        collapsedTeams.has(genKey) ? collapsedTeams.delete(genKey) : collapsedTeams.add(genKey);
+        render();
       });
+      genHeader.appendChild(genCollapseBtn);
+      tree.appendChild(genHeader);
+      if (collapsedTeams.has(genKey)) {
+        const ghost = document.createElement('div');
+        ghost.className = 'collapsed-ghost';
+        ghost.textContent = `▶ ${deptRootRoles.length} role${deptRootRoles.length !== 1 ? 's' : ''} hidden — click to expand`;
+        ghost.addEventListener('click', () => { collapsedTeams.delete(genKey); render(); });
+        tree.appendChild(ghost);
+      } else {
+        deptRootRoles.forEach(deptDirector => {
+          const rootNode = document.createElement('div');
+          rootNode.className = 'tree-node';
+          rootNode.appendChild(renderCard(deptDirector));
+          const subtree = renderTree(deptDirector.id, dept.id, true);
+          if (subtree) rootNode.appendChild(subtree);
+          tree.appendChild(rootNode);
+        });
+      }
     }
     // Render team sub-sections below General
     deptTeams.forEach(team => {
       const subHeader = document.createElement('div');
       subHeader.className = 'team-subheader';
-      subHeader.innerHTML = `<span class="team-subheader-name">${team.name}</span>`;
+      const nameSpan = document.createElement('span');
+      nameSpan.className = 'team-subheader-name';
+      nameSpan.textContent = team.name;
+      subHeader.appendChild(nameSpan);
+      const teamRoleCount = roles.filter(r => r.teamId === team.id).length;
+      if (teamRoleCount > 0) {
+        const btn = document.createElement('button');
+        btn.className = 'team-collapse-btn';
+        btn.textContent = collapsedTeams.has(team.id) ? '▶' : '▼';
+        btn.title = collapsedTeams.has(team.id) ? 'Expand team' : 'Collapse team';
+        btn.addEventListener('click', e => {
+          e.stopPropagation();
+          collapsedTeams.has(team.id) ? collapsedTeams.delete(team.id) : collapsedTeams.add(team.id);
+          render();
+        });
+        subHeader.appendChild(btn);
+      }
       subHeader.addEventListener('dragover', e => { if (state.draggedPersonId !== null) { e.preventDefault(); e.stopPropagation(); subHeader.classList.add('drop-target'); } });
       subHeader.addEventListener('dragleave', () => subHeader.classList.remove('drop-target'));
       subHeader.addEventListener('drop', e => { e.preventDefault(); e.stopPropagation(); subHeader.classList.remove('drop-target'); dropOnTeam(team.id, dept.id); });
       tree.appendChild(subHeader);
-      const teamRoots = getTeamRootRoles(team.id);
-      teamRoots.forEach(teamRoot => {
-        if (teamRoot.managerRoleId !== null) {
-          const externalMgr = roles.find(r => r.id === teamRoot.managerRoleId);
-          if (externalMgr) {
-            const mgrPerson = getPersonForRole(externalMgr.id);
-            const indicator = document.createElement('div');
-            indicator.className = 'team-external-ref';
-            indicator.textContent = `↑ Reports to: ${mgrPerson ? mgrPerson.name : externalMgr.title}`;
-            tree.appendChild(indicator);
+      if (collapsedTeams.has(team.id)) {
+        const ghost = document.createElement('div');
+        ghost.className = 'collapsed-ghost';
+        ghost.textContent = `▶ ${teamRoleCount} role${teamRoleCount !== 1 ? 's' : ''} hidden — click to expand`;
+        ghost.addEventListener('click', () => { collapsedTeams.delete(team.id); render(); });
+        tree.appendChild(ghost);
+      } else {
+        const teamRoots = getTeamRootRoles(team.id);
+        teamRoots.forEach(teamRoot => {
+          if (teamRoot.managerRoleId !== null) {
+            const externalMgr = roles.find(r => r.id === teamRoot.managerRoleId);
+            if (externalMgr) {
+              const mgrPerson = getPersonForRole(externalMgr.id);
+              const indicator = document.createElement('div');
+              indicator.className = 'team-external-ref';
+              indicator.textContent = `↑ Reports to: ${mgrPerson ? mgrPerson.name : externalMgr.title}`;
+              tree.appendChild(indicator);
+            }
           }
-        }
-        const rootNode = document.createElement('div');
-        rootNode.className = 'tree-node';
-        rootNode.appendChild(renderCard(teamRoot));
-        const subtree = renderTree(teamRoot.id, dept.id);
-        if (subtree) rootNode.appendChild(subtree);
-        tree.appendChild(rootNode);
-      });
+          const rootNode = document.createElement('div');
+          rootNode.className = 'tree-node';
+          rootNode.appendChild(renderCard(teamRoot));
+          const subtree = renderTree(teamRoot.id, dept.id);
+          if (subtree) rootNode.appendChild(subtree);
+          tree.appendChild(rootNode);
+        });
+      }
     });
   } else {
     // No teams — render all root roles (managerRoleId === null)
@@ -4209,10 +4310,10 @@ render();
 
 // ── Drop Create Role Modal ────────────────────────────────────────────────────
 
-function openDropCreateRoleModal(draggedPerson, targetRole) {
-  const dept = departments.find(d => d.id === targetRole.department);
-  document.getElementById('drop-create-role-modal-title').textContent = `Create role under ${targetRole.title}`;
-  document.getElementById('drop-create-role-dept-label').textContent = dept ? dept.name : targetRole.department;
+function openDropCreateRoleModal(draggedPerson, context) {
+  const dept = departments.find(d => d.id === context.department);
+  document.getElementById('drop-create-role-modal-title').textContent = context.modalTitle;
+  document.getElementById('drop-create-role-dept-label').textContent = dept ? dept.name : context.department;
 
   const currentAssignment = getAssignmentsForPerson(draggedPerson.id)[0];
   const currentRole = currentAssignment ? roles.find(r => r.id === currentAssignment.roleId) : null;
@@ -4229,13 +4330,14 @@ function openDropCreateRoleModal(draggedPerson, targetRole) {
 
   const teamGroup = document.getElementById('drop-create-role-team-group');
   const teamSel = document.getElementById('drop-create-role-team');
-  const deptTeams = getTeamsForDept(targetRole.department);
+  const deptTeams = getTeamsForDept(context.department);
   if (deptTeams.length) {
     teamSel.innerHTML = '';
     const none = document.createElement('option'); none.value = ''; none.textContent = '— None —';
     teamSel.appendChild(none);
     deptTeams.forEach(t => {
       const opt = document.createElement('option'); opt.value = t.id; opt.textContent = t.name;
+      if (context.teamId && t.id === context.teamId) opt.selected = true;
       teamSel.appendChild(opt);
     });
     teamGroup.style.display = '';
@@ -4260,22 +4362,20 @@ function saveDropCreateRoleModal() {
   const warn = document.getElementById('drop-create-role-warning');
   if (!title) { warn.textContent = 'Title is required.'; warn.classList.add('visible'); document.getElementById('drop-create-role-title').focus(); return; }
 
-  const { draggedPersonId, targetRoleId } = state.pendingDrop;
-  const targetRole = roles.find(r => r.id === targetRoleId);
-  if (!targetRole) { closeDropCreateRoleModal(); render(); return; }
+  const { draggedPersonId, department, managerRoleId, teamId: pendingTeamId } = state.pendingDrop;
 
   const level = document.getElementById('drop-create-role-level').value;
   const teamVal = document.getElementById('drop-create-role-team').value;
-  const teamId = teamVal ? parseInt(teamVal, 10) : null;
+  const resolvedTeamId = teamVal ? parseInt(teamVal, 10) : (pendingTeamId ?? null);
 
-  const newRole = { id: nextRoleId(), title, level, department: targetRole.department, managerRoleId: targetRole.id, teamId };
+  const newRole = { id: nextRoleId(), title, level, department, managerRoleId, teamId: resolvedTeamId };
   roles.push(newRole);
   roleAssignments = roleAssignments.filter(a => a.personId !== draggedPersonId);
   roleAssignments.push({ personId: draggedPersonId, roleId: newRole.id, percentage: 100 });
 
-  if (TITLES[targetRole.department]) {
-    if (!TITLES[targetRole.department][level]) TITLES[targetRole.department][level] = [];
-    if (!TITLES[targetRole.department][level].includes(title)) TITLES[targetRole.department][level].push(title);
+  if (TITLES[department]) {
+    if (!TITLES[department][level]) TITLES[department][level] = [];
+    if (!TITLES[department][level].includes(title)) TITLES[department][level].push(title);
   }
 
   closeDropCreateRoleModal();
