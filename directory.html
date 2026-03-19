@@ -1,0 +1,1767 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Directory — OrgChart</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #f5f4f0;
+    --surface: #ffffff;
+    --border: #e6e4df;
+    --border-hover: #c9c6be;
+    --text-primary: #111110;
+    --text-secondary: #57534e;
+    --text-muted: #a8a29e;
+    --accent: #2563eb;
+    --accent-light: #eff6ff;
+    --accent-border: #93c5fd;
+    --radius: 10px;
+    --shadow-sm: 0 1px 2px rgba(0,0,0,0.05), 0 1px 4px rgba(0,0,0,0.03);
+    --shadow-md: 0 4px 16px rgba(0,0,0,0.08), 0 1px 4px rgba(0,0,0,0.04);
+    --nav-bg: #1c1917;
+  }
+
+  body {
+    font-family: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--bg);
+    color: var(--text-primary);
+    height: 100vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: row;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  #app-content { flex: 1; display: flex; flex-direction: column; min-width: 0; overflow: hidden; }
+
+  /* ── Left Nav ── */
+  #left-nav {
+    width: 220px; flex-shrink: 0;
+    background: linear-gradient(180deg, #0f3d4a 0%, #0a2e3a 100%);
+    display: flex; flex-direction: column; height: 100vh; overflow: hidden;
+  }
+  #nav-logo {
+    display: flex; align-items: center; gap: 10px;
+    padding: 18px 16px 14px; border-bottom: 1px solid rgba(255,255,255,0.08); flex-shrink: 0;
+  }
+  .nav-logo-icon {
+    width: 28px; height: 28px; background: #e8622a; border-radius: 7px;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    box-shadow: 0 2px 8px rgba(232,98,42,0.4);
+  }
+  .nav-logo-name { font-size: 15px; font-weight: 700; color: white; letter-spacing: -0.2px; }
+  #nav-body { flex: 1; overflow-y: auto; padding: 12px 0 8px; display: flex; flex-direction: column; }
+  .nav-section { padding: 4px 0; }
+  .nav-section-label {
+    font-size: 10px; font-weight: 700; letter-spacing: 0.8px; text-transform: uppercase;
+    color: rgba(255,255,255,0.3); padding: 8px 20px 4px;
+  }
+  .nav-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 9px 16px 9px 18px; margin: 1px 8px; border-radius: 7px;
+    cursor: pointer; user-select: none; color: rgba(255,255,255,0.65);
+    font-size: 13px; font-weight: 500; transition: background 0.12s, color 0.12s;
+    border-left: 2.5px solid transparent; text-decoration: none;
+  }
+  .nav-item:hover { background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.95); }
+  .nav-item.active { background: rgba(255,255,255,0.13); color: white; border-left-color: rgba(255,255,255,0.7); font-weight: 600; }
+  .nav-item svg { flex-shrink: 0; opacity: 0.75; }
+  .nav-item.active svg, .nav-item:hover svg { opacity: 1; }
+  .nav-spacer { flex: 1; }
+  #nav-footer {
+    flex-shrink: 0; padding: 12px 16px; border-top: 1px solid rgba(255,255,255,0.08);
+    display: flex; align-items: center; gap: 10px; cursor: pointer;
+  }
+  #nav-footer:hover { background: rgba(255,255,255,0.06); }
+  .nav-user-avatar {
+    width: 32px; height: 32px; border-radius: 50%; background: #e8622a;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 700; color: white; flex-shrink: 0;
+    box-shadow: 0 2px 6px rgba(232,98,42,0.35);
+  }
+  .nav-user-info { min-width: 0; }
+  .nav-user-name { font-size: 12.5px; font-weight: 600; color: rgba(255,255,255,0.9); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .nav-user-role { font-size: 11px; color: rgba(255,255,255,0.38); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+  /* ── Header ── */
+  #app-header {
+    background: var(--surface); border-bottom: 1px solid var(--border);
+    padding: 0 24px; height: 56px;
+    display: flex; align-items: center; gap: 10px; flex-shrink: 0;
+  }
+  #app-header h1 { font-size: 15px; font-weight: 700; letter-spacing: -0.2px; color: var(--text-primary); }
+  .header-spacer { flex: 1; }
+  .header-badge {
+    font-size: 11.5px; font-weight: 500; color: var(--text-secondary);
+    background: var(--bg); border: 1px solid var(--border);
+    border-radius: 6px; padding: 3px 10px;
+  }
+  .header-divider { width: 1px; height: 18px; background: var(--border); margin: 0 4px; }
+
+  /* ── Main ── */
+  #main { flex: 1; display: flex; flex-direction: column; overflow: hidden; min-width: 0; }
+
+  /* ── Toolbar ── */
+  #toolbar {
+    background: var(--surface); border-bottom: 1px solid var(--border);
+    padding: 10px 24px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; flex-shrink: 0;
+  }
+  .tb-search-wrap { position: relative; flex: 1; min-width: 200px; max-width: 320px; }
+  .tb-search-wrap svg { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); pointer-events: none; color: var(--text-muted); }
+  #search-input {
+    width: 100%; border: 1px solid var(--border); border-radius: 8px;
+    padding: 7px 10px 7px 34px; font-size: 13px; font-family: inherit;
+    color: var(--text-primary); background: var(--bg); outline: none;
+    transition: border-color 0.12s, box-shadow 0.12s;
+  }
+  #search-input:focus { border-color: var(--accent-border); box-shadow: 0 0 0 3px rgba(37,99,235,0.1); background: var(--surface); }
+  .tb-select {
+    border: 1px solid var(--border); border-radius: 8px; padding: 7px 28px 7px 10px;
+    font-size: 12.5px; font-family: inherit; color: var(--text-secondary);
+    background: var(--bg) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12' fill='none'%3E%3Cpath d='M2.5 4.5L6 8L9.5 4.5' stroke='%2398a2b3' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") no-repeat right 8px center;
+    appearance: none; outline: none; cursor: pointer;
+    transition: border-color 0.12s;
+  }
+  .tb-select:focus { border-color: var(--accent-border); }
+  .tb-spacer { flex: 1; }
+  .view-toggle { display: flex; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+  .view-btn {
+    padding: 7px 10px; background: none; border: none; cursor: pointer;
+    color: var(--text-muted); transition: background 0.1s, color 0.1s; display: flex; align-items: center;
+  }
+  .view-btn.active { background: var(--accent); color: white; }
+  .view-btn:not(.active):hover { background: var(--bg); color: var(--text-primary); }
+
+  /* ── Scroll area ── */
+  #scroll-area { flex: 1; overflow-y: auto; }
+
+  /* ── Grid ── */
+  #dir-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px; padding: 20px 24px; max-width: 1400px;
+  }
+
+  .dir-card {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
+    padding: 18px; cursor: pointer; box-shadow: var(--shadow-sm);
+    transition: border-color 0.12s, box-shadow 0.12s;
+    display: flex; flex-direction: column; gap: 10px;
+  }
+  .dir-card:hover { border-color: var(--border-hover); box-shadow: var(--shadow-md); }
+  .dir-card.terminated { opacity: 0.5; }
+
+  .dir-card-top { display: flex; align-items: center; gap: 12px; }
+  .avatar-lg {
+    width: 48px; height: 48px; border-radius: 50%; font-size: 15px; font-weight: 700; color: white;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  }
+  .dir-card-name { font-size: 14px; font-weight: 650; color: var(--text-primary); line-height: 1.3; }
+  .dir-card-preferred { font-size: 12px; color: var(--text-muted); }
+  .dir-card-role {
+    display: flex; align-items: center; gap: 6px;
+    font-size: 12.5px; color: var(--text-secondary);
+  }
+  .dept-dot-sm { width: 7px; height: 7px; border-radius: 2px; flex-shrink: 0; }
+  .dir-card-dept { font-size: 12px; color: var(--text-muted); }
+  .dir-card-meta { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .dir-card-email { font-size: 11.5px; color: var(--text-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 180px; }
+  .dir-card-salary { font-size: 12.5px; font-weight: 600; color: var(--text-secondary); }
+  .dir-card-flags { display: flex; flex-wrap: wrap; gap: 4px; }
+
+  /* ── Table ── */
+  #dir-table-wrap { padding: 20px 24px; overflow-x: auto; }
+  #dir-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  #dir-table th {
+    text-align: left; padding: 8px 12px; font-size: 11px; font-weight: 700;
+    letter-spacing: 0.5px; text-transform: uppercase; color: var(--text-muted);
+    border-bottom: 1px solid var(--border); white-space: nowrap;
+    background: var(--surface);
+  }
+  #dir-table th.sortable { cursor: pointer; user-select: none; }
+  #dir-table th.sortable:hover { color: var(--text-secondary); }
+  #dir-table th .sort-icon { margin-left: 4px; opacity: 0.5; }
+  #dir-table th.sort-active { color: var(--accent); }
+  #dir-table th.sort-active .sort-icon { opacity: 1; }
+  #dir-table td { padding: 10px 12px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+  #dir-table tr:hover td { background: var(--bg); }
+  #dir-table tr.terminated td { opacity: 0.5; }
+  .tbl-name-cell { display: flex; align-items: center; gap: 10px; cursor: pointer; }
+  .avatar-sm {
+    width: 32px; height: 32px; border-radius: 50%; font-size: 11px; font-weight: 700; color: white;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  }
+  .tbl-name { font-weight: 600; color: var(--text-primary); }
+  .tbl-preferred { font-size: 11px; color: var(--text-muted); }
+  .tbl-dept { display: flex; align-items: center; gap: 6px; }
+  .tbl-flags { display: flex; flex-wrap: wrap; gap: 3px; }
+
+  /* ── Badges ── */
+  .level-badge {
+    display: inline-block; font-size: 11px; font-weight: 600; padding: 2px 7px;
+    border-radius: 5px; white-space: nowrap;
+  }
+  .level-badge.tier-gray   { background: #f4f4f5; color: #71717a; }
+  .level-badge.tier-sky    { background: #eff6ff; color: #1d4ed8; }
+  .level-badge.tier-violet { background: #f0fdf4; color: #15803d; }
+  .level-badge.tier-indigo { background: #faf5ff; color: #7c3aed; }
+
+  .person-flag-badge {
+    display: inline-block; font-size: 10.5px; font-weight: 600;
+    padding: 2px 7px; border-radius: 5px; border: 1px solid transparent; white-space: nowrap;
+  }
+  .person-flag-badge.amber { background: #fef3c7; color: #b45309; border-color: #fcd34d; }
+  .person-flag-badge.red   { background: #fee2e2; color: #b91c1c; border-color: #fca5a5; }
+  .person-flag-badge.green { background: #dcfce7; color: #15803d; border-color: #86efac; }
+  .person-flag-badge.blue  { background: #dbeafe; color: #1d4ed8; border-color: #93c5fd; }
+
+  .status-badge {
+    display: inline-block; font-size: 11px; font-weight: 600;
+    padding: 2px 8px; border-radius: 20px; white-space: nowrap;
+  }
+  .status-badge.active     { background: #dcfce7; color: #15803d; }
+  .status-badge.on-leave   { background: #dbeafe; color: #1d4ed8; }
+  .status-badge.terminated { background: #fee2e2; color: #b91c1c; }
+
+  /* ── Buttons + Forms ── */
+  .btn {
+    padding: 8px 16px; border-radius: 8px; font-size: 13px; font-weight: 600;
+    font-family: inherit; cursor: pointer; outline: none; border: 1.5px solid transparent;
+    transition: background 0.12s, border-color 0.12s, box-shadow 0.12s;
+  }
+  .btn-sm { padding: 6px 12px; font-size: 12px; }
+  .btn-ghost { background: none; border-color: var(--border); color: var(--text-secondary); }
+  .btn-ghost:hover { background: var(--bg); border-color: var(--border-hover); }
+  .btn-primary { background: #2563eb; color: white; border-color: #2563eb; }
+  .btn-primary:hover { background: #1d4ed8; border-color: #1d4ed8; box-shadow: 0 1px 4px rgba(37,99,235,0.3); }
+  .btn-icon { padding: 6px; display: inline-flex; align-items: center; justify-content: center; }
+
+  .form-group { display: flex; flex-direction: column; gap: 5px; }
+  .form-label { font-size: 11.5px; font-weight: 600; color: var(--text-secondary); letter-spacing: 0.1px; }
+  .form-control {
+    width: 100%; border: 1px solid var(--border); border-radius: 8px;
+    padding: 8px 11px; font-size: 13px; font-family: inherit;
+    color: var(--text-primary); background: var(--surface); outline: none;
+    transition: border-color 0.12s, box-shadow 0.12s;
+  }
+  .form-control:focus { border-color: var(--accent-border); box-shadow: 0 0 0 3px rgba(37,99,235,0.1); }
+  select.form-control {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12' fill='none'%3E%3Cpath d='M2.5 4.5L6 8L9.5 4.5' stroke='%2398a2b3' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: right 10px center; padding-right: 28px; cursor: pointer;
+  }
+  textarea.form-control { resize: vertical; min-height: 72px; }
+  .form-control[disabled] { opacity: 0.6; cursor: not-allowed; }
+
+  /* ── Person Modal ── */
+  #person-modal-backdrop {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 1000;
+    display: flex; align-items: center; justify-content: center;
+    opacity: 0; pointer-events: none; transition: opacity 0.18s;
+  }
+  #person-modal-backdrop.visible { opacity: 1; pointer-events: all; }
+
+  #person-modal-panel {
+    background: var(--surface); border-radius: 14px; width: 100%; max-width: 860px;
+    max-height: 90vh; display: flex; flex-direction: column;
+    box-shadow: 0 20px 60px rgba(16,24,40,0.18);
+    transform: translateY(10px) scale(0.98); opacity: 0;
+    transition: transform 0.18s, opacity 0.18s;
+  }
+  #person-modal-backdrop.visible #person-modal-panel { transform: translateY(0) scale(1); opacity: 1; }
+
+  /* Modal header */
+  #pm-header {
+    display: flex; align-items: center; gap: 16px;
+    padding: 20px 24px 16px; border-bottom: 1px solid var(--border); flex-shrink: 0;
+  }
+  #pm-avatar-xl {
+    width: 56px; height: 56px; border-radius: 50%; font-size: 18px; font-weight: 700; color: white;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  }
+  #pm-header-info { flex: 1; min-width: 0; }
+  #pm-header-name { font-size: 18px; font-weight: 700; color: var(--text-primary); letter-spacing: -0.3px; }
+  #pm-header-sub { display: flex; align-items: center; gap: 8px; margin-top: 4px; flex-wrap: wrap; }
+  #pm-header-preferred { font-size: 13px; color: var(--text-muted); font-style: italic; }
+  .pm-emp-id-badge {
+    font-size: 11px; font-weight: 600; color: var(--text-muted);
+    background: var(--bg); border: 1px solid var(--border);
+    border-radius: 5px; padding: 2px 7px;
+  }
+  #pm-header-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+
+  /* Tabs */
+  #pm-tab-bar {
+    display: flex; border-bottom: 1px solid var(--border);
+    padding: 0 24px; flex-shrink: 0; overflow-x: auto;
+  }
+  .pm-tab {
+    padding: 11px 16px; border-bottom: 2.5px solid transparent;
+    color: var(--text-muted); cursor: pointer; font-size: 13px; font-weight: 500;
+    white-space: nowrap; transition: color 0.12s, border-color 0.12s;
+    margin-bottom: -1px;
+  }
+  .pm-tab:hover { color: var(--text-secondary); }
+  .pm-tab.active { color: var(--accent); border-bottom-color: var(--accent); font-weight: 600; }
+
+  /* Panes */
+  #pm-panes { flex: 1; overflow: hidden; display: flex; flex-direction: column; min-height: 0; }
+  .pm-pane { display: none; padding: 22px 24px; overflow-y: auto; flex: 1; }
+  .pm-pane.active { display: block; }
+
+  /* Field grid */
+  .pm-field-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px 20px; }
+  .pm-field-grid .full-width { grid-column: 1 / -1; }
+
+  /* View/edit mode toggle */
+  #person-modal-panel.editing .pm-view { display: none !important; }
+  #person-modal-panel:not(.editing) .pm-edit { display: none !important; }
+  #pm-footer { display: none; }
+  #person-modal-panel.editing #pm-footer { display: flex; }
+
+  /* View value display */
+  .pm-val {
+    font-size: 13px; color: var(--text-primary); padding: 8px 0;
+    border-bottom: 1px solid var(--border); min-height: 36px;
+    line-height: 1.5;
+  }
+  .pm-val.empty { color: var(--text-muted); font-style: italic; }
+
+  /* Display-only fields (never editable) */
+  .pm-display-val {
+    font-size: 13px; color: var(--text-primary); padding: 8px 11px;
+    background: var(--bg); border: 1px solid var(--border); border-radius: 8px;
+    min-height: 36px; line-height: 1.5;
+  }
+  .pm-display-val.empty { color: var(--text-muted); }
+
+  /* Section sub-headings inside panes */
+  .pm-section-head {
+    font-size: 10.5px; font-weight: 700; letter-spacing: 0.7px; text-transform: uppercase;
+    color: var(--text-muted); padding: 16px 0 8px; display: flex; align-items: center; gap: 10px;
+  }
+  .pm-section-head::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+  .pm-section-head:first-child { padding-top: 0; }
+
+  /* Flag chips inside pane */
+  .pm-flag-chips { display: flex; flex-wrap: wrap; gap: 8px; padding: 6px 0; }
+  .pm-flag-chip {
+    display: flex; align-items: center; gap: 6px;
+    padding: 5px 12px; border-radius: 20px; border: 1px solid var(--border);
+    font-size: 12px; font-weight: 500; cursor: pointer;
+    color: var(--text-secondary); background: var(--bg);
+    transition: border-color 0.1s, background 0.1s;
+    user-select: none;
+  }
+  .pm-flag-chip.active-amber { background: #fef3c7; color: #b45309; border-color: #fcd34d; }
+  .pm-flag-chip.active-red   { background: #fee2e2; color: #b91c1c; border-color: #fca5a5; }
+  .pm-flag-chip.active-green { background: #dcfce7; color: #15803d; border-color: #86efac; }
+  .pm-flag-chip.active-blue  { background: #dbeafe; color: #1d4ed8; border-color: #93c5fd; }
+  .pm-flag-chip:not(.active-amber):not(.active-red):not(.active-green):not(.active-blue):hover { border-color: var(--border-hover); }
+  #person-modal-panel:not(.editing) .pm-flag-chip { cursor: default; pointer-events: none; }
+
+  /* Role list */
+  .pm-role-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 8px 12px; background: var(--bg); border: 1px solid var(--border);
+    border-radius: 8px; margin-bottom: 6px;
+  }
+  .pm-role-item:last-child { margin-bottom: 0; }
+  .pm-role-info { flex: 1; min-width: 0; }
+  .pm-role-title { font-size: 13px; font-weight: 600; color: var(--text-primary); }
+  .pm-role-meta { font-size: 11.5px; color: var(--text-muted); margin-top: 1px; }
+  .pm-role-pct { font-size: 12px; font-weight: 600; color: var(--text-secondary); flex-shrink: 0; }
+
+  /* Org chart link */
+  .pm-orgchart-link {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 12.5px; color: var(--accent); text-decoration: none; font-weight: 500;
+    margin-top: 12px;
+  }
+  .pm-orgchart-link:hover { text-decoration: underline; }
+
+  /* Band bar */
+  .band-bar-wrap { margin-top: 4px; }
+  .band-bar-track { height: 8px; background: var(--bg); border: 1px solid var(--border); border-radius: 4px; overflow: hidden; position: relative; }
+  .band-bar-fill { height: 100%; border-radius: 4px; transition: width 0.3s; }
+  .band-bar-fill.in    { background: #10b981; }
+  .band-bar-fill.below { background: #f59e0b; }
+  .band-bar-fill.above { background: #ef4444; }
+  .band-bar-labels { display: flex; justify-content: space-between; margin-top: 3px; font-size: 11px; color: var(--text-muted); }
+  .band-status-label { font-size: 11.5px; font-weight: 600; margin-top: 4px; }
+  .band-status-label.in    { color: #10b981; }
+  .band-status-label.below { color: #f59e0b; }
+  .band-status-label.above { color: #ef4444; }
+
+  /* Checkbox row */
+  .pm-checkbox-row { display: flex; align-items: center; gap: 8px; padding: 8px 0; }
+  .pm-checkbox-row input[type=checkbox] { width: 16px; height: 16px; cursor: pointer; accent-color: var(--accent); }
+  .pm-checkbox-row label { font-size: 13px; color: var(--text-primary); cursor: pointer; }
+
+  /* Annual equiv display */
+  .pm-annual-equiv { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
+
+  /* Modal footer */
+  #pm-footer {
+    justify-content: flex-end; gap: 8px;
+    padding: 14px 24px; border-top: 1px solid var(--border); flex-shrink: 0;
+  }
+
+  /* Empty state */
+  .dir-empty {
+    grid-column: 1 / -1; text-align: center; padding: 60px 20px;
+    color: var(--text-muted); font-size: 14px;
+  }
+  .dir-empty-icon { font-size: 32px; margin-bottom: 8px; }
+
+  /* Responsive: 2 cols below 1100px */
+  @media (max-width: 1100px) {
+    #dir-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (max-width: 720px) {
+    #dir-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<nav id="left-nav">
+  <div id="nav-logo">
+    <div class="nav-logo-icon">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+        <circle cx="8" cy="3" r="2" fill="white"/>
+        <circle cx="3" cy="11" r="2" fill="white" opacity="0.7"/>
+        <circle cx="13" cy="11" r="2" fill="white" opacity="0.7"/>
+        <line x1="8" y1="5" x2="3" y2="9" stroke="white" stroke-width="1.2" opacity="0.6"/>
+        <line x1="8" y1="5" x2="13" y2="9" stroke="white" stroke-width="1.2" opacity="0.6"/>
+      </svg>
+    </div>
+    <span class="nav-logo-name">OrgChart</span>
+  </div>
+  <div id="nav-body">
+    <div class="nav-section">
+      <a class="nav-item" href="dashboard.html">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M2 6.5L8 2l6 4.5V14a1 1 0 01-1 1H3a1 1 0 01-1-1V6.5z"/>
+          <path d="M6 15v-5h4v5"/>
+        </svg>
+        Dashboard
+      </a>
+      <a class="nav-item" href="orgchart.html">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="8" cy="3" r="1.8"/>
+          <circle cx="3" cy="12" r="1.8"/>
+          <circle cx="13" cy="12" r="1.8"/>
+          <line x1="8" y1="4.8" x2="3" y2="10.2"/>
+          <line x1="8" y1="4.8" x2="13" y2="10.2"/>
+        </svg>
+        Org Chart
+      </a>
+    </div>
+    <div class="nav-section">
+      <div class="nav-section-label">People</div>
+      <a class="nav-item active" href="directory.html">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="6" cy="5" r="2.5"/>
+          <path d="M1 14c0-3 2-5 5-5"/>
+          <line x1="10" y1="7" x2="15" y2="7"/>
+          <line x1="10" y1="10" x2="15" y2="10"/>
+          <line x1="10" y1="13" x2="13" y2="13"/>
+        </svg>
+        Directory
+      </a>
+      <a class="nav-item" href="#">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="2" y="3" width="12" height="12" rx="1.5"/>
+          <line x1="5" y1="1" x2="5" y2="5"/>
+          <line x1="11" y1="1" x2="11" y2="5"/>
+          <line x1="2" y1="7" x2="14" y2="7"/>
+          <polyline points="5.5,11 7,12.5 10.5,9"/>
+        </svg>
+        Time Off
+      </a>
+      <a class="nav-item" href="#">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="1" y="6" width="14" height="9" rx="1.5"/>
+          <path d="M5 6V4.5a3 3 0 016 0V6"/>
+        </svg>
+        Hiring
+      </a>
+    </div>
+    <div class="nav-section">
+      <div class="nav-section-label">Insights</div>
+      <a class="nav-item" href="#">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="3" y1="14" x2="3" y2="9"/>
+          <line x1="8" y1="14" x2="8" y2="5"/>
+          <line x1="13" y1="14" x2="13" y2="1"/>
+          <line x1="1" y1="14" x2="15" y2="14"/>
+        </svg>
+        Reports
+      </a>
+    </div>
+    <div class="nav-spacer"></div>
+    <div class="nav-section">
+      <div class="nav-section-label">Admin</div>
+      <a class="nav-item" href="orgchart.html#snapshots">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="8" cy="8" r="6"/><polyline points="8,4 8,8 11,10"/>
+        </svg>
+        Snapshots
+      </a>
+      <a class="nav-item" href="orgchart.html#settings">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="8" cy="8" r="2.5"/>
+          <path d="M8 1v1.5M8 13.5V15M1 8h1.5M13.5 8H15M3.05 3.05l1.06 1.06M11.89 11.89l1.06 1.06M3.05 12.95l1.06-1.06M11.89 4.11l1.06-1.06"/>
+        </svg>
+        Settings
+      </a>
+    </div>
+  </div>
+  <div id="nav-footer">
+    <div class="nav-user-avatar">DM</div>
+    <div class="nav-user-info">
+      <div class="nav-user-name">David Miller</div>
+      <div class="nav-user-role">HR Admin</div>
+    </div>
+  </div>
+</nav>
+
+<div id="app-content">
+
+<div id="app-header">
+  <h1>Employee Directory</h1>
+  <div class="header-divider"></div>
+  <span id="headcount-badge" class="header-badge">0 people</span>
+  <div class="header-spacer"></div>
+</div>
+
+<div id="main">
+  <div id="toolbar">
+    <div class="tb-search-wrap">
+      <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="7" cy="7" r="4.5"/><line x1="10.5" y1="10.5" x2="14" y2="14"/>
+      </svg>
+      <input id="search-input" type="text" placeholder="Search name, email, role…">
+    </div>
+    <select id="filter-dept" class="tb-select">
+      <option value="">All departments</option>
+    </select>
+    <select id="filter-status" class="tb-select">
+      <option value="active">Active</option>
+      <option value="leave">On leave</option>
+      <option value="terminated">Terminated</option>
+      <option value="all">All</option>
+    </select>
+    <select id="filter-flag" class="tb-select">
+      <option value="">All flags</option>
+      <option value="salaryReviewNeeded">Salary review</option>
+      <option value="performanceReviewNeeded">Perf review</option>
+      <option value="isNew">New employee</option>
+      <option value="onLeave">On leave</option>
+    </select>
+    <select id="sort-by" class="tb-select">
+      <option value="name">Name A→Z</option>
+      <option value="salary">Salary ↓</option>
+      <option value="dept">Department</option>
+      <option value="level">Level</option>
+    </select>
+    <div class="tb-spacer"></div>
+    <div class="view-toggle">
+      <button class="view-btn active" id="view-grid-btn" title="Grid view">
+        <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="2" y="2" width="5" height="5" rx="1"/><rect x="9" y="2" width="5" height="5" rx="1"/>
+          <rect x="2" y="9" width="5" height="5" rx="1"/><rect x="9" y="9" width="5" height="5" rx="1"/>
+        </svg>
+      </button>
+      <button class="view-btn" id="view-table-btn" title="Table view">
+        <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="2" y1="5" x2="14" y2="5"/><line x1="2" y1="9" x2="14" y2="9"/><line x1="2" y1="13" x2="14" y2="13"/>
+          <line x1="2" y1="2" x2="2" y2="14"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <div id="scroll-area">
+    <div id="dir-grid"></div>
+    <div id="dir-table-wrap" style="display:none">
+      <table id="dir-table">
+        <thead>
+          <tr>
+            <th class="sortable" data-col="name">Name <span class="sort-icon">↕</span></th>
+            <th>Title</th>
+            <th class="sortable" data-col="dept">Department <span class="sort-icon">↕</span></th>
+            <th class="sortable" data-col="level">Level <span class="sort-icon">↕</span></th>
+            <th class="sortable" id="th-salary" data-col="salary">Salary <span class="sort-icon">↕</span></th>
+            <th>Status</th>
+            <th>Flags</th>
+          </tr>
+        </thead>
+        <tbody id="dir-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+</div><!-- #main -->
+
+</div><!-- #app-content -->
+
+<!-- ── Person Detail Modal ── -->
+<div id="person-modal-backdrop">
+  <div id="person-modal-panel">
+
+    <!-- Header -->
+    <div id="pm-header">
+      <div id="pm-avatar-xl"></div>
+      <div id="pm-header-info">
+        <div id="pm-header-name"></div>
+        <div id="pm-header-sub">
+          <span id="pm-header-preferred"></span>
+          <span id="pm-emp-id-badge" class="pm-emp-id-badge" style="display:none"></span>
+          <span id="pm-status-badge" class="status-badge"></span>
+        </div>
+      </div>
+      <div id="pm-header-actions">
+        <button id="pm-edit-btn" class="btn btn-ghost btn-sm">Edit</button>
+        <button id="pm-close-btn" class="btn btn-icon btn-ghost" title="Close">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <line x1="1" y1="1" x2="13" y2="13"/><line x1="13" y1="1" x2="1" y2="13"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Tab bar -->
+    <div id="pm-tab-bar">
+      <div class="pm-tab active" data-tab="identity">Identity</div>
+      <div class="pm-tab" data-tab="employment">Employment</div>
+      <div class="pm-tab" data-tab="organization">Organization</div>
+      <div class="pm-tab" data-tab="job">Job</div>
+      <div class="pm-tab" data-tab="compensation">Compensation</div>
+    </div>
+
+    <!-- Panes -->
+    <div id="pm-panes">
+
+      <!-- Identity -->
+      <div class="pm-pane active" id="pane-identity">
+        <div class="pm-field-grid">
+          <div class="form-group">
+            <label class="form-label">Full name</label>
+            <div class="pm-val pm-view" id="pm-v-name"></div>
+            <input class="form-control pm-edit" id="pm-e-name" type="text" placeholder="Full name">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Preferred name</label>
+            <div class="pm-val pm-view" id="pm-v-preferred"></div>
+            <input class="form-control pm-edit" id="pm-e-preferred" type="text" placeholder="e.g. Alex">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Employee ID</label>
+            <div class="pm-val pm-view" id="pm-v-eid"></div>
+            <input class="form-control pm-edit" id="pm-e-eid" type="text" placeholder="e.g. EMP-1042">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Date of birth</label>
+            <div class="pm-val pm-view" id="pm-v-dob"></div>
+            <input class="form-control pm-edit" id="pm-e-dob" type="date">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Gender</label>
+            <div class="pm-val pm-view" id="pm-v-gender"></div>
+            <select class="form-control pm-edit" id="pm-e-gender">
+              <option value="">— select —</option>
+              <option value="male">Male</option>
+              <option value="female">Female</option>
+              <option value="non-binary">Non-binary</option>
+              <option value="other">Other</option>
+              <option value="prefer not to say">Prefer not to say</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Nationality</label>
+            <div class="pm-val pm-view" id="pm-v-nationality"></div>
+            <input class="form-control pm-edit" id="pm-e-nationality" type="text" placeholder="e.g. Danish">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Work email</label>
+            <div class="pm-val pm-view" id="pm-v-email"></div>
+            <input class="form-control pm-edit" id="pm-e-email" type="email" placeholder="name@company.com">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Phone</label>
+            <div class="pm-val pm-view" id="pm-v-phone"></div>
+            <input class="form-control pm-edit" id="pm-e-phone" type="tel" placeholder="+45 xx xx xx xx">
+          </div>
+          <div class="form-group full-width">
+            <label class="form-label">Address</label>
+            <div class="pm-val pm-view" id="pm-v-address"></div>
+            <textarea class="form-control pm-edit" id="pm-e-address" placeholder="Street, city, country"></textarea>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Emergency contact name</label>
+            <div class="pm-val pm-view" id="pm-v-emergency-name"></div>
+            <input class="form-control pm-edit" id="pm-e-emergency-name" type="text" placeholder="Contact name">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Emergency contact phone</label>
+            <div class="pm-val pm-view" id="pm-v-emergency-phone"></div>
+            <input class="form-control pm-edit" id="pm-e-emergency-phone" type="tel" placeholder="+45 xx xx xx xx">
+          </div>
+        </div>
+      </div>
+
+      <!-- Employment -->
+      <div class="pm-pane" id="pane-employment">
+        <div class="pm-field-grid">
+          <div class="form-group">
+            <label class="form-label">Hire date</label>
+            <div class="pm-val pm-view" id="pm-v-hiredate"></div>
+            <input class="form-control pm-edit" id="pm-e-hiredate" type="date">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Employment status</label>
+            <div class="pm-val pm-view" id="pm-v-empstatus"></div>
+            <select class="form-control pm-edit" id="pm-e-empstatus">
+              <option value="active">Active</option>
+              <option value="leave">On leave</option>
+              <option value="terminated">Terminated</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Employment type</label>
+            <div class="pm-val pm-view" id="pm-v-emptype"></div>
+            <select class="form-control pm-edit" id="pm-e-emptype">
+              <option value="">— select —</option>
+              <option value="Full-time">Full-time</option>
+              <option value="Part-time">Part-time</option>
+              <option value="Contractor">Contractor</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Contract type</label>
+            <div class="pm-val pm-view" id="pm-v-contracttype"></div>
+            <select class="form-control pm-edit" id="pm-e-contracttype">
+              <option value="">— select —</option>
+              <option value="Permanent">Permanent</option>
+              <option value="Temporary">Temporary</option>
+              <option value="Fixed-term">Fixed-term</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Probation end date</label>
+            <div class="pm-val pm-view" id="pm-v-probation"></div>
+            <input class="form-control pm-edit" id="pm-e-probation" type="date">
+          </div>
+          <div class="form-group" id="pm-termdate-row">
+            <label class="form-label">Termination date</label>
+            <div class="pm-val pm-view" id="pm-v-termdate"></div>
+            <input class="form-control pm-edit" id="pm-e-termdate" type="date">
+          </div>
+          <div class="form-group full-width" id="pm-termreason-row">
+            <label class="form-label">Termination reason</label>
+            <div class="pm-val pm-view" id="pm-v-termreason"></div>
+            <input class="form-control pm-edit" id="pm-e-termreason" type="text" placeholder="Reason for termination">
+          </div>
+        </div>
+        <div class="pm-section-head" style="margin-top:16px">Flags</div>
+        <div class="pm-flag-chips" id="pm-flag-chips">
+          <div class="pm-flag-chip" data-flag="salaryReviewNeeded" data-color="amber">
+            <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="8" cy="8" r="6"/><line x1="8" y1="5" x2="8" y2="8"/><circle cx="8" cy="11" r="0.5" fill="currentColor"/></svg>
+            Salary review
+          </div>
+          <div class="pm-flag-chip" data-flag="performanceReviewNeeded" data-color="red">
+            <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M8 2l1.5 4.5H15l-4.5 3 1.5 4.5L8 11l-4 3 1.5-4.5L1 6.5h5.5z"/></svg>
+            Perf review
+          </div>
+          <div class="pm-flag-chip" data-flag="isNew" data-color="green">
+            <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="8" cy="8" r="6"/><line x1="8" y1="5" x2="8" y2="11"/><line x1="5" y1="8" x2="11" y2="8"/></svg>
+            New employee
+          </div>
+          <div class="pm-flag-chip" data-flag="onLeave" data-color="blue">
+            <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M8 2v7M5 6l3 3 3-3"/><path d="M3 12h10"/></svg>
+            On leave
+          </div>
+        </div>
+      </div>
+
+      <!-- Organization -->
+      <div class="pm-pane" id="pane-organization">
+        <div class="pm-section-head">Org info</div>
+        <div class="pm-field-grid">
+          <div class="form-group">
+            <label class="form-label">Department</label>
+            <div class="pm-display-val" id="pm-d-dept">—</div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Manager</label>
+            <div class="pm-display-val" id="pm-d-manager">—</div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Direct reports</label>
+            <div class="pm-display-val" id="pm-d-directs">—</div>
+          </div>
+        </div>
+        <div class="pm-section-head">Role assignments</div>
+        <div id="pm-role-list"></div>
+        <a class="pm-orgchart-link" href="orgchart.html">
+          <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="8" cy="3" r="1.8"/><circle cx="3" cy="12" r="1.8"/><circle cx="13" cy="12" r="1.8"/>
+            <line x1="8" y1="4.8" x2="3" y2="10.2"/><line x1="8" y1="4.8" x2="13" y2="10.2"/>
+          </svg>
+          Manage in Org Chart →
+        </a>
+        <div class="pm-section-head">Additional</div>
+        <div class="pm-field-grid">
+          <div class="form-group">
+            <label class="form-label">Legal entity</label>
+            <div class="pm-val pm-view" id="pm-v-legalentity"></div>
+            <input class="form-control pm-edit" id="pm-e-legalentity" type="text" placeholder="e.g. Acme Corp ApS">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Cost center</label>
+            <div class="pm-val pm-view" id="pm-v-costcenter"></div>
+            <input class="form-control pm-edit" id="pm-e-costcenter" type="text" placeholder="e.g. CC-4200">
+          </div>
+          <div class="form-group full-width">
+            <label class="form-label">Location</label>
+            <div class="pm-val pm-view" id="pm-v-location"></div>
+            <input class="form-control pm-edit" id="pm-e-location" type="text" placeholder="e.g. Copenhagen, Denmark">
+          </div>
+        </div>
+      </div>
+
+      <!-- Job -->
+      <div class="pm-pane" id="pane-job">
+        <div class="pm-section-head">Role (from Org Chart)</div>
+        <div class="pm-field-grid">
+          <div class="form-group">
+            <label class="form-label">Job title</label>
+            <div class="pm-display-val" id="pm-d-title">—</div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Job level</label>
+            <div class="pm-display-val" id="pm-d-level">—</div>
+          </div>
+        </div>
+        <div class="pm-section-head">Additional</div>
+        <div class="pm-field-grid">
+          <div class="form-group full-width">
+            <label class="form-label">Job family / function</label>
+            <div class="pm-val pm-view" id="pm-v-jobfamily"></div>
+            <input class="form-control pm-edit" id="pm-e-jobfamily" type="text" placeholder="e.g. Software Engineering">
+          </div>
+          <div class="form-group">
+            <label class="form-label">FTE (0.1 – 1.0)</label>
+            <div class="pm-val pm-view" id="pm-v-fte"></div>
+            <input class="form-control pm-edit" id="pm-e-fte" type="number" min="0.1" max="1.0" step="0.1" placeholder="1.0">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Standard working hours / week</label>
+            <div class="pm-val pm-view" id="pm-v-hours"></div>
+            <input class="form-control pm-edit" id="pm-e-hours" type="number" min="1" max="60" step="1" placeholder="37">
+          </div>
+        </div>
+      </div>
+
+      <!-- Compensation -->
+      <div class="pm-pane" id="pane-compensation">
+        <div id="pm-comp-salary-section">
+          <div class="pm-section-head">Salary</div>
+          <div class="pm-field-grid">
+            <div class="form-group">
+              <label class="form-label">Monthly salary</label>
+              <div class="pm-val pm-view" id="pm-v-salary"></div>
+              <input class="form-control pm-edit" id="pm-e-salary" type="number" min="0" step="1000" placeholder="0">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Annual equivalent</label>
+              <div class="pm-display-val" id="pm-d-annual">—</div>
+            </div>
+            <div class="form-group full-width" id="pm-band-section">
+              <label class="form-label">Salary band for level</label>
+              <div id="pm-band-display">
+                <div class="band-bar-wrap">
+                  <div class="band-bar-track"><div class="band-bar-fill" id="pm-band-fill"></div></div>
+                  <div class="band-bar-labels"><span id="pm-band-min"></span><span id="pm-band-max"></span></div>
+                </div>
+                <div class="band-status-label" id="pm-band-status"></div>
+              </div>
+            </div>
+          </div>
+          <div class="pm-section-head">Pay structure</div>
+          <div class="pm-field-grid">
+            <div class="form-group">
+              <label class="form-label">Pay frequency</label>
+              <div class="pm-val pm-view" id="pm-v-payfreq"></div>
+              <select class="form-control pm-edit" id="pm-e-payfreq">
+                <option value="">— select —</option>
+                <option value="Monthly">Monthly</option>
+                <option value="Bi-weekly">Bi-weekly</option>
+                <option value="Weekly">Weekly</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Bonus target %</label>
+              <div class="pm-val pm-view" id="pm-v-bonustarget"></div>
+              <input class="form-control pm-edit" id="pm-e-bonustarget" type="number" min="0" max="200" step="5" placeholder="0">
+            </div>
+            <div class="form-group full-width">
+              <div class="pm-checkbox-row">
+                <input type="checkbox" id="pm-e-bonuseligible">
+                <label for="pm-e-bonuseligible">Bonus eligible</label>
+              </div>
+            </div>
+            <div class="form-group full-width">
+              <label class="form-label">Benefits notes</label>
+              <div class="pm-val pm-view" id="pm-v-benefits"></div>
+              <textarea class="form-control pm-edit" id="pm-e-benefits" placeholder="e.g. Health insurance, pension, gym…"></textarea>
+            </div>
+          </div>
+        </div>
+        <div id="pm-comp-hidden-msg" style="display:none; padding:24px; color:var(--text-muted); font-size:13px; text-align:center;">
+          Salary information is hidden by settings.
+        </div>
+      </div>
+
+    </div><!-- #pm-panes -->
+
+    <!-- Footer -->
+    <div id="pm-footer">
+      <button id="pm-cancel-btn" class="btn btn-ghost">Cancel</button>
+      <button id="pm-save-btn" class="btn btn-primary">Save changes</button>
+    </div>
+
+  </div><!-- #person-modal-panel -->
+</div><!-- #person-modal-backdrop -->
+
+<script>
+'use strict';
+
+// ── Storage ────────────────────────────────────────────────────────────────────
+const STORAGE_KEY = 'orgchart_data_v4';
+
+let departments = [];
+let roles = [];
+let persons = [];
+let roleAssignments = [];
+let teams = [];
+let settings = {};
+let salaryBands = {};
+
+function loadData() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return;
+    const saved = JSON.parse(raw);
+    if (saved.departments) departments = saved.departments.map(d => ({ ...d, headRoleId: d.headRoleId ?? null }));
+    if (saved.roles)       roles = saved.roles.map(r => ({ ...r, teamId: r.teamId || null, secondaryManagerRoleIds: r.secondaryManagerRoleIds || [] }));
+    if (saved.persons)     persons = saved.persons.map(p => ({ ...p }));
+    if (saved.roleAssignments) {
+      roleAssignments = saved.roleAssignments;
+    } else if (saved.persons) {
+      // Migrate: extract roleId from persons
+      roleAssignments = saved.persons.filter(p => p.roleId != null).map(p => ({ personId: p.id, roleId: p.roleId, percentage: 100 }));
+    }
+    if (saved.teams)       teams = saved.teams || [];
+    if (saved.settings)    settings = { ...saved.settings };
+    if (saved.salaryBands) salaryBands = { ...saved.salaryBands };
+  } catch (e) {
+    console.warn('Directory: failed to load data', e);
+  }
+}
+
+// Merge-save: only update persons[], never overwrite other keys
+function saveToStorage() {
+  try {
+    const p = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+    p.persons = persons;
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(p));
+  } catch (e) {
+    console.warn('Directory: failed to save', e);
+  }
+}
+
+// ── Helpers ────────────────────────────────────────────────────────────────────
+function getInitials(name) {
+  return (name || '?').split(' ').map(p => p[0]).join('').slice(0, 2).toUpperCase();
+}
+
+function nameToColor(name) {
+  const palette = [
+    ['#6366f1','#8b5cf6'], ['#3b82f6','#06b6d4'], ['#10b981','#14b8a6'],
+    ['#f43f5e','#ec4899'], ['#f97316','#eab308'], ['#84cc16','#10b981'],
+    ['#a855f7','#ec4899'], ['#0ea5e9','#6366f1'], ['#ef4444','#f97316'],
+    ['#14b8a6','#2563eb'], ['#8b5cf6','#3b82f6'], ['#22c55e','#0ea5e9'],
+  ];
+  let hash = 0;
+  for (let i = 0; i < (name || '').length; i++) hash = (name.charCodeAt(i) + ((hash << 5) - hash)) | 0;
+  const [c1, c2] = palette[Math.abs(hash) % palette.length];
+  return `linear-gradient(135deg, ${c1}, ${c2})`;
+}
+
+function levelTierClass(levelId) {
+  const n = parseInt((levelId || 'L1').slice(1), 10);
+  if (n <= 2) return 'tier-gray';
+  if (n <= 4) return 'tier-sky';
+  if (n <= 6) return 'tier-violet';
+  return 'tier-indigo';
+}
+
+function fmt(n) {
+  if (!n) return '—';
+  if (settings.currency === 'EUR') return '€' + n.toLocaleString('en-US') + '/mo';
+  return n.toLocaleString('en-US') + ' kr/mo';
+}
+
+function fmtDate(s) {
+  if (!s) return '—';
+  try {
+    return new Date(s).toLocaleDateString('en-GB', { year: 'numeric', month: 'short', day: 'numeric' });
+  } catch { return s; }
+}
+
+function capitalize(s) {
+  return s ? s.charAt(0).toUpperCase() + s.slice(1) : '';
+}
+
+// ── Directory Helpers ──────────────────────────────────────────────────────────
+function getPrimaryRoleForPerson(personId) {
+  const a = roleAssignments.find(x => x.personId === personId);
+  return a ? (roles.find(r => r.id === a.roleId) || null) : null;
+}
+
+function getAllRolesForPerson(personId) {
+  return roleAssignments
+    .filter(a => a.personId === personId)
+    .map(a => {
+      const role = roles.find(r => r.id === a.roleId);
+      return role ? { role, percentage: a.percentage } : null;
+    })
+    .filter(Boolean);
+}
+
+function getDeptForPerson(personId) {
+  const role = getPrimaryRoleForPerson(personId);
+  if (!role) return null;
+  return departments.find(d => d.id === role.department || d.name === role.department) || null;
+}
+
+function getManagerForPerson(personId) {
+  const role = getPrimaryRoleForPerson(personId);
+  if (!role || !role.managerRoleId) return null;
+  const mgrAssignment = roleAssignments.find(a => a.roleId === role.managerRoleId);
+  return mgrAssignment ? (persons.find(p => p.id === mgrAssignment.personId) || null) : null;
+}
+
+function getManagerRoleForPerson(personId) {
+  const role = getPrimaryRoleForPerson(personId);
+  if (!role || !role.managerRoleId) return null;
+  return roles.find(r => r.id === role.managerRoleId) || null;
+}
+
+function getDirectReportCount(personId) {
+  const role = getPrimaryRoleForPerson(personId);
+  if (!role) return 0;
+  const childRoles = roles.filter(r => r.managerRoleId === role.id);
+  // Count persons assigned to those roles
+  let count = 0;
+  childRoles.forEach(cr => {
+    if (roleAssignments.some(a => a.roleId === cr.id)) count++;
+  });
+  return count;
+}
+
+function getBandStatus(salary, level) {
+  const band = salaryBands[level];
+  if (!band || !salary) return { status: 'unknown', band: null, pct: 0 };
+  const range = band.max - band.min;
+  const pct = range > 0 ? Math.min(100, Math.max(0, ((salary - band.min) / range) * 100)) : 50;
+  let status = 'in';
+  if (salary < band.min) status = 'below';
+  if (salary > band.max) status = 'above';
+  return { status, band, pct };
+}
+
+function getEmploymentStatus(person) {
+  if (person.noLongerHired) return 'terminated';
+  if (person.onLeave) return 'leave';
+  return 'active';
+}
+
+// ── Filter / Sort State ────────────────────────────────────────────────────────
+const dirState = {
+  search: '',
+  filterDept: '',
+  filterStatus: 'active',
+  filterFlag: '',
+  sortBy: 'name',
+  sortDir: 'asc',
+  view: 'grid',
+};
+
+function getFilteredSortedPersons() {
+  let list = [...persons];
+
+  // Status filter
+  if (dirState.filterStatus === 'active')     list = list.filter(p => !p.noLongerHired && !p.onLeave);
+  else if (dirState.filterStatus === 'leave') list = list.filter(p => !!p.onLeave && !p.noLongerHired);
+  else if (dirState.filterStatus === 'terminated') list = list.filter(p => !!p.noLongerHired);
+  // 'all' = no filter
+
+  // Search
+  if (dirState.search) {
+    const q = dirState.search.toLowerCase();
+    list = list.filter(p => {
+      const role = getPrimaryRoleForPerson(p.id);
+      return (p.name || '').toLowerCase().includes(q)
+          || (p.preferredName || '').toLowerCase().includes(q)
+          || (p.email || '').toLowerCase().includes(q)
+          || (role ? role.title.toLowerCase().includes(q) : false);
+    });
+  }
+
+  // Dept filter
+  if (dirState.filterDept) {
+    const deptId = parseInt(dirState.filterDept, 10) || dirState.filterDept;
+    list = list.filter(p => {
+      const dept = getDeptForPerson(p.id);
+      return dept && (dept.id === deptId || dept.name === deptId);
+    });
+  }
+
+  // Flag filter
+  if (dirState.filterFlag) {
+    list = list.filter(p => !!p[dirState.filterFlag]);
+  }
+
+  // Sort
+  list.sort((a, b) => {
+    let av, bv;
+    if (dirState.sortBy === 'name') {
+      av = (a.name || '').toLowerCase(); bv = (b.name || '').toLowerCase();
+    } else if (dirState.sortBy === 'salary') {
+      av = a.salary || 0; bv = b.salary || 0;
+    } else if (dirState.sortBy === 'dept') {
+      const da = getDeptForPerson(a.id); const db = getDeptForPerson(b.id);
+      av = da ? da.name.toLowerCase() : 'zzz'; bv = db ? db.name.toLowerCase() : 'zzz';
+    } else if (dirState.sortBy === 'level') {
+      const ra = getPrimaryRoleForPerson(a.id); const rb = getPrimaryRoleForPerson(b.id);
+      av = ra ? parseInt(ra.level.slice(1), 10) : 0; bv = rb ? parseInt(rb.level.slice(1), 10) : 0;
+    }
+    const cmp = typeof av === 'string' ? av.localeCompare(bv) : (av - bv);
+    return dirState.sortDir === 'asc' ? cmp : -cmp;
+  });
+
+  return list;
+}
+
+// ── Render ─────────────────────────────────────────────────────────────────────
+function render() {
+  const filtered = getFilteredSortedPersons();
+  document.getElementById('headcount-badge').textContent = filtered.length + ' people';
+
+  if (dirState.view === 'grid') {
+    document.getElementById('dir-grid').style.display = 'grid';
+    document.getElementById('dir-table-wrap').style.display = 'none';
+    const grid = document.getElementById('dir-grid');
+    grid.innerHTML = '';
+    if (filtered.length === 0) {
+      const empty = document.createElement('div');
+      empty.className = 'dir-empty';
+      empty.innerHTML = '<div class="dir-empty-icon">👥</div><div>No employees match your filters.</div>';
+      grid.appendChild(empty);
+    } else {
+      filtered.forEach(p => grid.appendChild(buildDirCard(p)));
+    }
+  } else {
+    document.getElementById('dir-grid').style.display = 'none';
+    document.getElementById('dir-table-wrap').style.display = 'block';
+    const tbody = document.getElementById('dir-tbody');
+    tbody.innerHTML = '';
+    filtered.forEach(p => tbody.appendChild(buildTableRow(p)));
+    updateTableSortHeaders();
+    // Show/hide salary column
+    document.getElementById('th-salary').style.display = settings.hideSalaries ? 'none' : '';
+  }
+}
+
+function buildFlagBadges(person) {
+  const flags = [
+    person.salaryReviewNeeded      && '<span class="person-flag-badge amber">Salary review</span>',
+    person.performanceReviewNeeded && '<span class="person-flag-badge red">Perf review</span>',
+    person.isNew                   && '<span class="person-flag-badge green">New</span>',
+    person.onLeave                 && '<span class="person-flag-badge blue">On leave</span>',
+  ].filter(Boolean);
+  return flags.join('');
+}
+
+function buildDirCard(person) {
+  const role = getPrimaryRoleForPerson(person.id);
+  const dept = getDeptForPerson(person.id);
+  const div = document.createElement('div');
+  div.className = 'dir-card' + (person.noLongerHired ? ' terminated' : '');
+  div.onclick = () => openPersonModal(person.id);
+
+  const deptHtml = dept
+    ? `<span class="dept-dot-sm" style="background:${dept.color}"></span><span class="dir-card-dept">${dept.name}</span>`
+    : '';
+
+  const levelHtml = role
+    ? `<span class="level-badge ${levelTierClass(role.level)}">${role.level}</span>`
+    : '';
+
+  const infoLine = person.email
+    ? `<span class="dir-card-email">${person.email}</span>`
+    : (person.location ? `<span class="dir-card-email">${person.location}</span>` : '');
+
+  const salaryHtml = !settings.hideSalaries && person.salary
+    ? `<div class="dir-card-salary">${fmt(person.salary)}</div>` : '';
+
+  const flags = buildFlagBadges(person);
+
+  div.innerHTML = `
+    <div class="dir-card-top">
+      <div class="avatar-lg" style="background:${nameToColor(person.name)}">${getInitials(person.name)}</div>
+      <div>
+        <div class="dir-card-name">${person.name}</div>
+        ${person.preferredName ? `<div class="dir-card-preferred">"${person.preferredName}"</div>` : ''}
+      </div>
+    </div>
+    <div class="dir-card-role">
+      <span>${role ? role.title : '<em style="color:var(--text-muted)">No role assigned</em>'}</span>
+      ${deptHtml}
+    </div>
+    <div class="dir-card-meta">
+      ${levelHtml}
+      ${infoLine}
+    </div>
+    ${salaryHtml}
+    ${flags ? `<div class="dir-card-flags">${flags}</div>` : ''}
+  `;
+  return div;
+}
+
+function buildTableRow(person) {
+  const role = getPrimaryRoleForPerson(person.id);
+  const dept = getDeptForPerson(person.id);
+  const tr = document.createElement('tr');
+  if (person.noLongerHired) tr.className = 'terminated';
+  tr.style.cursor = 'pointer';
+  tr.onclick = () => openPersonModal(person.id);
+
+  const status = getEmploymentStatus(person);
+  const statusLabel = status === 'terminated' ? 'Terminated' : status === 'leave' ? 'On leave' : 'Active';
+  const statusClass = status === 'terminated' ? 'terminated' : status === 'leave' ? 'on-leave' : 'active';
+
+  const salaryCell = settings.hideSalaries ? '' : `<td>${person.salary ? fmt(person.salary) : '—'}</td>`;
+  const salaryCellHidden = settings.hideSalaries ? 'style="display:none"' : '';
+
+  tr.innerHTML = `
+    <td>
+      <div class="tbl-name-cell">
+        <div class="avatar-sm" style="background:${nameToColor(person.name)}">${getInitials(person.name)}</div>
+        <div>
+          <div class="tbl-name">${person.name}</div>
+          ${person.preferredName ? `<div class="tbl-preferred">"${person.preferredName}"</div>` : ''}
+        </div>
+      </div>
+    </td>
+    <td>${role ? role.title : '<em style="color:var(--text-muted)">—</em>'}</td>
+    <td>
+      ${dept ? `<div class="tbl-dept"><span class="dept-dot-sm" style="background:${dept.color}"></span>${dept.name}</div>` : '—'}
+    </td>
+    <td>${role ? `<span class="level-badge ${levelTierClass(role.level)}">${role.level}</span>` : '—'}</td>
+    <td ${salaryCellHidden}>${person.salary && !settings.hideSalaries ? fmt(person.salary) : '—'}</td>
+    <td><span class="status-badge ${statusClass}">${statusLabel}</span></td>
+    <td><div class="tbl-flags">${buildFlagBadges(person)}</div></td>
+  `;
+  return tr;
+}
+
+function updateTableSortHeaders() {
+  document.querySelectorAll('#dir-table th.sortable').forEach(th => {
+    th.classList.toggle('sort-active', th.dataset.col === dirState.sortBy);
+    const icon = th.querySelector('.sort-icon');
+    if (icon) {
+      if (th.dataset.col === dirState.sortBy) {
+        icon.textContent = dirState.sortDir === 'asc' ? '↑' : '↓';
+      } else {
+        icon.textContent = '↕';
+      }
+    }
+  });
+}
+
+// ── Modal State ────────────────────────────────────────────────────────────────
+let currentPersonId = null;
+let isEditing = false;
+
+function openPersonModal(personId) {
+  currentPersonId = personId;
+  isEditing = false;
+  const panel = document.getElementById('person-modal-panel');
+  panel.classList.remove('editing');
+  populateModal(personId);
+  switchTab('identity');
+  document.getElementById('person-modal-backdrop').classList.add('visible');
+}
+
+function closePersonModal() {
+  document.getElementById('person-modal-backdrop').classList.remove('visible');
+  currentPersonId = null;
+  isEditing = false;
+}
+
+function enterEditMode() {
+  if (settings.viewOnly) return;
+  isEditing = true;
+  document.getElementById('person-modal-panel').classList.add('editing');
+  // Sync edit inputs from current view values
+  if (currentPersonId) syncEditInputs(currentPersonId);
+}
+
+function exitEditMode(save) {
+  if (save) savePersonChanges();
+  isEditing = false;
+  document.getElementById('person-modal-panel').classList.remove('editing');
+}
+
+function switchTab(tabName) {
+  document.querySelectorAll('.pm-tab').forEach(t => t.classList.toggle('active', t.dataset.tab === tabName));
+  document.querySelectorAll('.pm-pane').forEach(p => p.classList.toggle('active', p.id === 'pane-' + tabName));
+}
+
+// ── Modal Population ───────────────────────────────────────────────────────────
+function populateModal(personId) {
+  const person = persons.find(p => p.id === personId);
+  if (!person) return;
+
+  const role = getPrimaryRoleForPerson(personId);
+  const dept = getDeptForPerson(personId);
+
+  // Header
+  const av = document.getElementById('pm-avatar-xl');
+  av.style.background = nameToColor(person.name);
+  av.textContent = getInitials(person.name);
+  document.getElementById('pm-header-name').textContent = person.name;
+
+  const prefEl = document.getElementById('pm-header-preferred');
+  prefEl.textContent = person.preferredName ? `"${person.preferredName}"` : '';
+
+  const eidBadge = document.getElementById('pm-emp-id-badge');
+  if (person.employeeId) {
+    eidBadge.textContent = person.employeeId;
+    eidBadge.style.display = '';
+  } else {
+    eidBadge.style.display = 'none';
+  }
+
+  const status = getEmploymentStatus(person);
+  const statusBadge = document.getElementById('pm-status-badge');
+  statusBadge.textContent = status === 'terminated' ? 'Terminated' : status === 'leave' ? 'On leave' : 'Active';
+  statusBadge.className = `status-badge ${status === 'terminated' ? 'terminated' : status === 'leave' ? 'on-leave' : 'active'}`;
+
+  // Edit button visibility
+  document.getElementById('pm-edit-btn').style.display = settings.viewOnly ? 'none' : '';
+
+  // Identity tab
+  setVal('pm-v-name',           person.name);
+  setVal('pm-v-preferred',      person.preferredName);
+  setVal('pm-v-eid',            person.employeeId);
+  setVal('pm-v-dob',            person.dateOfBirth ? fmtDate(person.dateOfBirth) : null);
+  setVal('pm-v-gender',         capitalize(person.gender));
+  setVal('pm-v-nationality',    person.nationality);
+  setVal('pm-v-email',          person.email);
+  setVal('pm-v-phone',          person.phone);
+  setVal('pm-v-address',        person.address);
+  setVal('pm-v-emergency-name', person.emergencyName);
+  setVal('pm-v-emergency-phone',person.emergencyPhone);
+
+  // Employment tab
+  setVal('pm-v-hiredate',    person.hireDate ? fmtDate(person.hireDate) : null);
+  setVal('pm-v-empstatus',   status === 'terminated' ? 'Terminated' : status === 'leave' ? 'On leave' : 'Active');
+  setVal('pm-v-emptype',     person.employmentType);
+  setVal('pm-v-contracttype',person.contractType);
+  setVal('pm-v-probation',   person.probationEnd ? fmtDate(person.probationEnd) : null);
+
+  const isTerminated = !!person.noLongerHired;
+  document.getElementById('pm-termdate-row').style.display = isTerminated ? '' : 'none';
+  document.getElementById('pm-termreason-row').style.display = isTerminated ? '' : 'none';
+  setVal('pm-v-termdate',   person.terminationDate ? fmtDate(person.terminationDate) : null);
+  setVal('pm-v-termreason', person.terminationReason);
+
+  // Flag chips
+  const flagDefs = [
+    { key: 'salaryReviewNeeded', color: 'amber' },
+    { key: 'performanceReviewNeeded', color: 'red' },
+    { key: 'isNew', color: 'green' },
+    { key: 'onLeave', color: 'blue' },
+  ];
+  document.querySelectorAll('.pm-flag-chip').forEach(chip => {
+    const flag = chip.dataset.flag;
+    const color = chip.dataset.color;
+    chip.className = 'pm-flag-chip' + (person[flag] ? ` active-${color}` : '');
+  });
+
+  // Organization tab
+  document.getElementById('pm-d-dept').textContent = dept ? dept.name : '—';
+  const mgr = getManagerForPerson(personId);
+  const mgrRole = getManagerRoleForPerson(personId);
+  document.getElementById('pm-d-manager').textContent = mgr
+    ? `${mgr.name}${mgrRole ? ' · ' + mgrRole.title : ''}`
+    : '—';
+  document.getElementById('pm-d-directs').textContent = getDirectReportCount(personId).toString();
+
+  const roleList = document.getElementById('pm-role-list');
+  roleList.innerHTML = '';
+  const allRoles = getAllRolesForPerson(personId);
+  if (allRoles.length === 0) {
+    roleList.innerHTML = '<div style="color:var(--text-muted);font-size:13px;padding:8px 0">No role assignments</div>';
+  } else {
+    allRoles.forEach(({ role: r, percentage }) => {
+      const d = departments.find(dep => dep.id === r.department || dep.name === r.department);
+      const item = document.createElement('div');
+      item.className = 'pm-role-item';
+      item.innerHTML = `
+        <div class="avatar-sm" style="background:${d ? d.color : '#94a3b8'}; width:28px; height:28px; border-radius:6px; font-size:10px; font-weight:700; color:white; display:flex; align-items:center; justify-content:center; flex-shrink:0">
+          ${(r.title || '?').charAt(0).toUpperCase()}
+        </div>
+        <div class="pm-role-info">
+          <div class="pm-role-title">${r.title}</div>
+          <div class="pm-role-meta">${d ? d.name : r.department || '—'} · <span class="level-badge ${levelTierClass(r.level)}" style="font-size:10px;padding:1px 5px">${r.level}</span></div>
+        </div>
+        <div class="pm-role-pct">${percentage != null ? percentage + '%' : '100%'}</div>
+      `;
+      roleList.appendChild(item);
+    });
+  }
+
+  setVal('pm-v-legalentity', person.legalEntity);
+  setVal('pm-v-costcenter',  person.costCenter);
+  setVal('pm-v-location',    person.location);
+
+  // Job tab
+  if (role) {
+    document.getElementById('pm-d-title').innerHTML = role.title;
+    document.getElementById('pm-d-level').innerHTML = `<span class="level-badge ${levelTierClass(role.level)}">${role.level}</span>`;
+  } else {
+    document.getElementById('pm-d-title').textContent = '—';
+    document.getElementById('pm-d-level').textContent = '—';
+  }
+  setVal('pm-v-jobfamily', person.jobFamily);
+  setVal('pm-v-fte',       person.fte != null ? person.fte : null);
+  setVal('pm-v-hours',     person.workingHours != null ? person.workingHours + ' hrs/week' : null);
+
+  // Compensation tab
+  const compSection = document.getElementById('pm-comp-salary-section');
+  const compHidden  = document.getElementById('pm-comp-hidden-msg');
+  if (settings.hideSalaries) {
+    compSection.style.display = 'none';
+    compHidden.style.display = 'block';
+  } else {
+    compSection.style.display = '';
+    compHidden.style.display = 'none';
+    setVal('pm-v-salary', person.salary ? fmt(person.salary) : null);
+    document.getElementById('pm-d-annual').textContent = person.salary
+      ? fmt(person.salary * 12).replace('/mo', '/yr') : '—';
+
+    // Band bar
+    const bandSection = document.getElementById('pm-band-section');
+    if (role) {
+      const bs = getBandStatus(person.salary, role.level);
+      if (bs.band) {
+        bandSection.style.display = '';
+        const fill = document.getElementById('pm-band-fill');
+        fill.style.width = bs.pct + '%';
+        fill.className = `band-bar-fill ${bs.status}`;
+        document.getElementById('pm-band-min').textContent = fmt(bs.band.min);
+        document.getElementById('pm-band-max').textContent = fmt(bs.band.max);
+        const statusEl = document.getElementById('pm-band-status');
+        statusEl.className = `band-status-label ${bs.status}`;
+        statusEl.textContent = bs.status === 'in' ? 'Within band' : bs.status === 'below' ? 'Below band' : 'Above band';
+      } else {
+        bandSection.style.display = 'none';
+      }
+    } else {
+      bandSection.style.display = 'none';
+    }
+
+    setVal('pm-v-payfreq',     person.payFrequency);
+    setVal('pm-v-bonustarget', person.bonusTarget != null ? person.bonusTarget + '%' : null);
+    setVal('pm-v-benefits',    person.benefits);
+  }
+}
+
+function setVal(id, value) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  if (value != null && value !== '' && value !== '—') {
+    el.textContent = value;
+    el.classList.remove('empty');
+  } else {
+    el.textContent = '—';
+    el.classList.add('empty');
+  }
+}
+
+function syncEditInputs(personId) {
+  const person = persons.find(p => p.id === personId);
+  if (!person) return;
+
+  // Identity
+  setInput('pm-e-name',           person.name || '');
+  setInput('pm-e-preferred',      person.preferredName || '');
+  setInput('pm-e-eid',            person.employeeId || '');
+  setInput('pm-e-dob',            person.dateOfBirth || '');
+  setSelect('pm-e-gender',        person.gender || '');
+  setInput('pm-e-nationality',    person.nationality || '');
+  setInput('pm-e-email',          person.email || '');
+  setInput('pm-e-phone',          person.phone || '');
+  setInput('pm-e-address',        person.address || '');
+  setInput('pm-e-emergency-name', person.emergencyName || '');
+  setInput('pm-e-emergency-phone',person.emergencyPhone || '');
+
+  // Employment
+  setInput('pm-e-hiredate',     person.hireDate || '');
+  const empStatus = getEmploymentStatus(person);
+  setSelect('pm-e-empstatus',   empStatus);
+  setSelect('pm-e-emptype',     person.employmentType || '');
+  setSelect('pm-e-contracttype',person.contractType || '');
+  setInput('pm-e-probation',    person.probationEnd || '');
+  setInput('pm-e-termdate',     person.terminationDate || '');
+  setInput('pm-e-termreason',   person.terminationReason || '');
+
+  // Show/hide termination fields in edit mode too
+  const isTerminated = empStatus === 'terminated';
+  document.getElementById('pm-termdate-row').style.display = isTerminated ? '' : 'none';
+  document.getElementById('pm-termreason-row').style.display = isTerminated ? '' : 'none';
+
+  // Organization
+  setInput('pm-e-legalentity', person.legalEntity || '');
+  setInput('pm-e-costcenter',  person.costCenter || '');
+  setInput('pm-e-location',    person.location || '');
+
+  // Job
+  setInput('pm-e-jobfamily', person.jobFamily || '');
+  setInput('pm-e-fte',       person.fte != null ? person.fte : '');
+  setInput('pm-e-hours',     person.workingHours != null ? person.workingHours : '');
+
+  // Compensation
+  if (!settings.hideSalaries) {
+    setInput('pm-e-salary',      person.salary || '');
+    setSelect('pm-e-payfreq',    person.payFrequency || '');
+    setInput('pm-e-bonustarget', person.bonusTarget != null ? person.bonusTarget : '');
+    setInput('pm-e-benefits',    person.benefits || '');
+    const bonusEl = document.getElementById('pm-e-bonuseligible');
+    if (bonusEl) bonusEl.checked = !!person.bonusEligible;
+  }
+}
+
+function setInput(id, value) {
+  const el = document.getElementById(id);
+  if (el) el.value = value;
+}
+function setSelect(id, value) {
+  const el = document.getElementById(id);
+  if (el) el.value = value;
+}
+
+// ── Save ───────────────────────────────────────────────────────────────────────
+function savePersonChanges() {
+  const person = persons.find(p => p.id === currentPersonId);
+  if (!person) return;
+
+  // Identity
+  person.name           = document.getElementById('pm-e-name').value.trim() || person.name;
+  person.preferredName  = document.getElementById('pm-e-preferred').value.trim();
+  person.employeeId     = document.getElementById('pm-e-eid').value.trim();
+  person.dateOfBirth    = document.getElementById('pm-e-dob').value;
+  person.gender         = document.getElementById('pm-e-gender').value;
+  person.nationality    = document.getElementById('pm-e-nationality').value.trim();
+  person.email          = document.getElementById('pm-e-email').value.trim();
+  person.phone          = document.getElementById('pm-e-phone').value.trim();
+  person.address        = document.getElementById('pm-e-address').value.trim();
+  person.emergencyName  = document.getElementById('pm-e-emergency-name').value.trim();
+  person.emergencyPhone = document.getElementById('pm-e-emergency-phone').value.trim();
+
+  // Employment
+  person.hireDate         = document.getElementById('pm-e-hiredate').value;
+  person.employmentType   = document.getElementById('pm-e-emptype').value;
+  person.contractType     = document.getElementById('pm-e-contracttype').value;
+  person.probationEnd     = document.getElementById('pm-e-probation').value;
+  person.terminationDate  = document.getElementById('pm-e-termdate').value;
+  person.terminationReason= document.getElementById('pm-e-termreason').value.trim();
+
+  // Sync boolean flags from employment status dropdown
+  const empStatus = document.getElementById('pm-e-empstatus').value;
+  if (empStatus === 'active')     { person.onLeave = false; person.noLongerHired = false; }
+  if (empStatus === 'leave')      { person.onLeave = true;  person.noLongerHired = false; }
+  if (empStatus === 'terminated') { person.onLeave = false; person.noLongerHired = true;  }
+
+  // Organization
+  person.legalEntity = document.getElementById('pm-e-legalentity').value.trim();
+  person.costCenter  = document.getElementById('pm-e-costcenter').value.trim();
+  person.location    = document.getElementById('pm-e-location').value.trim();
+
+  // Job
+  person.jobFamily    = document.getElementById('pm-e-jobfamily').value.trim();
+  const fteVal = parseFloat(document.getElementById('pm-e-fte').value);
+  person.fte = isNaN(fteVal) ? null : Math.min(1.0, Math.max(0.1, fteVal));
+  const hoursVal = parseFloat(document.getElementById('pm-e-hours').value);
+  person.workingHours = isNaN(hoursVal) ? null : hoursVal;
+
+  // Compensation
+  if (!settings.hideSalaries) {
+    const salVal = parseFloat(document.getElementById('pm-e-salary').value);
+    if (!isNaN(salVal) && salVal > 0) person.salary = salVal;
+    person.payFrequency   = document.getElementById('pm-e-payfreq').value;
+    const btVal = parseFloat(document.getElementById('pm-e-bonustarget').value);
+    person.bonusTarget    = isNaN(btVal) ? null : btVal;
+    person.bonusEligible  = document.getElementById('pm-e-bonuseligible').checked;
+    person.benefits       = document.getElementById('pm-e-benefits').value.trim();
+  }
+
+  // Flag chips (toggled in UI)
+  document.querySelectorAll('.pm-flag-chip').forEach(chip => {
+    const flag = chip.dataset.flag;
+    const color = chip.dataset.color;
+    person[flag] = chip.classList.contains(`active-${color}`);
+  });
+
+  saveToStorage();
+  render();
+  populateModal(currentPersonId); // refresh view values
+}
+
+// ── Event wiring ───────────────────────────────────────────────────────────────
+document.getElementById('search-input').addEventListener('input', e => {
+  dirState.search = e.target.value;
+  render();
+});
+
+document.getElementById('filter-dept').addEventListener('change', e => {
+  dirState.filterDept = e.target.value;
+  render();
+});
+
+document.getElementById('filter-status').addEventListener('change', e => {
+  dirState.filterStatus = e.target.value;
+  render();
+});
+
+document.getElementById('filter-flag').addEventListener('change', e => {
+  dirState.filterFlag = e.target.value;
+  render();
+});
+
+document.getElementById('sort-by').addEventListener('change', e => {
+  dirState.sortBy = e.target.value;
+  dirState.sortDir = dirState.sortBy === 'salary' ? 'desc' : 'asc';
+  render();
+});
+
+document.getElementById('view-grid-btn').addEventListener('click', () => {
+  dirState.view = 'grid';
+  document.getElementById('view-grid-btn').classList.add('active');
+  document.getElementById('view-table-btn').classList.remove('active');
+  render();
+});
+
+document.getElementById('view-table-btn').addEventListener('click', () => {
+  dirState.view = 'table';
+  document.getElementById('view-table-btn').classList.add('active');
+  document.getElementById('view-grid-btn').classList.remove('active');
+  render();
+});
+
+// Table header sort click
+document.getElementById('dir-table').addEventListener('click', e => {
+  const th = e.target.closest('th.sortable');
+  if (!th) return;
+  const col = th.dataset.col;
+  if (dirState.sortBy === col) {
+    dirState.sortDir = dirState.sortDir === 'asc' ? 'desc' : 'asc';
+  } else {
+    dirState.sortBy = col;
+    dirState.sortDir = col === 'salary' ? 'desc' : 'asc';
+  }
+  document.getElementById('sort-by').value = col;
+  render();
+});
+
+// Modal buttons
+document.getElementById('pm-close-btn').addEventListener('click', closePersonModal);
+document.getElementById('pm-edit-btn').addEventListener('click', enterEditMode);
+document.getElementById('pm-cancel-btn').addEventListener('click', () => exitEditMode(false));
+document.getElementById('pm-save-btn').addEventListener('click', () => exitEditMode(true));
+
+// Tab switching
+document.getElementById('pm-tab-bar').addEventListener('click', e => {
+  const tab = e.target.closest('.pm-tab');
+  if (tab) switchTab(tab.dataset.tab);
+});
+
+// Flag chip toggling (edit mode only)
+document.getElementById('pm-flag-chips').addEventListener('click', e => {
+  if (!isEditing) return;
+  const chip = e.target.closest('.pm-flag-chip');
+  if (!chip) return;
+  const color = chip.dataset.color;
+  const activeClass = `active-${color}`;
+  chip.classList.toggle(activeClass);
+});
+
+// Employment status change → show/hide termination rows
+document.getElementById('pm-e-empstatus').addEventListener('change', e => {
+  const isTerminated = e.target.value === 'terminated';
+  document.getElementById('pm-termdate-row').style.display = isTerminated ? '' : 'none';
+  document.getElementById('pm-termreason-row').style.display = isTerminated ? '' : 'none';
+});
+
+// Live salary → update annual
+document.getElementById('pm-e-salary').addEventListener('input', e => {
+  const val = parseFloat(e.target.value);
+  document.getElementById('pm-d-annual').textContent = !isNaN(val) && val > 0
+    ? fmt(val * 12).replace('/mo', '/yr') : '—';
+});
+
+// Close on backdrop click
+document.getElementById('person-modal-backdrop').addEventListener('click', e => {
+  if (e.target === document.getElementById('person-modal-backdrop')) closePersonModal();
+});
+
+// Escape key
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    if (isEditing) exitEditMode(false);
+    else closePersonModal();
+  }
+});
+
+// ── Department filter population ───────────────────────────────────────────────
+function populateDeptFilter() {
+  const sel = document.getElementById('filter-dept');
+  // Remove existing options beyond first
+  while (sel.options.length > 1) sel.remove(1);
+  departments.forEach(d => {
+    const opt = document.createElement('option');
+    opt.value = d.id;
+    opt.textContent = d.name;
+    sel.appendChild(opt);
+  });
+}
+
+// ── Init ───────────────────────────────────────────────────────────────────────
+loadData();
+populateDeptFilter();
+render();
+</script>
+</body>
+</html>
