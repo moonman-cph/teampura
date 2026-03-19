@@ -4,28 +4,32 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>OrgChart</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
   :root {
-    --bg: #f7f8fa;
+    --bg: #f5f4f0;
     --surface: #ffffff;
-    --border: #e4e7ec;
-    --border-hover: #c8cdd8;
-    --text-primary: #101828;
-    --text-secondary: #475467;
-    --text-muted: #98a2b3;
-    --accent: #5a67d8;
-    --accent-light: #eef0fd;
-    --accent-border: #8b96e9;
-    --drop-bg: #f0f3fe;
+    --border: #e6e4df;
+    --border-hover: #c9c6be;
+    --text-primary: #111110;
+    --text-secondary: #57534e;
+    --text-muted: #a8a29e;
+    --accent: #2563eb;
+    --accent-light: #eff6ff;
+    --accent-border: #93c5fd;
+    --drop-bg: #eff6ff;
     --radius: 10px;
-    --shadow-sm: 0 1px 3px rgba(16,24,40,0.06), 0 1px 2px rgba(16,24,40,0.04);
-    --shadow-md: 0 4px 12px rgba(16,24,40,0.08), 0 2px 4px rgba(16,24,40,0.04);
+    --shadow-sm: 0 1px 2px rgba(0,0,0,0.05), 0 1px 4px rgba(0,0,0,0.03);
+    --shadow-md: 0 4px 16px rgba(0,0,0,0.08), 0 1px 4px rgba(0,0,0,0.04);
+    --nav-bg: #1c1917;
   }
 
   body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif;
+    font-family: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
     background: var(--bg);
     color: var(--text-primary);
     height: 100vh;
@@ -45,10 +49,11 @@
   }
 
   /* ── Left Nav ────────────────────────────────────────────────── */
+  /* ── Left Nav ────────────────────────────────────────────────── */
   #left-nav {
     width: 220px;
     flex-shrink: 0;
-    background: #1e2239;
+    background: linear-gradient(180deg, #0f3d4a 0%, #0a2e3a 100%);
     display: flex;
     flex-direction: column;
     height: 100vh;
@@ -60,18 +65,19 @@
     align-items: center;
     gap: 10px;
     padding: 18px 16px 14px;
-    border-bottom: 1px solid rgba(255,255,255,0.07);
+    border-bottom: 1px solid rgba(255,255,255,0.08);
     flex-shrink: 0;
   }
   .nav-logo-icon {
     width: 28px;
     height: 28px;
-    background: var(--accent);
+    background: #e8622a;
     border-radius: 7px;
     display: flex;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
+    box-shadow: 0 2px 8px rgba(232,98,42,0.4);
   }
   .nav-logo-name { font-size: 15px; font-weight: 700; color: white; letter-spacing: -0.2px; }
 
@@ -90,7 +96,7 @@
     font-weight: 700;
     letter-spacing: 0.8px;
     text-transform: uppercase;
-    color: rgba(255,255,255,0.28);
+    color: rgba(255,255,255,0.3);
     padding: 8px 20px 4px;
   }
 
@@ -103,7 +109,7 @@
     border-radius: 7px;
     cursor: pointer;
     user-select: none;
-    color: rgba(255,255,255,0.62);
+    color: rgba(255,255,255,0.65);
     font-size: 13px;
     font-weight: 500;
     transition: background 0.12s, color 0.12s;
@@ -111,16 +117,16 @@
     text-decoration: none;
   }
   .nav-item:hover {
-    background: rgba(255,255,255,0.07);
-    color: rgba(255,255,255,0.9);
+    background: rgba(255,255,255,0.08);
+    color: rgba(255,255,255,0.95);
   }
   .nav-item.active {
-    background: rgba(90,103,216,0.22);
+    background: rgba(255,255,255,0.13);
     color: white;
-    border-left-color: #5a67d8;
+    border-left-color: rgba(255,255,255,0.7);
     font-weight: 600;
   }
-  .nav-item svg { flex-shrink: 0; opacity: 0.8; }
+  .nav-item svg { flex-shrink: 0; opacity: 0.75; }
   .nav-item.active svg, .nav-item:hover svg { opacity: 1; }
 
   .nav-spacer { flex: 1; }
@@ -128,18 +134,18 @@
   #nav-footer {
     flex-shrink: 0;
     padding: 12px 16px;
-    border-top: 1px solid rgba(255,255,255,0.07);
+    border-top: 1px solid rgba(255,255,255,0.08);
     display: flex;
     align-items: center;
     gap: 10px;
     cursor: pointer;
   }
-  #nav-footer:hover { background: rgba(255,255,255,0.05); }
+  #nav-footer:hover { background: rgba(255,255,255,0.06); }
   .nav-user-avatar {
     width: 32px;
     height: 32px;
     border-radius: 50%;
-    background: #6366f1;
+    background: #e8622a;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -147,6 +153,7 @@
     font-weight: 700;
     color: white;
     flex-shrink: 0;
+    box-shadow: 0 2px 6px rgba(232,98,42,0.35);
   }
   .nav-user-info { min-width: 0; }
   .nav-user-name {
@@ -232,6 +239,7 @@
     background: var(--surface);
     border-radius: var(--radius);
     border: 1px solid var(--border);
+    border-top: 3px solid var(--dept-color, var(--border));
     box-shadow: var(--shadow-sm);
     overflow: hidden;
     display: flex;
@@ -254,9 +262,9 @@
     background: var(--surface);
   }
   .dept-dot {
-    width: 9px;
-    height: 9px;
-    border-radius: 50%;
+    width: 8px;
+    height: 8px;
+    border-radius: 2px;
     flex-shrink: 0;
   }
   .dept-name {
@@ -608,8 +616,9 @@
     position: relative;
   }
   .emp-card:hover {
-    background: #fafbfc;
+    background: #fafaf9;
     border-color: var(--border-hover);
+    box-shadow: var(--shadow-sm);
   }
   .emp-card.selected {
     background: var(--accent-light);
@@ -680,10 +689,10 @@
     flex-shrink: 0;
     letter-spacing: 0.2px;
   }
-  .level-badge.tier-gray   { background: #e4e7ec; color: #667085; }
-  .level-badge.tier-sky    { background: #e0f2fe; color: #0369a1; }
-  .level-badge.tier-violet { background: #ede9fe; color: #6d28d9; }
-  .level-badge.tier-indigo { background: #e0e7ff; color: #3730a3; }
+  .level-badge.tier-gray   { background: #f4f4f5; color: #71717a; }
+  .level-badge.tier-sky    { background: #eff6ff; color: #1d4ed8; }
+  .level-badge.tier-violet { background: #f0fdf4; color: #15803d; }
+  .level-badge.tier-indigo { background: #faf5ff; color: #7c3aed; }
 
   /* ── Drag Handle ─────────────────────────────────────────────── */
   .drag-handle {
@@ -868,7 +877,7 @@
   }
   .form-control:focus {
     border-color: var(--accent-border);
-    box-shadow: 0 0 0 3px rgba(90,103,216,0.1);
+    box-shadow: 0 0 0 3px rgba(37,99,235,0.1);
   }
   select.form-control {
     appearance: none;
@@ -915,11 +924,11 @@
   }
   .btn-ghost:hover { background: var(--bg); border-color: var(--border-hover); }
   .btn-primary {
-    background: #4338ca;
+    background: #2563eb;
     color: white;
-    border-color: #4338ca;
+    border-color: #2563eb;
   }
-  .btn-primary:hover { background: #3730a3; border-color: #3730a3; box-shadow: 0 1px 4px rgba(67,56,202,0.3); }
+  .btn-primary:hover { background: #1d4ed8; border-color: #1d4ed8; box-shadow: 0 1px 4px rgba(37,99,235,0.3); }
 
   /* ── Modal Avatar ────────────────────────────────────────────── */
   .modal-avatar-area {
@@ -1012,6 +1021,9 @@
 
   /* ── View-only mode ────────────────────────────────────────────── */
   body.view-only #snapshots-nav-btn,
+  body.view-only #add-dept-btn,
+  body.view-only #add-role-btn,
+  body.view-only #add-emp-btn,
   body.view-only .dept-add-role-btn,
   body.view-only .dept-settings-btn,
   body.view-only #modal-person-fire-btn,
@@ -1236,8 +1248,8 @@
     white-space: nowrap;
   }
   .header-btn:hover { background: var(--bg); border-color: var(--border-hover); }
-  .header-btn.primary { background: #4338ca; color: white; border-color: #4338ca; }
-  .header-btn.primary:hover { background: #3730a3; border-color: #3730a3; }
+  .header-btn.primary { background: #2563eb; color: white; border-color: #2563eb; }
+  .header-btn.primary:hover { background: #1d4ed8; border-color: #1d4ed8; }
   #header-search {
     font-size: 12px;
     font-family: inherit;
@@ -1251,7 +1263,7 @@
     transition: border-color 0.12s, box-shadow 0.12s;
   }
   #header-search::placeholder { color: var(--text-muted); }
-  #header-search:focus { border-color: var(--accent-border); box-shadow: 0 0 0 3px rgba(90,103,216,0.1); }
+  #header-search:focus { border-color: var(--accent-border); box-shadow: 0 0 0 3px rgba(37,99,235,0.1); }
 
   #filter-bar {
     background: var(--surface);
@@ -2820,13 +2832,15 @@ function getInitials(name) {
 
 function nameToColor(name) {
   const palette = [
-    '#6366f1','#8b5cf6','#a855f7','#ec4899','#f43f5e',
-    '#ef4444','#f97316','#eab308','#84cc16','#22c55e',
-    '#10b981','#14b8a6','#06b6d4','#0ea5e9','#3b82f6',
+    ['#6366f1','#8b5cf6'], ['#3b82f6','#06b6d4'], ['#10b981','#14b8a6'],
+    ['#f43f5e','#ec4899'], ['#f97316','#eab308'], ['#84cc16','#10b981'],
+    ['#a855f7','#ec4899'], ['#0ea5e9','#6366f1'], ['#ef4444','#f97316'],
+    ['#14b8a6','#2563eb'], ['#8b5cf6','#3b82f6'], ['#22c55e','#0ea5e9'],
   ];
   let hash = 0;
   for (let i = 0; i < name.length; i++) hash = name.charCodeAt(i) + ((hash << 5) - hash);
-  return palette[Math.abs(hash) % palette.length];
+  const [c1, c2] = palette[Math.abs(hash) % palette.length];
+  return `linear-gradient(135deg, ${c1}, ${c2})`;
 }
 
 function levelTierClass(levelId) {
@@ -3316,6 +3330,7 @@ function renderDeptColumn(dept) {
   const col = document.createElement('div');
   col.className = 'dept-column';
   col.dataset.dept = dept.id;
+  col.style.setProperty('--dept-color', dept.color);
 
   const deptRoles = roles.filter(r => r.department === dept.id);
   const vacantCount = deptRoles.filter(r => !getPersonForRole(r.id)).length;
