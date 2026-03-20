@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -9,11 +9,10 @@
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="shared.css">
 <link rel="stylesheet" href="orgchart.css">
-
 </head>
 <body>
 
-<div id="loading-overlay" style="position:fixed;inset:0;background:#fff;display:flex;align-items:center;justify-content:center;font-family:inherit;color:#6b7280;z-index:9999;font-size:1.1rem;">Loading�</div>
+<div id="loading-overlay" style="position:fixed;inset:0;background:#fff;display:flex;align-items:center;justify-content:center;font-family:inherit;color:#6b7280;z-index:9999;font-size:1.1rem;">Loading…</div>
 
 <nav id="left-nav">
   <div id="nav-logo">
@@ -158,7 +157,7 @@
   <div class="header-divider"></div>
   <span class="header-meta">Roles &amp; Employees</span>
   <div class="header-spacer"></div>
-  <input type="text" id="header-search" placeholder="Search name or title�" />
+  <input type="text" id="header-search" placeholder="Search name or title…" />
   <button class="header-btn" id="add-dept-btn">+ Department</button>
   <button class="header-btn" id="add-role-btn">+ Role</button>
   <button class="header-btn primary" id="add-emp-btn">+ Person</button>
@@ -186,11 +185,11 @@
     <span id="status-text">No selection</span>
     <span class="status-hint">
       Click to select
-      <span class="status-sep">�</span>
+      <span class="status-sep">·</span>
       Ctrl+Click for multi-select
-      <span class="status-sep">�</span>
+      <span class="status-sep">·</span>
       Drag to reorganize
-      <span class="status-sep">�</span>
+      <span class="status-sep">·</span>
       Double-click to edit
     </span>
   </div>
@@ -223,7 +222,7 @@
     <div class="modal-body" id="modal-body-person">
       <div class="modal-avatar-area">
         <div id="modal-avatar"></div>
-        <div id="modal-avatar-badge" class="modal-avatar-badge">?</div>
+        <div id="modal-avatar-badge" class="modal-avatar-badge">⚠</div>
         <div id="modal-person-name" style="font-size:14px;font-weight:600;color:var(--text-primary);margin-top:8px;text-align:center;"></div>
         <div id="modal-person-emp-id" class="modal-emp-id"></div>
       </div>
@@ -292,7 +291,7 @@
           <div id="modal-role-secondary-list" style="display:flex;flex-direction:column;gap:4px;margin-bottom:6px"></div>
           <div style="position:relative">
             <input type="text" id="modal-role-secondary-search" class="form-control"
-                   placeholder="Search by name or role�" autocomplete="off"
+                   placeholder="Search by name or role…" autocomplete="off"
                    style="font-size:12px" />
             <div id="modal-role-secondary-suggestions"></div>
           </div>
@@ -306,7 +305,7 @@
       <div class="modal-comp-section" style="font-size:12.5px;">
         Assigned to: <span id="modal-role-person-name" style="font-weight:600"></span>
       </div>
-      <button class="btn btn-ghost" id="modal-role-assign-btn" style="width:100%;margin-top:8px;display:none">Assign person�</button>
+      <button class="btn btn-ghost" id="modal-role-assign-btn" style="width:100%;margin-top:8px;display:none">Assign person…</button>
       <div class="role-edit">
         <button class="btn btn-ghost" id="modal-role-delete-btn" style="color:#ef4444;border-color:#fca5a5;width:100%;margin-top:8px;display:none">Delete role</button>
       </div>
@@ -329,10 +328,10 @@
       <button class="modal-close" id="import-modal-close">&#x2715;</button>
     </div>
     <div class="import-steps">
-      <div class="import-step active" id="import-step-1">1 � Upload</div>
-      <div class="import-step" id="import-step-2">2 � Map fields</div>
-      <div class="import-step" id="import-step-3">3 � Options</div>
-      <div class="import-step" id="import-step-4">4 � Preview</div>
+      <div class="import-step active" id="import-step-1">1 · Upload</div>
+      <div class="import-step" id="import-step-2">2 · Map fields</div>
+      <div class="import-step" id="import-step-3">3 · Options</div>
+      <div class="import-step" id="import-step-4">4 · Preview</div>
     </div>
     <!-- Step 1: Upload -->
     <div class="import-panel active" id="import-panel-1">
@@ -354,13 +353,13 @@
         <div class="import-map-row"><div class="import-map-label">Full name <span>*</span></div><div class="imap-field-wrap"><select class="form-control" id="imap-name"></select><span class="imap-sample" id="imap-sample-name"></span></div></div>
         <div class="import-map-row"><div class="import-map-label">Employee ID</div><div class="imap-field-wrap"><select class="form-control" id="imap-employeeId"></select><span class="imap-sample" id="imap-sample-employeeId"></span></div></div>
         <div class="import-map-row"><div class="import-map-label">Salary (monthly)</div><div class="imap-field-wrap"><select class="form-control" id="imap-salary"></select><span class="imap-sample" id="imap-sample-salary"></span></div></div>
-        <div class="import-map-row"><div class="import-map-label">Gender</div><div class="imap-field-wrap"><div class="imap-field-top"><select class="form-control" id="imap-gender"></select><button class="imap-vmap-btn" id="imap-vmap-btn-gender" style="display:none">? Map values</button></div><span class="imap-sample" id="imap-sample-gender"></span></div></div>
+        <div class="import-map-row"><div class="import-map-label">Gender</div><div class="imap-field-wrap"><div class="imap-field-top"><select class="form-control" id="imap-gender"></select><button class="imap-vmap-btn" id="imap-vmap-btn-gender" style="display:none">↔ Map values</button></div><span class="imap-sample" id="imap-sample-gender"></span></div></div>
         <div class="imap-vmap-panel" id="imap-vmap-gender" style="display:none"></div>
       </div>
       <div class="import-map-group">
         <div class="import-map-group-label">Role</div>
         <div class="import-map-row"><div class="import-map-label">Job title <span>*</span></div><div class="imap-field-wrap"><select class="form-control" id="imap-roleTitle"></select><span class="imap-sample" id="imap-sample-roleTitle"></span></div></div>
-        <div class="import-map-row"><div class="import-map-label">Level (L1�L8)</div><div class="imap-field-wrap"><div class="imap-field-top"><select class="form-control" id="imap-roleLevel"></select><button class="imap-vmap-btn" id="imap-vmap-btn-roleLevel" style="display:none">? Map values</button></div><span class="imap-sample" id="imap-sample-roleLevel"></span></div></div>
+        <div class="import-map-row"><div class="import-map-label">Level (L1–L8)</div><div class="imap-field-wrap"><div class="imap-field-top"><select class="form-control" id="imap-roleLevel"></select><button class="imap-vmap-btn" id="imap-vmap-btn-roleLevel" style="display:none">↔ Map values</button></div><span class="imap-sample" id="imap-sample-roleLevel"></span></div></div>
         <div class="imap-vmap-panel" id="imap-vmap-roleLevel" style="display:none"></div>
         <div class="import-map-row"><div class="import-map-label">Department</div><div class="imap-field-wrap"><select class="form-control" id="imap-roleDept"></select><span class="imap-sample" id="imap-sample-roleDept"></span></div></div>
         <div class="import-map-row"><div class="import-map-label">Team</div><div class="imap-field-wrap"><select class="form-control" id="imap-roleTeam"></select><span class="imap-sample" id="imap-sample-roleTeam"></span></div></div>
@@ -385,7 +384,7 @@
         <div><div class="import-mode-title">Replace</div><div class="import-mode-desc">Remove all existing employees and roles, then import fresh from this file.</div></div>
       </label>
       <div class="import-replace-warn" id="import-replace-warn">
-        ? All current employees and roles will be permanently deleted before importing.
+        ⚠ All current employees and roles will be permanently deleted before importing.
       </div>
     </div>
     <!-- Step 4: Preview -->
@@ -393,10 +392,10 @@
       <div id="import-preview-content"></div>
     </div>
     <div class="import-footer">
-      <button class="btn btn-ghost" id="import-back-btn" style="visibility:hidden">? Back</button>
+      <button class="btn btn-ghost" id="import-back-btn" style="visibility:hidden">← Back</button>
       <div style="display:flex;gap:8px">
         <button class="btn btn-ghost" id="import-cancel-btn">Cancel</button>
-        <button class="btn btn-primary" id="import-next-btn">Next ?</button>
+        <button class="btn btn-primary" id="import-next-btn">Next →</button>
       </div>
     </div>
   </div>
@@ -685,7 +684,7 @@
         <label style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;user-select:none;">
           <div>
             <span style="font-size:13px;font-weight:500;color:var(--text-secondary);">Hide level badges</span>
-            <div style="font-size:11px;color:var(--text-muted);margin-top:2px;">Removes L1�L8 badges from org chart cards</div>
+            <div style="font-size:11px;color:var(--text-muted);margin-top:2px;">Removes L1–L8 badges from org chart cards</div>
           </div>
           <div id="settings-hide-levels-toggle" style="position:relative;width:36px;height:20px;flex-shrink:0;">
             <input type="checkbox" id="settings-hide-levels-cb" style="opacity:0;width:0;height:0;position:absolute;" />
@@ -696,7 +695,7 @@
       </div>
       <div style="border-top:1px solid var(--border);margin-top:16px;padding-top:16px;">
         <button id="settings-open-paybands" style="width:100%;padding:8px 12px;border-radius:6px;border:1.5px solid var(--border);background:#fff;font-size:13px;font-weight:500;cursor:pointer;color:var(--text-secondary);text-align:left;display:flex;align-items:center;justify-content:space-between;">
-          Manage pay bands <span style="color:var(--text-muted);font-size:16px;">�</span>
+          Manage pay bands <span style="color:var(--text-muted);font-size:16px;">›</span>
         </button>
       </div>
       <div style="border-top:1px solid var(--border);margin-top:16px;padding-top:16px;">
@@ -751,7 +750,7 @@
 </div>
 
 <script>
-// -- Data ---------------------------------------------------------------------
+// ── Data ─────────────────────────────────────────────────────────────────────
 
 const departments = [
   { id: 'executive',        name: 'Executive',        color: '#0f172a', description: 'C-Level leadership', headRoleId: null },
@@ -767,37 +766,37 @@ const departments = [
 ];
 
 let teams = [
-  // Engineering � product teams
+  // Engineering — product teams
   { id:1,  name:'Nexus',         departmentId:'engineering' },
   { id:2,  name:'Plinger',       departmentId:'engineering' },
   { id:3,  name:'Delta Wing',    departmentId:'engineering' },
-  // Product � product teams
+  // Product — product teams
   { id:4,  name:'Nexus',         departmentId:'product' },
   { id:5,  name:'Plinger',       departmentId:'product' },
   { id:6,  name:'Delta Wing',    departmentId:'product' },
-  // Sales � regions
+  // Sales — regions
   { id:7,  name:'North America', departmentId:'sales' },
   { id:8,  name:'Europe',        departmentId:'sales' },
   { id:9,  name:'APAC',          departmentId:'sales' },
-  // Marketing � regions
+  // Marketing — regions
   { id:10, name:'North America', departmentId:'marketing' },
   { id:11, name:'Europe',        departmentId:'marketing' },
   { id:12, name:'APAC',          departmentId:'marketing' },
-  // Customer Success � regions
+  // Customer Success — regions
   { id:13, name:'North America', departmentId:'customer-success' },
   { id:14, name:'Europe',        departmentId:'customer-success' },
   { id:15, name:'APAC',          departmentId:'customer-success' },
 ];
 
 let roles = [
-  // -- Executive (9001�9006) --------------------------------------------------
+  // ── Executive (9001–9006) ──────────────────────────────────────────────────
   { id:9001, title:'Chief Executive Officer',   level:'L8', department:'executive', managerRoleId:null, teamId:null },
   { id:9002, title:'Chief Technology Officer',  level:'L8', department:'executive', managerRoleId:9001, teamId:null },
   { id:9003, title:'Chief Product Officer',     level:'L8', department:'executive', managerRoleId:9001, teamId:null },
   { id:9004, title:'Chief Financial Officer',   level:'L8', department:'executive', managerRoleId:9001, teamId:null },
   { id:9005, title:'Chief Marketing Officer',   level:'L8', department:'executive', managerRoleId:9001, teamId:null },
   { id:9006, title:'Chief People Officer',      level:'L8', department:'executive', managerRoleId:9001, teamId:null },
-  // -- Engineering � VP + one manager per product team ------------------------
+  // ── Engineering — VP + one manager per product team ────────────────────────
   { id:10001, title:'VP of Engineering',        level:'L7', department:'engineering', managerRoleId:null,  teamId:null },
   { id:10002, title:'Engineering Manager',      level:'L5', department:'engineering', managerRoleId:10001, teamId:1 },
   { id:10003, title:'Engineering Manager',      level:'L5', department:'engineering', managerRoleId:10001, teamId:2 },
@@ -833,7 +832,7 @@ let roles = [
   { id:10030, title:'QA Engineer',              level:'L2', department:'engineering', managerRoleId:10004, teamId:3 },
   { id:10031, title:'Junior Software Engineer', level:'L1', department:'engineering', managerRoleId:10004, teamId:3 },
   { id:10032, title:'Junior Software Engineer', level:'L1', department:'engineering', managerRoleId:10004, teamId:3 },
-  // -- Product � Director + one GPM per product team --------------------------
+  // ── Product — Director + one GPM per product team ──────────────────────────
   { id:10033, title:'Director of Product',      level:'L7', department:'product', managerRoleId:null,  teamId:null },
   // Nexus
   { id:10034, title:'Group Product Manager',    level:'L5', department:'product', managerRoleId:10033, teamId:4 },
@@ -849,7 +848,7 @@ let roles = [
   { id:10042, title:'Group Product Manager',    level:'L5', department:'product', managerRoleId:10033, teamId:6 },
   { id:10043, title:'Senior Product Manager',   level:'L4', department:'product', managerRoleId:10042, teamId:6 },
   { id:10044, title:'Product Manager',          level:'L3', department:'product', managerRoleId:10042, teamId:6 },
-  // -- Design -----------------------------------------------------------------
+  // ── Design ─────────────────────────────────────────────────────────────────
   { id:10045, title:'Director of Design',       level:'L7', department:'design', managerRoleId:null,  teamId:null },
   { id:10046, title:'Design Manager',           level:'L5', department:'design', managerRoleId:10045, teamId:null },
   { id:10047, title:'Design Manager',           level:'L5', department:'design', managerRoleId:10045, teamId:null },
@@ -858,7 +857,7 @@ let roles = [
   { id:10050, title:'UX Designer',              level:'L2', department:'design', managerRoleId:10046, teamId:null },
   { id:10051, title:'Senior Visual Designer',   level:'L3', department:'design', managerRoleId:10047, teamId:null },
   { id:10052, title:'Visual Designer',          level:'L2', department:'design', managerRoleId:10047, teamId:null },
-  // -- Sales � VP + one regional manager per territory ------------------------
+  // ── Sales — VP + one regional manager per territory ────────────────────────
   { id:10053, title:'VP of Sales',              level:'L7', department:'sales', managerRoleId:null,  teamId:null },
   // North America
   { id:10054, title:'Regional Sales Manager',   level:'L5', department:'sales', managerRoleId:10053, teamId:7 },
@@ -882,7 +881,7 @@ let roles = [
   { id:10070, title:'Account Executive',        level:'L4', department:'sales', managerRoleId:10069, teamId:9 },
   { id:10071, title:'Account Executive',        level:'L4', department:'sales', managerRoleId:10069, teamId:9 },
   { id:10072, title:'Sales Development Rep',    level:'L2', department:'sales', managerRoleId:10069, teamId:9 },
-  // -- Marketing � Director + one regional manager per territory --------------
+  // ── Marketing — Director + one regional manager per territory ──────────────
   { id:10073, title:'Director of Marketing',         level:'L7', department:'marketing', managerRoleId:null,  teamId:null },
   // North America
   { id:10074, title:'Regional Marketing Manager',    level:'L5', department:'marketing', managerRoleId:10073, teamId:10 },
@@ -898,7 +897,7 @@ let roles = [
   { id:10082, title:'Regional Marketing Manager',    level:'L5', department:'marketing', managerRoleId:10073, teamId:12 },
   { id:10083, title:'Senior Marketing Manager',      level:'L3', department:'marketing', managerRoleId:10082, teamId:12 },
   { id:10084, title:'Marketing Coordinator',         level:'L1', department:'marketing', managerRoleId:10082, teamId:12 },
-  // -- Customer Success � Director + one CS manager per territory -------------
+  // ── Customer Success — Director + one CS manager per territory ─────────────
   { id:10085, title:'Director of Customer Success',    level:'L7', department:'customer-success', managerRoleId:null,  teamId:null },
   // North America
   { id:10086, title:'CS Manager',                      level:'L5', department:'customer-success', managerRoleId:10085, teamId:13 },
@@ -917,7 +916,7 @@ let roles = [
   { id:10097, title:'CS Manager',                      level:'L5', department:'customer-success', managerRoleId:10085, teamId:15 },
   { id:10098, title:'Customer Success Manager',        level:'L3', department:'customer-success', managerRoleId:10097, teamId:15 },
   { id:10099, title:'Customer Success Manager',        level:'L3', department:'customer-success', managerRoleId:10097, teamId:15 },
-  // -- People & HR ------------------------------------------------------------
+  // ── People & HR ────────────────────────────────────────────────────────────
   { id:10100, title:'Director of People',              level:'L7', department:'hr', managerRoleId:null,  teamId:null },
   { id:10101, title:'HR Manager',                      level:'L5', department:'hr', managerRoleId:10100, teamId:null },
   { id:10102, title:'Senior HR Business Partner',      level:'L4', department:'hr', managerRoleId:10101, teamId:null },
@@ -926,14 +925,14 @@ let roles = [
   { id:10105, title:'HR Specialist',                   level:'L2', department:'hr', managerRoleId:10102, teamId:null },
   { id:10106, title:'Recruiter',                       level:'L2', department:'hr', managerRoleId:10104, teamId:null },
   { id:10107, title:'People Operations Specialist',    level:'L2', department:'hr', managerRoleId:10101, teamId:null },
-  // -- Finance ----------------------------------------------------------------
+  // ── Finance ────────────────────────────────────────────────────────────────
   { id:10108, title:'Director of Finance',             level:'L7', department:'finance', managerRoleId:null,  teamId:null },
   { id:10109, title:'Finance Manager',                 level:'L5', department:'finance', managerRoleId:10108, teamId:null },
   { id:10110, title:'Senior Financial Analyst',        level:'L4', department:'finance', managerRoleId:10109, teamId:null },
   { id:10111, title:'Financial Analyst',               level:'L3', department:'finance', managerRoleId:10109, teamId:null },
   { id:10112, title:'Financial Analyst',               level:'L3', department:'finance', managerRoleId:10109, teamId:null },
   { id:10113, title:'Finance Analyst',                 level:'L2', department:'finance', managerRoleId:10109, teamId:null },
-  // -- Legal ------------------------------------------------------------------
+  // ── Legal ──────────────────────────────────────────────────────────────────
   { id:10114, title:'General Counsel',                 level:'L7', department:'legal', managerRoleId:null,  teamId:null },
   { id:10115, title:'Senior Counsel',                  level:'L5', department:'legal', managerRoleId:10114, teamId:null },
   { id:10116, title:'Counsel',                         level:'L4', department:'legal', managerRoleId:10115, teamId:null },
@@ -978,7 +977,7 @@ let persons = [
   { id:33,  name:'Nina Simone',         salary:47000,  salaryReviewNeeded:false, gender:'female',                        roleId:10027 },
   { id:34,  name:'Marlon Wayans',       salary:45000,  salaryReviewNeeded:false, gender:'male',                          roleId:10028 },
   { id:35,  name:'Ray Charles',         salary:50000,  salaryReviewNeeded:false, gender:'male',                          roleId:10029 },
-  // Product  (roles 10030�10032 in Delta Wing are vacant)
+  // Product  (roles 10030–10032 in Delta Wing are vacant)
   { id:36,  name:'Denzel Washington',   salary:155000, salaryReviewNeeded:false, gender:'male',                          roleId:10033 },
   { id:37,  name:'Beyonce Knowles',     salary:110000, salaryReviewNeeded:false, gender:'female',                        roleId:10034 },
   { id:38,  name:'Robert De Niro',      salary:105000, salaryReviewNeeded:false, gender:'male',                          roleId:10038 },
@@ -1075,23 +1074,23 @@ let persons = [
 const DEFAULT_PERSONS = persons.map(p => ({ id: p.id, gender: p.gender }));
 
 // roleAssignments replaces person.roleId as the join between persons and roles.
-// Each entry: { personId, roleId, percentage } where percentage is 1�100.
+// Each entry: { personId, roleId, percentage } where percentage is 1–100.
 // A role may have at most one person; a person may have many roles.
 let roleAssignments = persons
   .filter(p => p.roleId != null)
   .map(p => ({ personId: p.id, roleId: p.roleId, percentage: 100 }));
 
-// -- Level & Title Config ------------------------------------------------------
+// ── Level & Title Config ──────────────────────────────────────────────────────
 
 const LEVELS = [
-  { id: 'L1', label: 'L1 � Junior' },
-  { id: 'L2', label: 'L2 � Mid' },
-  { id: 'L3', label: 'L3 � Senior' },
-  { id: 'L4', label: 'L4 � Lead / Specialist' },
-  { id: 'L5', label: 'L5 � Manager' },
-  { id: 'L6', label: 'L6 � Senior Manager' },
-  { id: 'L7', label: 'L7 � Director' },
-  { id: 'L8', label: 'L8 � VP / Head' },
+  { id: 'L1', label: 'L1 · Junior' },
+  { id: 'L2', label: 'L2 · Mid' },
+  { id: 'L3', label: 'L3 · Senior' },
+  { id: 'L4', label: 'L4 · Lead / Specialist' },
+  { id: 'L5', label: 'L5 · Manager' },
+  { id: 'L6', label: 'L6 · Senior Manager' },
+  { id: 'L7', label: 'L7 · Director' },
+  { id: 'L8', label: 'L8 · VP / Head' },
 ];
 
 const PERSON_FLAGS = [
@@ -1205,7 +1204,7 @@ const TITLES = {
   },
 };
 
-// -- State ---------------------------------------------------------------------
+// ── State ─────────────────────────────────────────────────────────────────────
 
 const state = {
   selectedRoleIds: new Set(),
@@ -1225,7 +1224,7 @@ let hiddenDepts = new Set();
 let collapsedManagers = new Set(); // role IDs whose direct reports are collapsed
 let collapsedTeams = new Set();    // team IDs (or '__general__<deptId>') whose contents are collapsed
 
-// -- Utilities -----------------------------------------------------------------
+// ── Utilities ─────────────────────────────────────────────────────────────────
 
 function getInitials(name) {
   return name.split(' ').map(p => p[0]).join('').slice(0, 2).toUpperCase();
@@ -1256,7 +1255,7 @@ function levelTierClass(levelId) {
 function getLevelNum(levelId) { return parseInt(levelId.slice(1), 10); }
 
 function formatSalary(n) {
-  if (settings.currency === 'EUR') return '�' + n.toLocaleString('en-US') + '/mo';
+  if (settings.currency === 'EUR') return '€' + n.toLocaleString('en-US') + '/mo';
   return n.toLocaleString('da-DK') + ' kr/mo';
 }
 
@@ -1274,7 +1273,7 @@ function nextAvailableColor() {
   return DEPT_COLOR_PALETTE.find(c => !used.has(c)) || DEPT_COLOR_PALETTE[0];
 }
 
-// -- Role / Person helpers -----------------------------------------------------
+// ── Role / Person helpers ─────────────────────────────────────────────────────
 
 function getPersonForRole(roleId) {
   const a = roleAssignments.find(a => a.roleId === roleId);
@@ -1382,7 +1381,7 @@ function hasLevelMismatch(roleId) {
   return false;
 }
 
-// -- Rendering -----------------------------------------------------------------
+// ── Rendering ─────────────────────────────────────────────────────────────────
 
 function renderCard(role, isOrphaned = false) {
   const person = getPersonForRole(role.id);
@@ -1438,7 +1437,7 @@ function renderCard(role, isOrphaned = false) {
   if (isPartial || isOver) {
     const fteBadge = document.createElement('span');
     fteBadge.className = 'fte-badge' + (isOver ? ' over' : '');
-    fteBadge.textContent = isOver ? `${totalAlloc}% ?` : `${assignment.percentage}%`;
+    fteBadge.textContent = isOver ? `${totalAlloc}% ⚠` : `${assignment.percentage}%`;
     fteBadge.title = isOver
       ? `Over-allocated: ${totalAlloc}% total across all roles`
       : `${assignment.percentage}% FTE on this role`;
@@ -1639,12 +1638,12 @@ function renderCard(role, isOrphaned = false) {
       const smRole = roles.find(r => r.id === smId);
       if (!smRole) return null;
       const smPerson = getPersonForRole(smId);
-      return `? ${smPerson ? smPerson.name : smRole.title} � ${smRole.title}`;
+      return `⤷ ${smPerson ? smPerson.name : smRole.title} · ${smRole.title}`;
     }).filter(Boolean).join('\n');
     const icon = document.createElement('div');
     icon.className = 'matrix-icon';
     icon.title = tooltipLines;
-    icon.textContent = '?';
+    icon.textContent = '⤷';
     card.appendChild(icon);
   }
 
@@ -1662,7 +1661,7 @@ function renderTree(managerRoleId, deptId, excludeTeamRoles = false, restrictToT
   if (managerRoleId !== null && collapsedManagers.has(managerRoleId)) {
     const ghost = document.createElement('div');
     ghost.className = 'collapsed-ghost';
-    ghost.textContent = `? ${children.length} direct report${children.length !== 1 ? 's' : ''} hidden � click to expand`;
+    ghost.textContent = `▶ ${children.length} direct report${children.length !== 1 ? 's' : ''} hidden — click to expand`;
     ghost.addEventListener('click', () => { collapsedManagers.delete(managerRoleId); render(); });
     container.appendChild(ghost);
     return container;
@@ -1671,7 +1670,7 @@ function renderTree(managerRoleId, deptId, excludeTeamRoles = false, restrictToT
   if (managerRoleId !== null) {
     const toggleBtn = document.createElement('button');
     toggleBtn.className = 'tree-collapse-btn';
-    toggleBtn.textContent = '?';
+    toggleBtn.textContent = '▼';
     toggleBtn.title = 'Collapse direct reports';
     toggleBtn.addEventListener('click', e => { e.stopPropagation(); collapsedManagers.add(managerRoleId); render(); });
     container.appendChild(toggleBtn);
@@ -1795,7 +1794,7 @@ function renderDeptColumn(dept) {
       const person = getPersonForRole(headRole.id);
       const ref = document.createElement('div');
       ref.className = 'dept-head-ref';
-      ref.textContent = `? ${person ? person.name : headRole.title} � ${headRole.title}`;
+      ref.textContent = `↑ ${person ? person.name : headRole.title} · ${headRole.title}`;
       tree.appendChild(ref);
     }
   }
@@ -1815,7 +1814,7 @@ function renderDeptColumn(dept) {
       const genKey = '__general__' + dept.id;
       const genCollapseBtn = document.createElement('button');
       genCollapseBtn.className = 'team-collapse-btn';
-      genCollapseBtn.textContent = collapsedTeams.has(genKey) ? '?' : '?';
+      genCollapseBtn.textContent = collapsedTeams.has(genKey) ? '▶' : '▼';
       genCollapseBtn.title = collapsedTeams.has(genKey) ? 'Expand' : 'Collapse';
       genCollapseBtn.addEventListener('click', e => {
         e.stopPropagation();
@@ -1827,7 +1826,7 @@ function renderDeptColumn(dept) {
       if (collapsedTeams.has(genKey)) {
         const ghost = document.createElement('div');
         ghost.className = 'collapsed-ghost';
-        ghost.textContent = `? ${deptRootRoles.length} role${deptRootRoles.length !== 1 ? 's' : ''} hidden � click to expand`;
+        ghost.textContent = `▶ ${deptRootRoles.length} role${deptRootRoles.length !== 1 ? 's' : ''} hidden — click to expand`;
         ghost.addEventListener('click', () => { collapsedTeams.delete(genKey); render(); });
         tree.appendChild(ghost);
       } else {
@@ -1853,7 +1852,7 @@ function renderDeptColumn(dept) {
       if (teamRoleCount > 0) {
         const btn = document.createElement('button');
         btn.className = 'team-collapse-btn';
-        btn.textContent = collapsedTeams.has(team.id) ? '?' : '?';
+        btn.textContent = collapsedTeams.has(team.id) ? '▶' : '▼';
         btn.title = collapsedTeams.has(team.id) ? 'Expand team' : 'Collapse team';
         btn.addEventListener('click', e => {
           e.stopPropagation();
@@ -1869,7 +1868,7 @@ function renderDeptColumn(dept) {
       if (collapsedTeams.has(team.id)) {
         const ghost = document.createElement('div');
         ghost.className = 'collapsed-ghost';
-        ghost.textContent = `? ${teamRoleCount} role${teamRoleCount !== 1 ? 's' : ''} hidden � click to expand`;
+        ghost.textContent = `▶ ${teamRoleCount} role${teamRoleCount !== 1 ? 's' : ''} hidden — click to expand`;
         ghost.addEventListener('click', () => { collapsedTeams.delete(team.id); render(); });
         tree.appendChild(ghost);
       } else {
@@ -1881,7 +1880,7 @@ function renderDeptColumn(dept) {
               const mgrPerson = getPersonForRole(externalMgr.id);
               const indicator = document.createElement('div');
               indicator.className = 'team-external-ref';
-              indicator.textContent = `? Reports to: ${mgrPerson ? mgrPerson.name : externalMgr.title}`;
+              indicator.textContent = `↑ Reports to: ${mgrPerson ? mgrPerson.name : externalMgr.title}`;
               tree.appendChild(indicator);
             }
           }
@@ -1895,7 +1894,7 @@ function renderDeptColumn(dept) {
       }
     });
   } else {
-    // No teams � render all root roles (managerRoleId === null)
+    // No teams — render all root roles (managerRoleId === null)
     const rootRoles = roles.filter(r => r.department === dept.id && r.managerRoleId === null && !r.teamId);
     rootRoles.forEach(rootRole => {
       const rootNode = document.createElement('div');
@@ -2060,7 +2059,7 @@ function rebuildRoleTeamDropdown(deptId, currentTeamId, elementId) {
   });
 }
 
-// -- Combined Edit Modal -------------------------------------------------------
+// ── Combined Edit Modal ───────────────────────────────────────────────────────
 
 function switchModalTab(tab) {
   document.querySelectorAll('.modal-tab').forEach(t => t.classList.toggle('active', t.dataset.tab === tab));
@@ -2103,11 +2102,11 @@ function rebuildSecondaryManagersUI(roleId) {
   const secIds = (role?.secondaryManagerRoleIds) || [];
 
   const viewEl = document.getElementById('modal-role-secondary-view');
-  viewEl.textContent = secIds.length === 0 ? '�' : secIds.map(id => {
+  viewEl.textContent = secIds.length === 0 ? '—' : secIds.map(id => {
     const r = roles.find(x => x.id === id);
     if (!r) return '';
     const p = getPersonForRole(id);
-    return `${p ? p.name : r.title} � ${r.title}`;
+    return `${p ? p.name : r.title} · ${r.title}`;
   }).filter(Boolean).join(', ');
 
   const listEl = document.getElementById('modal-role-secondary-list');
@@ -2136,7 +2135,7 @@ function rebuildSecondaryManagersUI(roleId) {
       const deptName = departments.find(d => d.id === r.department)?.name || '';
       const item = document.createElement('div');
       item.className = 'secondary-suggestion';
-      item.textContent = `${p.name} � ${r.title} (${deptName})`;
+      item.textContent = `${p.name} · ${r.title} (${deptName})`;
       item.onmousedown = e => {
         e.preventDefault();
         appendSecondaryManagerItem(listEl, r.id, roleId);
@@ -2167,10 +2166,10 @@ function appendSecondaryManagerItem(listEl, roleId, editingRoleId) {
   item.style.cssText = 'display:flex;align-items:center;gap:6px;font-size:12px;padding:2px 0';
   const label = document.createElement('span');
   label.style.flex = '1';
-  label.textContent = `${p ? p.name : r.title} � ${r.title} (${deptName})`;
+  label.textContent = `${p ? p.name : r.title} · ${r.title} (${deptName})`;
   const removeBtn = document.createElement('button');
   removeBtn.type = 'button';
-  removeBtn.textContent = '�';
+  removeBtn.textContent = '×';
   removeBtn.style.cssText = 'border:none;background:none;cursor:pointer;color:var(--text-muted);font-size:14px;padding:0 2px';
   removeBtn.onclick = () => item.remove();
   item.append(label, removeBtn);
@@ -2333,13 +2332,13 @@ function openCombinedModal(roleId, defaultTab) {
     // Populate view-mode text spans
     const levelEntry = LEVELS.find(l => l.id === role.level);
     document.getElementById('modal-role-level-view').textContent = levelEntry ? levelEntry.label : role.level;
-    document.getElementById('modal-role-title-view').textContent = role.title || '�';
+    document.getElementById('modal-role-title-view').textContent = role.title || '—';
     const deptObj = departments.find(d => d.id === role.department);
-    document.getElementById('modal-role-dept-view').textContent = deptObj ? deptObj.name : (role.department || '�');
+    document.getElementById('modal-role-dept-view').textContent = deptObj ? deptObj.name : (role.department || '—');
     const mgrObj = role.managerRoleId ? roles.find(r => r.id === role.managerRoleId) : null;
     document.getElementById('modal-role-manager-view').textContent = mgrObj ? mgrObj.title : 'None (top level)';
     const teamObj = role.teamId ? teams.find(t => t.id === role.teamId) : null;
-    document.getElementById('modal-role-team-view').textContent = teamObj ? teamObj.name : '�';
+    document.getElementById('modal-role-team-view').textContent = teamObj ? teamObj.name : '—';
   }
 
   document.getElementById('modal-title-text').textContent = hasPerson ? person.name : (role ? role.title + ' (Vacant)' : 'Edit');
@@ -2554,7 +2553,7 @@ document.getElementById('modal-role-delete-btn').addEventListener('click', () =>
 document.getElementById('modal-save-btn').addEventListener('click', saveModal);
 document.getElementById('modal-backdrop').addEventListener('click', e => { if (e.target === document.getElementById('modal-backdrop')) closeModal(); });
 
-// -- Assign Person Picker ------------------------------------------------------
+// ── Assign Person Picker ──────────────────────────────────────────────────────
 
 let assigningRoleId = null;
 
@@ -2574,7 +2573,7 @@ function openAssignPersonPicker(roleId) {
   function renderPersonRow(person) {
     const totalAlloc = getTotalAllocationForPerson(person.id);
     const suggested = Math.max(1, Math.min(100, 100 - totalAlloc));
-    const freeLabel = totalAlloc > 0 ? ` � ${100 - totalAlloc}% free` : '';
+    const freeLabel = totalAlloc > 0 ? ` · ${100 - totalAlloc}% free` : '';
     const row = document.createElement('div');
     row.className = 'assign-person-row';
     row.style.cssText = 'display:flex;align-items:center;gap:8px;padding:8px 12px;cursor:default;border-radius:8px;transition:background 0.12s';
@@ -2633,7 +2632,7 @@ document.getElementById('assign-person-close-btn').addEventListener('click', clo
 document.getElementById('assign-person-modal-backdrop').addEventListener('click', e => { if (e.target === document.getElementById('assign-person-modal-backdrop')) closeAssignPersonModal(); });
 document.getElementById('assign-person-create-btn').addEventListener('click', () => { closeAssignPersonModal(); openAddPersonModal(assigningRoleId); });
 
-// -- Add to Role Modal ----------------------------------------------------------
+// ── Add to Role Modal ──────────────────────────────────────────────────────────
 
 let addToRolePersonId = null;
 let addToRoleSelectedRoleId = null;
@@ -2701,7 +2700,7 @@ function populateAddToRoleList(personId, deptFilter) {
     row.innerHTML = `
       <div style="flex:1;min-width:0">
         <div style="font-size:12.5px;font-weight:600;color:var(--text-primary);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r.title}</div>
-        <div style="font-size:11px;color:var(--text-muted)">${dept ? dept.name : r.department} � <span class="level-badge ${levelTierClass(r.level)}" style="font-size:10px;padding:1px 4px">${r.level}</span></div>
+        <div style="font-size:11px;color:var(--text-muted)">${dept ? dept.name : r.department} · <span class="level-badge ${levelTierClass(r.level)}" style="font-size:10px;padding:1px 4px">${r.level}</span></div>
       </div>
     `;
     row.appendChild(pctInput);
@@ -2747,7 +2746,7 @@ document.getElementById('add-to-role-cancel-btn').addEventListener('click', clos
 document.getElementById('add-to-role-save-btn').addEventListener('click', saveAddToRoleModal);
 document.getElementById('add-to-role-modal-backdrop').addEventListener('click', e => { if (e.target === document.getElementById('add-to-role-modal-backdrop')) closeAddToRoleModal(); });
 
-// -- Snapshots ------------------------------------------------------------------
+// ── Snapshots ──────────────────────────────────────────────────────────────────
 
 function renderSnapshotList() {
   const list = document.getElementById('snapshots-list');
@@ -2811,17 +2810,17 @@ function restoreSnapshot(snapId) {
 
   const restored = JSON.parse(JSON.stringify(snap.data.persons)).map(p => ({ ...p, noLongerHired: false }));
 
-  // Persons in snapshot but not in current ? fired since; show anonymised in their old role
+  // Persons in snapshot but not in current → fired since; show anonymised in their old role
   restored.forEach(p => { if (!currentPersonIds.has(p.id)) p.noLongerHired = true; });
 
-  // Persons in current but not in snapshot ? hired after snapshot; add to unassigned
-  // Only active (non-ghost) persons are preserved � ghosts come from snapshot data, not current state
+  // Persons in current but not in snapshot → hired after snapshot; add to unassigned
+  // Only active (non-ghost) persons are preserved — ghosts come from snapshot data, not current state
   persons.filter(p => !p.noLongerHired).forEach(p => { if (!snapPersonIds.has(p.id)) restored.push({ ...p }); });
 
   persons.splice(0, persons.length, ...restored);
 
   // Restore assignments from snapshot (noLongerHired persons keep their slot)
-  // Exclude only post-snapshot hires � they go to unassigned
+  // Exclude only post-snapshot hires — they go to unassigned
   const postHireIds = new Set(restored.filter(p => !snapPersonIds.has(p.id)).map(p => p.id));
   roleAssignments.splice(0, roleAssignments.length,
     ...JSON.parse(JSON.stringify(snap.data.roleAssignments)).filter(a => !postHireIds.has(a.personId)));
@@ -2846,7 +2845,7 @@ document.getElementById('snapshots-list').addEventListener('click', e => {
   }
 });
 
-// -- Department Modal ----------------------------------------------------------
+// ── Department Modal ──────────────────────────────────────────────────────────
 
 let selectedDeptColor = null;
 
@@ -2887,7 +2886,7 @@ document.getElementById('dept-modal-save-btn').addEventListener('click', saveDep
 document.getElementById('dept-modal-backdrop').addEventListener('click', e => { if (e.target === document.getElementById('dept-modal-backdrop')) closeDeptModal(); });
 document.getElementById('dept-name-input').addEventListener('keydown', e => { if (e.key === 'Enter') saveDeptModal(); });
 
-// -- Add Role Modal ------------------------------------------------------------
+// ── Add Role Modal ────────────────────────────────────────────────────────────
 
 function addRoleRebuildTitleDropdown() {
   const deptId = document.getElementById('add-role-dept').value;
@@ -2962,7 +2961,7 @@ document.getElementById('add-role-modal-backdrop').addEventListener('click', e =
 document.getElementById('add-role-dept').addEventListener('change', () => { addRoleRebuildTitleDropdown(); addRoleRebuildManagerDropdown(); addRoleRebuildTeamDropdown(); });
 document.getElementById('add-role-level').addEventListener('change', addRoleRebuildTitleDropdown);
 
-// -- Add Person Modal ----------------------------------------------------------
+// ── Add Person Modal ──────────────────────────────────────────────────────────
 
 function openAddPersonModal(preselectedRoleId) {
   const roleSel = document.getElementById('add-emp-role');
@@ -3023,7 +3022,7 @@ document.getElementById('add-emp-gender-group').addEventListener('click', e => {
   if (!isActive) btn.classList.add('active');
 });
 
-// -- Department Settings Modal -------------------------------------------------
+// ── Department Settings Modal ─────────────────────────────────────────────────
 
 let editingDeptId = null;
 let selectedSettingsColor = null;
@@ -3112,14 +3111,14 @@ function openDeptSettingsModal(deptId) {
   document.getElementById('dept-settings-warning').classList.remove('visible');
   // Populate Responsible Person dropdown
   const headSelect = document.getElementById('dept-settings-head-role');
-  headSelect.innerHTML = '<option value="">� None �</option>';
+  headSelect.innerHTML = '<option value="">— None —</option>';
   roles.forEach(r => {
     const p = getPersonForRole(r.id);
     if (!p) return;
     const opt = document.createElement('option');
     opt.value = r.id;
     const deptName = departments.find(d => d.id === r.department)?.name || '';
-    opt.textContent = `${p.name} � ${r.title} (${deptName})`;
+    opt.textContent = `${p.name} · ${r.title} (${deptName})`;
     if (r.id === dept.headRoleId) opt.selected = true;
     headSelect.appendChild(opt);
   });
@@ -3141,7 +3140,7 @@ function openDeptSettingsModal(deptId) {
           .filter(pid => persons.find(p => p.id === pid)?.noLongerHired)
       );
       persons.splice(0, persons.length, ...persons.filter(p => !ghostsToRemove.has(p.id)));
-      // Remove assignments for this dept's roles � live employees become unassigned
+      // Remove assignments for this dept's roles — live employees become unassigned
       roleAssignments.splice(0, roleAssignments.length, ...roleAssignments.filter(a => !deptRoleIds.has(a.roleId)));
       roles.splice(0, roles.length, ...roles.filter(r => r.department !== deptId));
     } else {
@@ -3203,7 +3202,7 @@ document.getElementById('dept-settings-save-btn').addEventListener('click', save
 document.getElementById('dept-settings-modal-backdrop').addEventListener('click', e => { if (e.target === document.getElementById('dept-settings-modal-backdrop')) closeDeptSettingsModal(); });
 document.getElementById('dept-settings-name').addEventListener('keydown', e => { if (e.key === 'Enter') saveDeptSettingsModal(); });
 
-// -- Misc Event Wiring ---------------------------------------------------------
+// ── Misc Event Wiring ─────────────────────────────────────────────────────────
 
 document.getElementById('clear-employees-btn').addEventListener('click', e => {
   e.preventDefault();
@@ -3266,7 +3265,7 @@ document.addEventListener('keydown', e => {
   }
 });
 
-// -- Persistence ---------------------------------------------------------------
+// ── Persistence ───────────────────────────────────────────────────────────────
 
 const STORAGE_KEY = 'orgchart_data_v4';
 
@@ -3295,7 +3294,7 @@ async function loadFromStorage() {
     const res = await fetch('/api/data');
     if (!res.ok) throw new Error('Server returned ' + res.status);
     const saved = await res.json();
-    if (!saved || !saved.departments) return; // empty � will seed defaults
+    if (!saved || !saved.departments) return; // empty — will seed defaults
     if (saved.departments) departments.splice(0, departments.length, ...saved.departments.map(d => ({ ...d, headRoleId: d.headRoleId ?? null })));
     if (saved.roles) roles.splice(0, roles.length, ...saved.roles.map(r => ({ ...r, teamId: r.teamId || null, secondaryManagerRoleIds: r.secondaryManagerRoleIds || [] })));
     if (saved.persons) persons.splice(0, persons.length, ...saved.persons.map(p => ({ ...p })));
@@ -3316,7 +3315,7 @@ async function loadFromStorage() {
   }
 }
 
-// -- Settings modal ------------------------------------------------------------
+// ── Settings modal ────────────────────────────────────────────────────────────
 
 function applySalaryVisibility() {
   document.body.classList.toggle('hide-salaries', !!settings.hideSalaries);
@@ -3430,7 +3429,7 @@ document.getElementById('settings-modal-backdrop').addEventListener('click', e =
     document.getElementById('settings-modal-backdrop').style.display = 'none';
 });
 
-// -- Pay-bands modal -----------------------------------------------------------
+// ── Pay-bands modal ───────────────────────────────────────────────────────────
 
 function openPaybandsModal() {
   document.getElementById('settings-modal-backdrop').style.display = 'none';
@@ -3473,7 +3472,7 @@ document.getElementById('paybands-save-btn').addEventListener('click', () => {
   render();
 });
 
-// -- Init ----------------------------------------------------------------------
+// ── Init ──────────────────────────────────────────────────────────────────────
 
 async function init() {
   const overlay = document.getElementById('loading-overlay');
@@ -3527,7 +3526,7 @@ async function init() {
 }
 init();
 
-// -- Drop Create Role Modal ----------------------------------------------------
+// ── Drop Create Role Modal ────────────────────────────────────────────────────
 
 function openDropCreateRoleModal(draggedPerson, context) {
   const dept = departments.find(d => d.id === context.department);
@@ -3552,7 +3551,7 @@ function openDropCreateRoleModal(draggedPerson, context) {
   const deptTeams = getTeamsForDept(context.department);
   if (deptTeams.length) {
     teamSel.innerHTML = '';
-    const none = document.createElement('option'); none.value = ''; none.textContent = '� None �';
+    const none = document.createElement('option'); none.value = ''; none.textContent = '— None —';
     teamSel.appendChild(none);
     deptTeams.forEach(t => {
       const opt = document.createElement('option'); opt.value = t.id; opt.textContent = t.name;
@@ -3607,7 +3606,7 @@ document.getElementById('drop-create-role-save-btn').addEventListener('click', s
 document.getElementById('drop-create-role-modal-backdrop').addEventListener('click', e => { if (e.target === document.getElementById('drop-create-role-modal-backdrop')) closeDropCreateRoleModal(); });
 document.getElementById('drop-create-role-title').addEventListener('keydown', e => { if (e.key === 'Enter') saveDropCreateRoleModal(); });
 
-// -- Reparent Role Modal -------------------------------------------------------
+// ── Reparent Role Modal ───────────────────────────────────────────────────────
 
 function openReparentRoleModal(draggedRoleId, targetRoleId, targetDeptId) {
   const draggedRole = roles.find(r => r.id === draggedRoleId);
@@ -3652,7 +3651,7 @@ function reparentRoleRebuildTeamDropdown() {
   const deptTeams = getTeamsForDept(deptId);
   if (deptTeams.length) {
     teamSel.innerHTML = '';
-    const none = document.createElement('option'); none.value = ''; none.textContent = '� None �';
+    const none = document.createElement('option'); none.value = ''; none.textContent = '— None —';
     teamSel.appendChild(none);
     deptTeams.forEach(t => {
       const opt = document.createElement('option'); opt.value = t.id; opt.textContent = t.name;
@@ -3696,15 +3695,15 @@ document.getElementById('reparent-role-save-btn').addEventListener('click', save
 document.getElementById('reparent-role-modal-backdrop').addEventListener('click', e => { if (e.target === document.getElementById('reparent-role-modal-backdrop')) closeReparentRoleModal(); });
 document.getElementById('reparent-role-dept').addEventListener('change', reparentRoleRebuildTeamDropdown);
 
-// -- CSV Import ----------------------------------------------------------------
+// ── CSV Import ────────────────────────────────────────────────────────────────
 
 const IMPORT_MAPPING_KEY = 'orgchart_import_mapping_v1';
 
 const IMPORT_TARGET_FIELDS = [
   { id: 'name',        hints: ['name','full name','employee name','fullname','person','navn'] },
   { id: 'employeeId',  hints: ['id','emp id','employee id','staff id','medarbejder id','nr','number'] },
-  { id: 'salary',      hints: ['salary','pay','l�n','wage','monthly','compensation','comp'] },
-  { id: 'gender',      hints: ['gender','k�n','sex'], enumValues: ['male','female','other'] },
+  { id: 'salary',      hints: ['salary','pay','løn','wage','monthly','compensation','comp'] },
+  { id: 'gender',      hints: ['gender','køn','sex'], enumValues: ['male','female','other'] },
   { id: 'roleTitle',   hints: ['title','job title','role','position','jobtitle','stilling','job'] },
   { id: 'roleLevel',   hints: ['level','grade','rang','tier'], enumValues: ['L1','L2','L3','L4','L5','L6','L7','L8'] },
   { id: 'roleDept',    hints: ['department','dept','afdeling','division','team dept'] },
@@ -3724,7 +3723,7 @@ let importState = {
   valueTransforms: {},
 };
 
-// -- CSV parser --
+// ── CSV parser ──
 function parseCSV(text) {
   const lines = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n').split('\n');
   const nonEmpty = lines.filter(l => l.trim() !== '');
@@ -3754,7 +3753,7 @@ function parseCSV(text) {
   return { headers, rows };
 }
 
-// -- Auto-suggest mapping --
+// ── Auto-suggest mapping ──
 function autoSuggestMapping(headers) {
   const saved = loadImportMapping();
   const mapping = {};
@@ -3781,7 +3780,7 @@ function saveImportMapping(mapping) {
   localStorage.setItem(IMPORT_MAPPING_KEY, JSON.stringify(clean));
 }
 
-// -- Modal open/close --
+// ── Modal open/close ──
 function openImportModal() {
   importState = { step: 1, headers: [], rows: [], mapping: {}, mode: 'append', preview: null, valueTransforms: {} };
   document.getElementById('import-file-input').value = '';
@@ -3794,7 +3793,7 @@ function closeImportModal() {
   document.getElementById('import-modal-backdrop').style.display = 'none';
 }
 
-// -- Step indicator --
+// ── Step indicator ──
 function setImportStep(n) {
   importState.step = n;
   [1,2,3,4].forEach(i => {
@@ -3806,10 +3805,10 @@ function setImportStep(n) {
   const backBtn = document.getElementById('import-back-btn');
   const nextBtn = document.getElementById('import-next-btn');
   backBtn.style.visibility = n > 1 ? 'visible' : 'hidden';
-  if (n !== 4) nextBtn.textContent = 'Next ?'; // Step 4 label set by buildPreview()
+  if (n !== 4) nextBtn.textContent = 'Next →'; // Step 4 label set by buildPreview()
 }
 
-// -- Step 1: file handling --
+// ── Step 1: file handling ──
 function handleImportFile(file) {
   if (!file || !file.name.match(/\.csv$/i)) { alert('Please select a .csv file.'); return; }
   const reader = new FileReader();
@@ -3819,7 +3818,7 @@ function handleImportFile(file) {
     importState.headers = parsed.headers;
     importState.rows = parsed.rows;
     // Show preview
-    document.getElementById('import-row-count').textContent = `${parsed.rows.length} rows � ${parsed.headers.length} columns detected`;
+    document.getElementById('import-row-count').textContent = `${parsed.rows.length} rows · ${parsed.headers.length} columns detected`;
     const chips = document.getElementById('import-col-chips');
     chips.innerHTML = '';
     parsed.headers.forEach(h => {
@@ -3840,7 +3839,7 @@ dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover
 dropZone.addEventListener('drop', e => { e.preventDefault(); dropZone.classList.remove('dragover'); if (e.dataTransfer.files[0]) handleImportFile(e.dataTransfer.files[0]); });
 document.getElementById('import-file-input').addEventListener('change', e => { if (e.target.files[0]) handleImportFile(e.target.files[0]); });
 
-// -- Step 2: populate mapping selects --
+// ── Step 2: populate mapping selects ──
 function updateSampleHint(fieldId) {
   const sel = document.getElementById(`imap-${fieldId}`);
   const el = document.getElementById(`imap-sample-${fieldId}`);
@@ -3887,11 +3886,11 @@ function renderValueMapPanel(fieldId) {
 
   let html = '';
   for (const srcVal of allValues) {
-    const optionsHtml = `<option value="">� as-is</option>` +
+    const optionsHtml = `<option value="">— as-is</option>` +
       field.enumValues.map(ev => `<option value="${ev}" ${transforms[srcVal] === ev ? 'selected' : ''}>${ev}</option>`).join('');
     html += `<div class="imap-vmap-row">
       <span class="imap-vmap-source">"${srcVal}"</span>
-      <span class="imap-vmap-arrow">?</span>
+      <span class="imap-vmap-arrow">→</span>
       <select class="form-control imap-vmap-target" data-src="${srcVal}">${optionsHtml}</select>
     </div>`;
   }
@@ -3911,7 +3910,7 @@ function populateMappingStep() {
   importState.mapping = autoSuggestMapping(importState.headers);
   IMPORT_TARGET_FIELDS.forEach(field => {
     const sel = document.getElementById(`imap-${field.id}`);
-    sel.innerHTML = '<option value="">� skip</option>';
+    sel.innerHTML = '<option value="">— skip</option>';
     importState.headers.forEach(h => {
       const opt = document.createElement('option');
       opt.value = h; opt.textContent = h;
@@ -3934,7 +3933,7 @@ function readMappingFromUI() {
   return m;
 }
 
-// -- Step 3: mode options --
+// ── Step 3: mode options ──
 document.querySelectorAll('input[name="import-mode"]').forEach(radio => {
   radio.addEventListener('change', () => {
     importState.mode = radio.value;
@@ -3945,7 +3944,7 @@ document.querySelectorAll('input[name="import-mode"]').forEach(radio => {
   });
 });
 
-// -- Step 4: dry-run preview --
+// ── Step 4: dry-run preview ──
 function buildPreview() {
   const result = runImport(importState.rows, importState.mapping, importState.mode, true, importState.valueTransforms);
   importState.preview = result;
@@ -3954,7 +3953,7 @@ function buildPreview() {
   const hasIssues = result.warnings.length > 0 || result.skipped.length > 0;
 
   // Update button label
-  document.getElementById('import-next-btn').textContent = hasIssues ? 'Import anyway ?' : 'Import ?';
+  document.getElementById('import-next-btn').textContent = hasIssues ? 'Import anyway →' : 'Import →';
 
   function row(cls, icon, text) {
     return `<div class="import-preview-row ${cls}"><span class="import-preview-icon">${icon}</span><span style="font-size:13px">${text}</span></div>`;
@@ -3965,51 +3964,51 @@ function buildPreview() {
 
   let html = '';
 
-  // -- Summary --
+  // ── Summary ──
   html += section('Summary');
-  html += row('ok', '??', `${total} row${total !== 1 ? 's' : ''} in file`);
-  if (result.personsCreated > 0) html += row('ok', '?', `${result.personsCreated} employee${result.personsCreated !== 1 ? 's' : ''} will be added`);
-  if (result.personsUpdated > 0) html += row('ok', '?', `${result.personsUpdated} employee${result.personsUpdated !== 1 ? 's' : ''} will be updated`);
-  if (result.rolesCreated   > 0) html += row('ok', '?', `${result.rolesCreated} new role${result.rolesCreated !== 1 ? 's' : ''} will be created`);
-  if (result.deptsCreated   > 0) html += row('ok', '?', `${result.deptsCreated} new department${result.deptsCreated !== 1 ? 's' : ''} will be created`);
-  if (result.teamsCreated   > 0) html += row('ok', '?', `${result.teamsCreated} new team${result.teamsCreated !== 1 ? 's' : ''} will be created`);
-  if (importState.mode === 'replace') html += row('warn', '?', 'All existing employees and roles will be deleted first');
+  html += row('ok', '📋', `${total} row${total !== 1 ? 's' : ''} in file`);
+  if (result.personsCreated > 0) html += row('ok', '✓', `${result.personsCreated} employee${result.personsCreated !== 1 ? 's' : ''} will be added`);
+  if (result.personsUpdated > 0) html += row('ok', '✓', `${result.personsUpdated} employee${result.personsUpdated !== 1 ? 's' : ''} will be updated`);
+  if (result.rolesCreated   > 0) html += row('ok', '✓', `${result.rolesCreated} new role${result.rolesCreated !== 1 ? 's' : ''} will be created`);
+  if (result.deptsCreated   > 0) html += row('ok', '✓', `${result.deptsCreated} new department${result.deptsCreated !== 1 ? 's' : ''} will be created`);
+  if (result.teamsCreated   > 0) html += row('ok', '✓', `${result.teamsCreated} new team${result.teamsCreated !== 1 ? 's' : ''} will be created`);
+  if (importState.mode === 'replace') html += row('warn', '⚠', 'All existing employees and roles will be deleted first');
 
-  // -- Info --
+  // ── Info ──
   if (result.infoTopLevel > 0) {
     html += section('Info');
-    html += row('info', '?', `${result.infoTopLevel} employee${result.infoTopLevel !== 1 ? 's have' : ' has'} no manager � will be placed at top level`);
+    html += row('info', 'ℹ', `${result.infoTopLevel} employee${result.infoTopLevel !== 1 ? 's have' : ' has'} no manager — will be placed at top level`);
   }
 
-  // -- Warnings --
+  // ── Warnings ──
   const allWarnings = [...result.warnings];
   if (result.missingGender > 0) allWarnings.push(`${result.missingGender} employee${result.missingGender !== 1 ? 's have' : ' has'} no gender data (will be blank)`);
   if (result.missingSalary > 0) allWarnings.push(`${result.missingSalary} employee${result.missingSalary !== 1 ? 's have' : ' has'} no salary data (will be 0)`);
-  if (result.unmatchedLevels > 0) allWarnings.push(`${result.unmatchedLevels} row${result.unmatchedLevels !== 1 ? 's have' : ' has'} unrecognised level values (e.g. "A", "B") � defaulting to L3`);
+  if (result.unmatchedLevels > 0) allWarnings.push(`${result.unmatchedLevels} row${result.unmatchedLevels !== 1 ? 's have' : ' has'} unrecognised level values (e.g. "A", "B") — defaulting to L3`);
   if (allWarnings.length > 0) {
     html += section(`Warnings (${allWarnings.length})`);
     const MAX_VISIBLE = 8;
-    allWarnings.slice(0, MAX_VISIBLE).forEach(w => { html += row('warn', '?', w); });
+    allWarnings.slice(0, MAX_VISIBLE).forEach(w => { html += row('warn', '⚠', w); });
     if (allWarnings.length > MAX_VISIBLE) {
-      html += `<div class="import-show-more" id="import-show-more-btn">� show ${allWarnings.length - MAX_VISIBLE} more</div>`;
+      html += `<div class="import-show-more" id="import-show-more-btn">… show ${allWarnings.length - MAX_VISIBLE} more</div>`;
       html += `<div id="import-warnings-extra" style="display:none">` +
-        allWarnings.slice(MAX_VISIBLE).map(w => row('warn', '?', w)).join('') +
+        allWarnings.slice(MAX_VISIBLE).map(w => row('warn', '⚠', w)).join('') +
         `</div>`;
     }
   }
 
-  // -- Skipped --
+  // ── Skipped ──
   if (result.skipped.length > 0) {
     html += section(`Skipped (${result.skipped.length})`);
-    result.skipped.forEach(s => { html += row('skip', '?', s); });
+    result.skipped.forEach(s => { html += row('skip', '✗', s); });
   }
 
-  // -- Ignored columns --
+  // ── Ignored columns ──
   const mappedCols = new Set(Object.values(importState.mapping).filter(Boolean));
   const ignoredCols = importState.headers.filter(h => !mappedCols.has(h));
   if (ignoredCols.length > 0) {
     html += section(`Ignored columns (${ignoredCols.length})`);
-    html += `<div class="import-ignored-cols">${ignoredCols.join(' � ')}</div>`;
+    html += `<div class="import-ignored-cols">${ignoredCols.join(' · ')}</div>`;
   }
 
   el.innerHTML = html;
@@ -4024,7 +4023,7 @@ function buildPreview() {
   }
 }
 
-// -- Core import engine --
+// ── Core import engine ──
 function runImport(rows, mapping, mode, dryRun = false, valueTransforms = {}) {
   const result = { personsCreated: 0, personsUpdated: 0, rolesCreated: 0, deptsCreated: 0, teamsCreated: 0, skipped: [], warnings: [], infoTopLevel: 0, missingGender: 0, missingSalary: 0, unmatchedLevels: 0 };
   const get = (row, field) => {
@@ -4073,8 +4072,8 @@ function runImport(rows, mapping, mode, dryRun = false, valueTransforms = {}) {
     }
   });
 
-  // Phase 3: ensure roles, track rowIndex?roleId
-  // claimedRoleIds prevents two CSV rows from sharing the same role object �
+  // Phase 3: ensure roles, track rowIndex→roleId
+  // claimedRoleIds prevents two CSV rows from sharing the same role object —
   // each row gets its own role so every imported person is individually visible.
   const rowRoleIds = {};
   const claimedRoleIds = new Set();
@@ -4124,7 +4123,7 @@ function runImport(rows, mapping, mode, dryRun = false, valueTransforms = {}) {
       if (!mgrName) { result.infoTopLevel++; return; }
       const mgrRoleId = nameToRoleId[mgrName.toLowerCase()];
       if (mgrRoleId === undefined) {
-        result.warnings.push(`Row ${idx + 2} � ${get(row, 'name') || '?'} � manager "${mgrName}" not found`);
+        result.warnings.push(`Row ${idx + 2} · ${get(row, 'name') || '?'} — manager "${mgrName}" not found`);
         return;
       }
       if (mgrRoleId !== roleId) {
@@ -4163,7 +4162,7 @@ function runImport(rows, mapping, mode, dryRun = false, valueTransforms = {}) {
       if (!mgrEmpId) { result.infoTopLevel++; return; }
       const mgrRoleId = empIdToRoleId[mgrEmpId.toLowerCase()];
       if (mgrRoleId === undefined) {
-        result.warnings.push(`Row ${idx + 2} � ${get(row, 'name') || '?'} � manager ID "${mgrEmpId}" not found`);
+        result.warnings.push(`Row ${idx + 2} · ${get(row, 'name') || '?'} — manager ID "${mgrEmpId}" not found`);
         return;
       }
       if (mgrRoleId !== roleId) {
@@ -4199,7 +4198,7 @@ function runImport(rows, mapping, mode, dryRun = false, valueTransforms = {}) {
       if (roleId === undefined || !dottedEmpId) return;
       const dottedRoleId = empIdToRoleId2[dottedEmpId.toLowerCase()];
       if (dottedRoleId === undefined) {
-        result.warnings.push(`Row ${idx + 2} � ${get(row, 'name') || '?'} � dotted-line manager ID "${dottedEmpId}" not found`);
+        result.warnings.push(`Row ${idx + 2} · ${get(row, 'name') || '?'} — dotted-line manager ID "${dottedEmpId}" not found`);
         return;
       }
       if (dottedRoleId !== roleId) {
@@ -4265,7 +4264,7 @@ function nextAvailableColorFrom(deptList) {
   return DEPT_COLOR_PALETTE.find(c => !used.has(c)) || DEPT_COLOR_PALETTE[0];
 }
 
-// -- Navigation between steps --
+// ── Navigation between steps ──
 document.getElementById('import-next-btn').addEventListener('click', () => {
   const step = importState.step;
   if (step === 1) {
@@ -4274,7 +4273,7 @@ document.getElementById('import-next-btn').addEventListener('click', () => {
     setImportStep(2);
   } else if (step === 2) {
     importState.mapping = readMappingFromUI();
-    if (!importState.mapping.name) { alert('Please map the "Full name" field � it is required.'); return; }
+    if (!importState.mapping.name) { alert('Please map the "Full name" field — it is required.'); return; }
     setImportStep(3);
   } else if (step === 3) {
     importState.mode = document.querySelector('input[name="import-mode"]:checked').value;
