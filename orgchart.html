@@ -1554,16 +1554,25 @@ function renderCard(role, isOrphaned = false) {
       } else if (state.draggedRoleId !== null && state.draggedRoleId !== role.id) {
         const dragged = roles.find(r => r.id === state.draggedRoleId);
         if (!dragged) { state.draggedRoleId = null; render(); return; }
-        const descendants = getDescendantRoleIds(state.draggedRoleId);
-        if (descendants.has(role.id)) { state.draggedRoleId = null; render(); return; }
-        const savedId = state.draggedRoleId;
+        const sourceAssignment = getAssignmentForRole(dragged.id);
         state.draggedRoleId = null;
-        if (dragged.departmentId === role.departmentId) {
-          dragged.managerRoleId = role.id;
+        if (sourceAssignment && !getAssignmentForRole(role.id)) {
+          // Fill the vacancy: move the person from the source role into this vacant role
+          roleAssignments = roleAssignments.filter(a => !(a.personId === sourceAssignment.personId && a.roleId === dragged.id));
+          roleAssignments.push({ id: nextRoleAssignmentId(), personId: sourceAssignment.personId, roleId: role.id, percentage: 100 });
+          debounceSave();
           render();
         } else {
-          openReparentRoleModal(savedId, role.id);
-          render();
+          // No person to move — just reparent the role under this one
+          const descendants = getDescendantRoleIds(dragged.id);
+          if (descendants.has(role.id)) { render(); return; }
+          if (dragged.departmentId === role.departmentId) {
+            dragged.managerRoleId = role.id;
+            render();
+          } else {
+            openReparentRoleModal(dragged.id, role.id);
+            render();
+          }
         }
       }
     });
@@ -1624,6 +1633,8 @@ function renderCard(role, isOrphaned = false) {
         state.draggedRoleId = null;
         if (dragged.departmentId === role.departmentId) {
           dragged.managerRoleId = role.id;
+          dragged.teamId = role.teamId ?? null;
+          debounceSave();
           render();
         } else {
           openReparentRoleModal(savedId, role.id);
