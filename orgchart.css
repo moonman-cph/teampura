@@ -68,7 +68,7 @@ body:not(.page-ready) #columns > .dept-column:nth-child(n+9) { animation-delay: 
   gap: 16px;
   flex: 1;
   overflow-x: auto;
-  padding-bottom: 8px;
+  padding: 4px 4px 8px;
   min-width: 0;
 }
 
