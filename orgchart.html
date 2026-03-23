@@ -2977,6 +2977,7 @@ function enterSimulation() {
   simMode   = true;
   document.body.classList.add('sim-mode');
   updateSimBanner();
+  saveToStorage(); // push initial state to /api/sim-data so dashboard can read it
 }
 
 function exitSimulation(apply) {
@@ -2991,6 +2992,7 @@ function exitSimulation(apply) {
   }
   simBackup = null;
   simLabel  = '';
+  fetch('/api/sim-data', { method: 'DELETE' }).catch(() => {}); // clear sim data from server
   updateSimBanner();
   render();
 }
@@ -3481,10 +3483,10 @@ function migrateOldFormat(saved) {
 
 let _saveTimer = null;
 function saveToStorage() {
-  if (simMode) return;
   clearTimeout(_saveTimer);
   _saveTimer = setTimeout(() => {
-    fetch('/api/data', {
+    const endpoint = simMode ? '/api/sim-data' : '/api/data';
+    fetch(endpoint, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ departments, roles, persons, roleAssignments, titles: TITLES, teams, settings, salaryBands: SALARY_BANDS, snapshots })
