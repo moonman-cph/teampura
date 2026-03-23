@@ -67,7 +67,7 @@ body { color: var(--text-1); }
 }
 .dash-grid {
   display: grid; grid-template-columns: repeat(4, 1fr);
-  gap: 16px; max-width: 1440px;
+  gap: 16px;
 }
 .span-1 { grid-column: span 1; }
 .span-2 { grid-column: span 2; }
@@ -125,27 +125,27 @@ body { color: var(--text-1); }
 .donut-segment:hover { stroke-width: 5.5; }
 .donut-center-text { font-size: 6px; font-weight: 800; fill: var(--text-1); text-anchor: middle; dominant-baseline: central; }
 .donut-center-sub { font-size: 2.8px; fill: var(--text-3); text-anchor: middle; dominant-baseline: central; }
-.donut-wrap { display: flex; align-items: center; gap: 20px; }
-.donut-legend { display: flex; flex-direction: column; gap: 8px; flex: 1; }
-.legend-item { display: flex; align-items: center; gap: 8px; font-size: 12px; }
+.donut-wrap { display: flex; flex-direction: column; align-items: center; gap: 16px; }
+.donut-legend { display: flex; flex-direction: row; flex-wrap: wrap; justify-content: center; gap: 6px 20px; }
+.legend-item { display: flex; align-items: center; gap: 6px; font-size: 12px; }
 .legend-dot { width: 9px; height: 9px; border-radius: 3px; flex-shrink: 0; }
-.legend-label { color: var(--text-2); flex: 1; }
+.legend-label { color: var(--text-2); }
 .legend-value { font-weight: 700; color: var(--text-1); }
-.legend-pct { font-size: 10.5px; color: var(--text-3); min-width: 30px; text-align: right; }
-.gender-secondary { display: flex; flex-direction: column; gap: 6px; padding-top: 10px; border-top: 1px solid var(--border); }
-.gender-stat { display: flex; justify-content: space-between; align-items: center; font-size: 12px; }
+.legend-pct { font-size: 10.5px; color: var(--text-3); }
+.gender-secondary { display: flex; flex-direction: column; gap: 6px; padding-top: 10px; border-top: 1px solid var(--border); align-items: center; }
+.gender-stat { display: flex; align-items: center; gap: 8px; font-size: 12px; }
 .gender-stat-label { color: var(--text-2); }
 .gender-stat-value { font-weight: 600; color: var(--text-1); }
 
 /* ── Bar Chart ────────────────────────────────────────────────── */
-.bar-chart { display: flex; flex-direction: column; gap: 0; }
-.bar-row { display: flex; align-items: center; gap: 10px; padding: 5px 0; }
-.bar-dept-name { font-size: 12px; font-weight: 500; color: var(--text-2); white-space: nowrap; min-width: 96px; overflow: hidden; text-overflow: ellipsis; }
-.bar-track { flex: 1; height: 9px; background: rgba(15,23,42,0.06); border-radius: 99px; overflow: hidden; }
+.bar-chart { display: grid; grid-template-columns: max-content 1fr auto; column-gap: 10px; }
+.bar-row-group { display: grid; grid-template-columns: subgrid; grid-column: 1 / -1; }
+.bar-row { display: grid; grid-template-columns: subgrid; grid-column: 1 / -1; align-items: center; padding: 5px 0 2px; }
+.bar-dept-name { font-size: 12px; font-weight: 500; color: var(--text-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.bar-track { height: 9px; background: rgba(15,23,42,0.06); border-radius: 99px; overflow: hidden; }
 .bar-fill { height: 100%; border-radius: 99px; transition: width 0.55s cubic-bezier(.4,0,.2,1); }
 .bar-value { font-size: 12px; font-weight: 600; color: var(--text-1); white-space: nowrap; min-width: 36px; text-align: right; }
-.bar-row-group { display: flex; flex-direction: column; }
-.bar-row-sub { display: flex; align-items: center; gap: 10px; padding: 2px 0 6px; border-bottom: 1px solid var(--border); }
+.bar-row-sub { display: grid; grid-template-columns: subgrid; grid-column: 1 / -1; align-items: center; padding: 2px 0 6px; border-bottom: 1px solid var(--border); }
 .bar-row-sub:last-child { border-bottom: none; }
 .stacked-seg { height: 100%; transition: width 0.55s cubic-bezier(.4,0,.2,1); }
 
@@ -216,9 +216,9 @@ body { color: var(--text-1); }
 .no-data { text-align: center; color: var(--text-3); font-size: 13px; padding: 32px 0; }
 
 /* ── Band Health ──────────────────────────────────────────────── */
-.band-offenders { display: flex; flex-direction: column; gap: 3px; }
+.band-offenders { display: flex; flex-direction: column; gap: 3px; max-width: 380px; margin: 0 auto; width: 100%; }
 .band-offender-row {
-  display: grid; grid-template-columns: 1fr 60px auto; align-items: center;
+  display: grid; grid-template-columns: 1fr 50px auto; align-items: center;
   gap: 8px; font-size: 12px; padding: 6px 0; border-bottom: 1px solid var(--border);
 }
 .band-offender-row:last-child { border-bottom: none; }

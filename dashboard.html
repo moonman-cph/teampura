@@ -633,13 +633,13 @@ kpiDefs.forEach(k => {
       if (total > 0) {
         const subRow = document.createElement('div');
         subRow.className = 'bar-row-sub';
-        subRow.style.cssText = 'display:flex; align-items:center; gap:10px; padding-bottom:6px;';
+        subRow.style.paddingBottom = '6px';
         const spacer = document.createElement('div');
         spacer.className = 'bar-dept-name';
         spacer.style.visibility = 'hidden';
         spacer.textContent = '\u00a0';
         const stackWrap = document.createElement('div');
-        stackWrap.style.cssText = 'flex:1; display:flex; height:4px; border-radius:99px; overflow:hidden; background:var(--bg);';
+        stackWrap.style.cssText = 'display:flex; height:4px; border-radius:99px; overflow:hidden; background:var(--bg);';
         [
           { key: 'male',    color: '#2a9aaa' },
           { key: 'female',  color: '#e8622a' },
