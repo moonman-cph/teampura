@@ -2435,10 +2435,12 @@ function openCombinedModal(roleId, defaultTab) {
       document.getElementById('modal-person-role-info').style.display = '';
       document.getElementById('modal-person-remove-btn').style.display = role ? '' : 'none';
       if (role) document.getElementById('modal-person-remove-btn').textContent = `Remove from ${role.title}`;
+      document.getElementById('modal-person-fire-btn').style.display = 'none';
       document.getElementById('modal-person-add-role-btn').style.display = (!settings.viewOnly && total < 100) ? '' : 'none';
     } else {
       document.getElementById('modal-person-role-info').style.display = 'none';
       document.getElementById('modal-person-remove-btn').style.display = 'none';
+      document.getElementById('modal-person-fire-btn').style.display = 'none';
       document.getElementById('modal-person-add-role-btn').style.display = 'none';
     }
   }
