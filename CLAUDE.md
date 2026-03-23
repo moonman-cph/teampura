@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Overview
 
-HR org chart app served by a minimal Node.js/Express server. All three HTML files are single-file apps (inline CSS + inline JS). Data is stored in `orgchart-data.json` on disk and served via `GET /POST /api/data`.
+HR org chart app served by a minimal Node.js/Express server. All three HTML files are single-file apps (inline CSS + inline JS). Data is stored in `orgchart-data.json` on disk and served via `GET /POST /api/data`. Every data change is recorded in `changelog.json` via a server-side diff engine (see [Changelog / Audit Log](#changelog--audit-log)).
 
 ## Startup
 
@@ -23,11 +23,12 @@ Data is stored in `orgchart-data.json` — back it up by copying the file.
 
 ## Files
 
-- **`server.js`** — Express server on port 3000. Serves static files + `GET /api/data` / `POST /api/data`.
+- **`server.js`** — Express server on port 3000. Serves static files + `GET /api/data` / `POST /api/data` / `GET /api/changelog` / `GET /api/changelog/summary`.
 - **`orgchart.html`** — Primary app. Interactive org chart with employee editing, department filtering, drag-and-drop, Add Employee modal, and salary totals. This is the source of truth for data.
 - **`dashboard.html`** — Analytics dashboard. Reads data from `/api/data`.
 - **`dashboard-v2.html`** — Analytics dashboard (v2, redesigned). Also reads from `/api/data`.
 - **`directory.html`** — Employee directory. Reads and writes persons via `/api/data`.
+- **`changelog.html`** — Read-only audit log viewer. Shows every data change grouped by save event, with filters and field-level detail. Reads from `/api/changelog`.
 
 ## Data Model
 
@@ -67,6 +68,10 @@ Single user, single dummy organisation, flat JSON file persistence, single-file 
 - Do not store sensitive data (salaries, personal details) in `localStorage`, unprotected cookies, or client-side JS bundles. The habit must start now.
 - Do not embed business logic or access rules in HTML files beyond rendering. Logic that will eventually need to be enforced server-side should be clearly separated.
 
+**Changelog (introduced in M1):** A server-side diff engine intercepts every `POST /api/data` call, compares the previous and new state, and appends field-level change entries to `changelog.json`. Entries capture entity type, entity ID, field, old value, new value, timestamp, IP address, user agent, an optional change reason, and a correlation ID grouping all changes from one save. Actor identity is `null` in M1 (no auth); it is populated in M3. See [## Changelog / Audit Log](#changelog--audit-log) for the full entry schema and evolution across milestones.
+
+**M1 Limitation:** Changelog logging is API-level only. Any direct edit to `orgchart-data.json` on disk bypasses it entirely. The data write and changelog write are two separate `fs.writeFileSync` calls — a crash between them leaves data without a log entry. A future code path that writes the file without going through `POST /api/data` would also be invisible to the log. This is acceptable for M1 (single-user, dev mode). The hard guarantee is delivered in M2 via PostgreSQL triggers (see M2 below).
+
 ---
 
 ### M2 — Database, API Layer & Multi-Tenancy Foundations
@@ -82,8 +87,18 @@ Multi-tenancy is built into the data model from day one. Three deployment tiers 
 Security foundations introduced in this milestone:
 - TLS enforced everywhere — no plain HTTP, including internal service communication.
 - Sensitive fields (salary, personal identifiers) encrypted at field level; encryption keys are tenant-isolated and managed via a key management service (e.g. AWS KMS or Azure Key Vault).
-- All reads and writes of sensitive data are written to an append-only audit log (user ID, timestamp, action, record affected). This is a GDPR and EU Pay Transparency compliance requirement.
+- The changelog introduced in M1 migrates from `changelog.json` to a PostgreSQL `audit_log` table. The table is append-only (the application DB role has INSERT + SELECT only — no UPDATE or DELETE). Sensitive field values (`isSensitive: true`) are encrypted at column level using `pgcrypto` with tenant-isolated keys. The diff and data write occur in a single transaction. See [## Changelog / Audit Log](#changelog--audit-log).
 - Input sanitisation and server-side validation on all API endpoints. No trust of client-supplied data.
+
+**Change Data Capture (CDC) — hard audit guarantee:** A `BEFORE INSERT OR UPDATE OR DELETE` trigger on every data table (`persons`, `roles`, `departments`, `teams`, `role_assignments`, `salary_bands`) writes a row to `audit_log` within the **same transaction** as the data change. This means: if the data write commits, the log entry commits; if the data write rolls back, the log entry rolls back — they cannot be separated. The trigger fires regardless of which code path caused the change (API, migration script, admin DB tool, etc.). The application-level diff introduced in M1 becomes supplementary context (providing `changeReason`, `correlationId`, `actorId` from the request) rather than the primary logging mechanism. The trigger provides the hard guarantee; the application layer enriches each entry.
+
+| | M1 | M2 |
+|---|---|---|
+| Mechanism | Server-side diff on `POST /api/data` | PostgreSQL trigger on every row change |
+| Atomicity | Two separate file writes (not atomic) | Same DB transaction |
+| Bypassed by direct file edit? | Yes | No (trigger fires on all DB writes) |
+| Bypassed by bug in diff code? | Yes | No |
+| Actor/reason enrichment | Yes (from headers) | Yes (from application layer via session variable) |
 
 **Architecture pattern — modular monolith:** The application is one deployable unit, but internally divided into strict modules (auth, org-data, compensation, workflows, AI, export). No module may import another module's internals — only its public interface. This allows a module to be extracted into a standalone microservice later by moving the module and updating the router, without rewriting business logic. The compensation module is the most likely candidate for early extraction due to its distinct security and access requirements.
 
@@ -111,14 +126,14 @@ Super-admin interface to create and configure customer organisations, manage lic
 ### M5 — Salary Bands & EU Pay Transparency
 Full salary band management: define bands per role/level, flag employees outside their band, document rationale for individual salary decisions. Pay gap reporting across gender, department, and level.
 
-This milestone is driven by EU Pay Transparency regulation, which requires organisations to be able to demonstrate and document why each employee receives their salary (fair pay, equal terms). The audit log introduced in M2 is the foundation for this compliance trail.
+This milestone is driven by EU Pay Transparency regulation (implementation deadline: June 7, 2026), which requires organisations to be able to demonstrate and document why each employee receives their salary (fair pay, equal terms). The `changeReason` field captured in the changelog on every salary write (introduced in M1, made mandatory for sensitive fields in M3) is the primary compliance trail for this requirement. Pay gap reporting draws directly on `audit_log` to show the history of salary band assignments and documented justifications.
 
 This module should be designed with clean boundaries from the org-data module, as it is the most likely candidate for extraction into a dedicated microservice with its own security controls.
 
 ---
 
 ### M6 — AI Assistant (role-scoped, data-aware)
-The AI assistant sits on top of the existing permission-filtered API. It receives a scoped view of data identical to what the logged-in user can see — it never bypasses the role layer or accesses data the user could not access directly. Every AI query is written to the audit log.
+The AI assistant sits on top of the existing permission-filtered API. It receives a scoped view of data identical to what the logged-in user can see — it never bypasses the role layer or accesses data the user could not access directly. Every AI query (prompt, response summary, data entities accessed, timestamp, actor) is written to `audit_log` via the same changelog pipeline, using `entityType: null`, `operation: "AI_QUERY"`, and `source: "ai"`.
 
 The assistant should be capable of natural-language queries over HR data, observations about org health, salary equity insights, and surfacing relevant information based on the user's role and context. Managers see their team data; HR sees org-wide data; employees see only their own.
 
@@ -154,12 +169,92 @@ These apply across all milestones and must not be violated:
 2. **Server-side enforcement** — access rules, data visibility, and business logic are enforced on the server. UI hiding is cosmetic only and never a substitute for server-side checks.
 3. **Sensitive data is opt-in** — salary, personal identifiers, and other sensitive fields are never returned by the API unless the requesting user's role explicitly permits it.
 4. **Versioned API** — all routes are under `/api/v1/`. Breaking changes require a new version, never modification of an existing route.
-5. **Audit log** — all reads and writes of sensitive data are logged with user, timestamp, and action. This log is append-only.
+5. **Audit log** — all data changes are logged with field-level granularity (entity, field, old value, new value, actor, timestamp, IP, user agent, change reason, correlation ID). In M1 stored in `changelog.json`; in M2+ in the PostgreSQL `audit_log` table. This log is strictly append-only — no entry may ever be modified or deleted. See [## Changelog / Audit Log](#changelog--audit-log).
 6. **Encryption** — sensitive fields are encrypted at rest with tenant-isolated keys. Keys are never embedded in application code.
 7. **No data in URLs** — sensitive data must never appear in URLs, query strings, or browser history.
 8. **Module boundaries** — each module (auth, org-data, compensation, workflows, AI, export) owns its own routes, data access, and logic. Cross-module calls go through defined interfaces only.
 9. **Import/export by design** — the data model should always assume that data may need to be imported from or exported to external systems. Avoid internal-only IDs or formats that cannot be mapped to a standard representation.
 10. **Mobile is a separate app** — do not add complexity to this codebase for mobile compatibility. The API is the mobile integration point.
+
+---
+
+## Changelog / Audit Log
+
+Every `POST /api/data` is intercepted server-side: the previous and new state are diffed, and one log entry per changed field is appended to the changelog. The changelog is strictly append-only — no entry is ever modified or deleted.
+
+### Entry Schema
+
+```json
+{
+  "id":             "uuid",
+  "orgId":          "default",
+  "correlationId":  "uuid",
+  "timestamp":      "ISO 8601 UTC",
+  "actorId":        null,
+  "actorEmail":     null,
+  "actorRole":      null,
+  "actorIp":        "string|null",
+  "actorUserAgent": "string|null",
+  "operation":      "CREATE|UPDATE|DELETE|BULK_SUMMARY",
+  "entityType":     "person|role|department|team|roleAssignment|settings|salaryBand",
+  "entityId":       "string|null",
+  "entityLabel":    "string|null",
+  "field":          "string|null",
+  "oldValue":       "any|null",
+  "newValue":       "any|null",
+  "changeReason":   "string|null",
+  "source":         "ui|csv_import|api|system",
+  "bulkId":         "string|null",
+  "isSensitive":    "boolean"
+}
+```
+
+- **`correlationId`** — shared by all entries from one `POST /api/data` call. Groups related changes (e.g. a single drag-drop that updates a role and a person appears as one logical event).
+- **`entityLabel`** — denormalised at write time (person name, role title, etc.) so the log remains readable even after deletions. Never computed via joins at read time.
+- **`isSensitive`** — set server-side based on `SENSITIVE_FIELDS`. In M2+ entries where `isSensitive: true` have `oldValue`/`newValue` encrypted at rest. In M3, these values are redacted in API responses for non-HR roles.
+- **`changeReason`** — optional free-text justification from the `X-Change-Reason` request header. Mandatory in M3 for any write touching a sensitive field (server rejects if absent or < 10 chars). This is the primary compliance trail for EU Pay Transparency.
+- **`BULK_SUMMARY`** entries summarise CSV imports: `newValue` carries `{ personsCreated, personsUpdated, rolesCreated, totalEntries }`.
+
+### Sensitive Fields (server-side only — never client-trusted)
+
+| Entity | Fields |
+|--------|--------|
+| `person` | `salary`, `employeeId`, `dateOfBirth`, `nationalId` |
+| `settings` | `hideSalaries` |
+| `salaryBand` | `min`, `max`, `midpoint` |
+
+### Ignored Fields (never generate log entries)
+
+`orgId`, `_simLabel`, `isNew`, `snapshots`, `plannedChange`
+
+### Bulk Operation Detection
+
+When a single `POST /api/data` produces more than `BULK_THRESHOLD = 10` entity-level CREATE or DELETE operations, the batch is flagged as a bulk operation. CSV imports additionally send `X-Source: csv_import` and `X-Bulk-Id: <uuid>` headers. A `BULK_SUMMARY` entry is appended alongside individual field entries. The `changelog.html` UI collapses bulk batches to a single row by default.
+
+### Client → Server Metadata Convention
+
+Metadata for a save operation is passed via HTTP headers (not in the JSON body, which is the raw data model):
+
+| Header | Purpose |
+|--------|---------|
+| `X-Change-Reason` | Optional free-text justification (max 500 chars) |
+| `X-Source` | `ui` (default) or `csv_import` |
+| `X-Bulk-Id` | UUID generated client-side per CSV import batch |
+
+The server generates `correlationId` itself — the client never sends it.
+
+### Milestone Evolution
+
+| Milestone | Changelog changes |
+|-----------|-------------------|
+| **M1** | `changelog.json` file, `GET /api/changelog`, `GET /api/changelog/summary`, `changelog.html` UI, actor fields are `null`; API capped at 1,000 entries per request (newest-first); UI shows most recent 1,000 entries only — sufficient for single-user dev use |
+| **M2** | PostgreSQL `audit_log` table (INSERT+SELECT only); `isSensitive` values encrypted with `pgcrypto`; route becomes `GET /api/v1/audit-log`; cursor-based pagination replaces the M1 limit cap — full history always queryable without loading the entire log into memory |
+| **M3** | Actor fields populated from JWT; role-scoped access to log; `changeReason` mandatory for sensitive fields; viewing `isSensitive` entries is itself logged (meta-audit) |
+
+### API Endpoints (M1)
+
+- `GET /api/changelog` — returns entries, supports query params: `correlationId`, `entityType`, `entityId`, `field`, `operation`, `source`, `bulkId`, `from`, `to`, `limit` (default 200, max 1000), `offset`
+- `GET /api/changelog/summary?days=30` — returns counts by day/entityType/operation and a list of recent save batches
 
 ---
 

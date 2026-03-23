@@ -1,0 +1,802 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Changelog — OrgChart</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="shared.css">
+<style>
+/* ── Changelog page layout ──────────────────────────────────── */
+#app-content { overflow: hidden; }
+
+#changelog-layout {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* ── Sidebar ─────────────────────────────────────────────────── */
+#cl-sidebar {
+  width: 260px;
+  flex-shrink: 0;
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+#cl-sidebar-header {
+  padding: 16px 16px 12px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+#cl-sidebar-header h2 {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+#cl-filters {
+  flex: 1;
+  overflow-y: auto;
+  padding: 12px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.filter-group label {
+  display: block;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 6px;
+}
+
+.filter-group input[type="text"],
+.filter-group input[type="date"],
+.filter-group select {
+  width: 100%;
+  padding: 6px 10px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-family: inherit;
+  font-size: 13px;
+  color: var(--text-primary);
+  background: var(--bg);
+  outline: none;
+}
+.filter-group input:focus,
+.filter-group select:focus { border-color: var(--accent); }
+
+.filter-check-group { display: flex; flex-direction: column; gap: 5px; }
+.filter-check-group label {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--text-primary);
+  text-transform: none;
+  letter-spacing: 0;
+  cursor: pointer;
+}
+.filter-check-group input[type="checkbox"] { accent-color: var(--accent); width: 14px; height: 14px; flex-shrink: 0; }
+
+.filter-actions {
+  padding: 12px 16px;
+  border-top: 1px solid var(--border);
+  flex-shrink: 0;
+  display: flex;
+  gap: 8px;
+}
+.btn-sm {
+  flex: 1;
+  padding: 7px 12px;
+  border-radius: 6px;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text-primary);
+  transition: background 0.15s;
+}
+.btn-sm:hover { background: var(--bg); }
+.btn-sm.primary { background: var(--accent); color: #fff; border-color: var(--accent); }
+.btn-sm.primary:hover { background: #1d4ed8; }
+
+/* ── Main area ───────────────────────────────────────────────── */
+#cl-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  overflow: hidden;
+}
+
+#cl-header {
+  padding: 16px 20px 12px;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+#cl-header h1 { font-size: 18px; font-weight: 700; color: var(--text-primary); }
+#cl-stats { margin-left: auto; font-size: 12px; color: var(--text-muted); }
+
+#cl-banner {
+  background: #fffbeb;
+  border-bottom: 1px solid #fde68a;
+  padding: 8px 20px;
+  font-size: 12px;
+  color: #92400e;
+  flex-shrink: 0;
+}
+
+#cl-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px 20px;
+}
+
+/* ── Loading / empty states ──────────────────────────────────── */
+.cl-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 200px;
+  color: var(--text-muted);
+  font-size: 14px;
+  gap: 8px;
+}
+.cl-empty svg { opacity: 0.3; }
+
+/* ── Batch rows ──────────────────────────────────────────────── */
+.cl-batch {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  margin-bottom: 10px;
+  overflow: hidden;
+  transition: box-shadow 0.15s;
+}
+.cl-batch:hover { box-shadow: var(--shadow-sm); }
+
+.cl-batch-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  cursor: pointer;
+  user-select: none;
+}
+.cl-batch-header:hover { background: var(--bg); }
+
+.cl-batch-chevron {
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+  color: var(--text-muted);
+  transition: transform 0.2s;
+}
+.cl-batch.open .cl-batch-chevron { transform: rotate(90deg); }
+
+.cl-batch-time {
+  font-size: 12px;
+  color: var(--text-muted);
+  flex-shrink: 0;
+  min-width: 130px;
+}
+
+.cl-batch-summary {
+  flex: 1;
+  font-size: 13px;
+  color: var(--text-primary);
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.cl-batch-reason {
+  font-size: 12px;
+  color: var(--text-secondary);
+  font-style: italic;
+  max-width: 200px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex-shrink: 0;
+}
+
+.cl-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 99px;
+  font-size: 11px;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+.badge-count { background: var(--bg); color: var(--text-secondary); border: 1px solid var(--border); }
+.badge-import { background: #eff6ff; color: #1d4ed8; border: 1px solid #93c5fd; }
+.badge-sensitive { background: #fef3c7; color: #92400e; border: 1px solid #fde68a; }
+.badge-source { background: #f0fdf4; color: #166534; border: 1px solid #86efac; }
+
+/* ── Expanded entries table ──────────────────────────────────── */
+.cl-entries {
+  display: none;
+  border-top: 1px solid var(--border);
+}
+.cl-batch.open .cl-entries { display: block; }
+
+.cl-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+.cl-table th {
+  text-align: left;
+  padding: 8px 12px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+}
+.cl-table td {
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+  color: var(--text-primary);
+}
+.cl-table tr:last-child td { border-bottom: none; }
+.cl-table tr:hover td { background: #fafaf9; }
+
+.op-badge {
+  display: inline-block;
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.op-create  { background: #f0fdf4; color: #166534; }
+.op-update  { background: #eff6ff; color: #1d4ed8; }
+.op-delete  { background: #fef2f2; color: #991b1b; }
+.op-bulk    { background: #fefce8; color: #713f12; }
+
+.val-old { color: #991b1b; }
+.val-new  { color: #166534; }
+.val-null { color: var(--text-muted); font-style: italic; }
+.val-obj  { font-family: monospace; font-size: 11px; color: var(--text-secondary); max-width: 180px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sensitive-dot { display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: #f59e0b; margin-left: 4px; vertical-align: middle; title: "Sensitive field"; }
+
+/* ── Pagination ──────────────────────────────────────────────── */
+#cl-pagination {
+  padding: 12px 20px;
+  border-top: 1px solid var(--border);
+  background: var(--surface);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  color: var(--text-secondary);
+  flex-shrink: 0;
+}
+#cl-pagination button {
+  padding: 5px 14px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  font-family: inherit;
+  font-size: 13px;
+  cursor: pointer;
+  color: var(--text-primary);
+}
+#cl-pagination button:disabled { opacity: 0.4; cursor: not-allowed; }
+#cl-pagination button:not(:disabled):hover { background: var(--bg); }
+
+/* ── App header ─────────────────────────────────────────────── */
+#app-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 20px;
+  height: 52px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+#app-header h1 { font-size: 16px; font-weight: 700; }
+.header-divider { width: 1px; height: 18px; background: var(--border); }
+.header-meta { font-size: 13px; color: var(--text-muted); }
+</style>
+</head>
+<body>
+
+<nav id="left-nav"></nav>
+<script src="shared-nav.js"></script>
+
+<div id="app-content">
+
+<div id="app-header">
+  <h1>Changelog</h1>
+  <div class="header-divider"></div>
+  <span class="header-meta">Audit Log</span>
+</div>
+
+<div id="changelog-layout">
+
+  <!-- Sidebar filters -->
+  <div id="cl-sidebar">
+    <div id="cl-sidebar-header"><h2>Filters</h2></div>
+    <div id="cl-filters">
+
+      <div class="filter-group">
+        <label>Search</label>
+        <input type="text" id="f-search" placeholder="Entity, field, reason…">
+      </div>
+
+      <div class="filter-group">
+        <label>Entity Type</label>
+        <div class="filter-check-group" id="f-entity-types">
+          <label><input type="checkbox" value="person" checked> Person</label>
+          <label><input type="checkbox" value="role" checked> Role</label>
+          <label><input type="checkbox" value="department" checked> Department</label>
+          <label><input type="checkbox" value="team" checked> Team</label>
+          <label><input type="checkbox" value="roleAssignment" checked> Role Assignment</label>
+          <label><input type="checkbox" value="settings" checked> Settings</label>
+          <label><input type="checkbox" value="salaryBand" checked> Salary Band</label>
+        </div>
+      </div>
+
+      <div class="filter-group">
+        <label>Operation</label>
+        <div class="filter-check-group" id="f-operations">
+          <label><input type="checkbox" value="CREATE" checked> Create</label>
+          <label><input type="checkbox" value="UPDATE" checked> Update</label>
+          <label><input type="checkbox" value="DELETE" checked> Delete</label>
+          <label><input type="checkbox" value="BULK_SUMMARY" checked> Bulk import</label>
+        </div>
+      </div>
+
+      <div class="filter-group">
+        <label>Source</label>
+        <div class="filter-check-group" id="f-sources">
+          <label><input type="checkbox" value="ui" checked> UI</label>
+          <label><input type="checkbox" value="csv_import" checked> CSV Import</label>
+          <label><input type="checkbox" value="api" checked> API</label>
+          <label><input type="checkbox" value="system" checked> System</label>
+        </div>
+      </div>
+
+      <div class="filter-group">
+        <label>From</label>
+        <input type="date" id="f-from">
+      </div>
+      <div class="filter-group">
+        <label>To</label>
+        <input type="date" id="f-to">
+      </div>
+
+      <div class="filter-group">
+        <label>Field</label>
+        <input type="text" id="f-field" placeholder="e.g. salary, name">
+      </div>
+
+      <div class="filter-group">
+        <label>Display</label>
+        <div class="filter-check-group">
+          <label><input type="checkbox" id="f-expand-bulk"> Show individual bulk entries</label>
+          <label><input type="checkbox" id="f-only-sensitive"> Sensitive fields only</label>
+        </div>
+      </div>
+
+    </div>
+    <div class="filter-actions">
+      <button class="btn-sm" id="f-clear-btn">Clear</button>
+      <button class="btn-sm primary" id="f-apply-btn">Apply</button>
+    </div>
+  </div>
+
+  <!-- Main content -->
+  <div id="cl-main">
+    <div id="cl-header">
+      <h1 id="cl-title">All Changes</h1>
+      <span id="cl-stats"></span>
+    </div>
+    <div id="cl-banner">
+      Audit log — single-user mode. Authentication and role-based access controls will be enforced in a future release.
+    </div>
+    <div id="cl-content">
+      <div class="cl-empty" id="cl-loading">
+        <svg width="32" height="32" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4">
+          <circle cx="8" cy="8" r="6"/><polyline points="8,4 8,8 11,10"/>
+        </svg>
+        Loading…
+      </div>
+    </div>
+    <div id="cl-pagination" style="display:none">
+      <button id="pg-prev" disabled>← Prev</button>
+      <span id="pg-info"></span>
+      <button id="pg-next">Next →</button>
+      <span style="margin-left:auto; color:var(--text-muted)" id="pg-total"></span>
+    </div>
+  </div>
+
+</div><!-- /changelog-layout -->
+</div><!-- /app-content -->
+
+<script>
+// ── State ─────────────────────────────────────────────────────────────────────
+let allBatches    = [];  // [{correlationId, timestamp, source, bulkId, changeReason, hasSensitive, entries:[]}]
+let filteredBatches = [];
+let currency      = 'USD';
+
+const PAGE_SIZE   = 25;
+let page          = 0;
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
+function fmtTime(iso) {
+  const d = new Date(iso);
+  const date = d.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+  const time = d.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
+  return `${date} ${time}`;
+}
+
+function fmtRelative(iso) {
+  const diff = Date.now() - new Date(iso).getTime();
+  const mins  = Math.floor(diff / 60000);
+  if (mins < 1)  return 'just now';
+  if (mins < 60) return `${mins}m ago`;
+  const hours = Math.floor(mins / 60);
+  if (hours < 24) return `${hours}h ago`;
+  return `${Math.floor(hours / 24)}d ago`;
+}
+
+function fmtValue(val, field, entityType) {
+  if (val === null || val === undefined) return `<span class="val-null">—</span>`;
+  if (typeof val === 'object') {
+    const s = JSON.stringify(val);
+    const escaped = s.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    return `<span class="val-obj" title="${escaped}">${escaped}</span>`;
+  }
+  // Currency formatting for salary fields
+  if (['salary', 'min', 'max', 'midpoint'].includes(field) && typeof val === 'number') {
+    try {
+      return new Intl.NumberFormat(undefined, { style: 'currency', currency, maximumFractionDigits: 0 }).format(val);
+    } catch { return String(val); }
+  }
+  return String(val).replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+function escHtml(s) {
+  return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function summariseBatch(batch) {
+  const ops = { CREATE: 0, UPDATE: 0, DELETE: 0 };
+  const types = new Set();
+  for (const e of batch.entries) {
+    if (e.operation in ops) ops[e.operation]++;
+    if (e.entityType) types.add(e.entityType);
+  }
+  const parts = [];
+  if (ops.CREATE)  parts.push(`${ops.CREATE} created`);
+  if (ops.UPDATE)  parts.push(`${ops.UPDATE} updated`);
+  if (ops.DELETE)  parts.push(`${ops.DELETE} deleted`);
+  const typeStr = [...types].slice(0, 3).join(', ');
+  return parts.length ? `${parts.join(', ')} · ${typeStr || ''}` : `${batch.entries.length} entries`;
+}
+
+// ── Data loading ──────────────────────────────────────────────────────────────
+async function loadData() {
+  // Load currency from data
+  try {
+    const r = await fetch('/api/data');
+    if (r.ok) {
+      const d = await r.json();
+      if (d.settings && d.settings.currency) currency = d.settings.currency;
+    }
+  } catch (e) {}
+
+  // Load changelog
+  const params = buildQueryParams();
+  const res = await fetch('/api/changelog?' + new URLSearchParams(params));
+  if (!res.ok) throw new Error('Failed to load changelog');
+  const data = await res.json();
+  return data;
+}
+
+function buildQueryParams() {
+  const p = { limit: 2000, offset: 0 };
+  const field = document.getElementById('f-field').value.trim();
+  if (field) p.field = field;
+
+  const fromVal = document.getElementById('f-from').value;
+  const toVal   = document.getElementById('f-to').value;
+  if (fromVal) p.from = fromVal + 'T00:00:00.000Z';
+  if (toVal)   p.to   = toVal   + 'T23:59:59.999Z';
+
+  if (document.getElementById('f-only-sensitive').checked) p.isSensitive = 'true';
+
+  return p;
+}
+
+// ── Group entries into batches ────────────────────────────────────────────────
+function groupIntoBatches(entries) {
+  const batchMap = new Map();
+  for (const e of entries) {
+    const cid = e.correlationId;
+    if (!batchMap.has(cid)) {
+      batchMap.set(cid, {
+        correlationId: cid,
+        timestamp:    e.timestamp,
+        source:       e.source,
+        bulkId:       e.bulkId,
+        changeReason: e.changeReason,
+        hasSensitive: false,
+        entries:      [],
+      });
+    }
+    const b = batchMap.get(cid);
+    if (e.isSensitive) b.hasSensitive = true;
+    b.entries.push(e);
+  }
+  return [...batchMap.values()].sort((a, b) => b.timestamp.localeCompare(a.timestamp));
+}
+
+// ── Filter ────────────────────────────────────────────────────────────────────
+function applyClientFilters(batches) {
+  const searchTerm = document.getElementById('f-search').value.trim().toLowerCase();
+  const expandBulk = document.getElementById('f-expand-bulk').checked;
+
+  const allowedTypes = new Set([...document.querySelectorAll('#f-entity-types input:checked')].map(i => i.value));
+  const allowedOps   = new Set([...document.querySelectorAll('#f-operations input:checked')].map(i => i.value));
+  const allowedSrcs  = new Set([...document.querySelectorAll('#f-sources input:checked')].map(i => i.value));
+
+  return batches.map(batch => {
+    if (!allowedSrcs.has(batch.source)) return null;
+
+    let entries = batch.entries;
+
+    // Filter entries by type / op
+    entries = entries.filter(e => {
+      if (!allowedOps.has(e.operation)) return false;
+      if (e.entityType && !allowedTypes.has(e.entityType)) return false;
+      return true;
+    });
+
+    // Suppress individual bulk entries unless "expand bulk" is on
+    if (!expandBulk && batch.bulkId) {
+      entries = entries.filter(e => e.operation === 'BULK_SUMMARY');
+      if (!entries.length) entries = batch.entries.filter(e => e.operation === 'BULK_SUMMARY');
+    }
+
+    if (!entries.length) return null;
+
+    // Search filter
+    if (searchTerm) {
+      const matchesBatch = (batch.changeReason || '').toLowerCase().includes(searchTerm);
+      if (!matchesBatch) {
+        entries = entries.filter(e =>
+          (e.entityLabel || '').toLowerCase().includes(searchTerm) ||
+          (e.entityType  || '').toLowerCase().includes(searchTerm) ||
+          (e.field       || '').toLowerCase().includes(searchTerm) ||
+          String(e.oldValue || '').toLowerCase().includes(searchTerm) ||
+          String(e.newValue || '').toLowerCase().includes(searchTerm)
+        );
+      }
+      if (!entries.length) return null;
+    }
+
+    return { ...batch, entries };
+  }).filter(Boolean);
+}
+
+// ── Render ────────────────────────────────────────────────────────────────────
+function render(batches) {
+  const content = document.getElementById('cl-content');
+  const pagination = document.getElementById('cl-pagination');
+
+  if (!batches.length) {
+    content.innerHTML = `<div class="cl-empty">
+      <svg width="32" height="32" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3">
+        <path d="M3 3h10M3 6h10M3 9h10M3 12h6"/>
+      </svg>
+      No changelog entries match the current filters.
+    </div>`;
+    pagination.style.display = 'none';
+    document.getElementById('cl-stats').textContent = '0 batches';
+    return;
+  }
+
+  const total = batches.length;
+  const start = page * PAGE_SIZE;
+  const slice = batches.slice(start, start + PAGE_SIZE);
+
+  document.getElementById('cl-stats').textContent = `${total} save event${total !== 1 ? 's' : ''}`;
+
+  const html = slice.map(batch => renderBatch(batch)).join('');
+  content.innerHTML = html;
+
+  // Wire expand toggles
+  content.querySelectorAll('.cl-batch-header').forEach(el => {
+    el.addEventListener('click', () => {
+      el.closest('.cl-batch').classList.toggle('open');
+    });
+  });
+
+  // Pagination
+  const totalPages = Math.ceil(total / PAGE_SIZE);
+  document.getElementById('pg-prev').disabled = page === 0;
+  document.getElementById('pg-next').disabled = page >= totalPages - 1;
+  document.getElementById('pg-info').textContent = `Page ${page + 1} of ${Math.max(1, totalPages)}`;
+  document.getElementById('pg-total').textContent = `${total} total`;
+  pagination.style.display = total > PAGE_SIZE ? 'flex' : 'none';
+}
+
+function renderBatch(batch) {
+  const time    = fmtTime(batch.timestamp);
+  const rel     = fmtRelative(batch.timestamp);
+  const summary = summariseBatch(batch);
+  const reason  = batch.changeReason ? `<span class="cl-batch-reason" title="${escHtml(batch.changeReason)}">"${escHtml(batch.changeReason)}"</span>` : '';
+
+  const badges = [];
+  badges.push(`<span class="cl-badge badge-count">${batch.entries.length} change${batch.entries.length !== 1 ? 's' : ''}</span>`);
+  if (batch.source === 'csv_import') badges.push(`<span class="cl-badge badge-import">CSV</span>`);
+  if (batch.hasSensitive)           badges.push(`<span class="cl-badge badge-sensitive">sensitive</span>`);
+
+  const badgeHtml = badges.join(' ');
+
+  const entriesHtml = renderEntries(batch.entries);
+
+  return `<div class="cl-batch">
+    <div class="cl-batch-header">
+      <svg class="cl-batch-chevron" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2">
+        <polyline points="6,4 10,8 6,12"/>
+      </svg>
+      <span class="cl-batch-time" title="${time}">${rel} · ${time}</span>
+      <span class="cl-batch-summary">${escHtml(summary)}</span>
+      ${reason}
+      ${badgeHtml}
+    </div>
+    <div class="cl-entries">
+      ${entriesHtml}
+    </div>
+  </div>`;
+}
+
+function renderEntries(entries) {
+  const rows = entries.map(e => {
+    const opClass = { CREATE: 'op-create', UPDATE: 'op-update', DELETE: 'op-delete', BULK_SUMMARY: 'op-bulk' }[e.operation] || 'op-update';
+    const opLabel = e.operation === 'BULK_SUMMARY' ? 'BULK' : e.operation;
+    const sensitiveIndicator = e.isSensitive ? `<span class="sensitive-dot" title="Sensitive field"></span>` : '';
+
+    let oldCell, newCell;
+    if (e.operation === 'CREATE') {
+      oldCell = `<span class="val-null">—</span>`;
+      newCell = typeof e.newValue === 'object' && e.newValue !== null
+        ? `<span class="val-obj" title="${escHtml(JSON.stringify(e.newValue))}">${escHtml(e.entityLabel || e.entityType)}</span>`
+        : `<span class="val-new">${fmtValue(e.newValue, e.field, e.entityType)}</span>`;
+    } else if (e.operation === 'DELETE') {
+      oldCell = typeof e.oldValue === 'object' && e.oldValue !== null
+        ? `<span class="val-obj" title="${escHtml(JSON.stringify(e.oldValue))}">${escHtml(e.entityLabel || e.entityType)}</span>`
+        : `<span class="val-old">${fmtValue(e.oldValue, e.field, e.entityType)}</span>`;
+      newCell = `<span class="val-null">—</span>`;
+    } else if (e.operation === 'BULK_SUMMARY') {
+      oldCell = `<span class="val-null">—</span>`;
+      newCell = `<span class="val-obj">${escHtml(JSON.stringify(e.newValue))}</span>`;
+    } else {
+      oldCell = `<span class="val-old">${fmtValue(e.oldValue, e.field, e.entityType)}</span>`;
+      newCell = `<span class="val-new">${fmtValue(e.newValue, e.field, e.entityType)}</span>`;
+    }
+
+    return `<tr>
+      <td><span class="op-badge ${opClass}">${opLabel}</span></td>
+      <td>${escHtml(e.entityType || '—')}</td>
+      <td>${escHtml(e.entityLabel || e.entityId || '—')}</td>
+      <td>${e.field ? escHtml(e.field) + sensitiveIndicator : '<span class="val-null">—</span>'}</td>
+      <td>${oldCell}</td>
+      <td>${newCell}</td>
+    </tr>`;
+  }).join('');
+
+  return `<table class="cl-table">
+    <thead><tr>
+      <th>Op</th><th>Type</th><th>Entity</th><th>Field</th><th>Old Value</th><th>New Value</th>
+    </tr></thead>
+    <tbody>${rows}</tbody>
+  </table>`;
+}
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+async function init() {
+  try {
+    const data = await loadData();
+    allBatches = groupIntoBatches(data.entries || []);
+    filteredBatches = applyClientFilters(allBatches);
+    render(filteredBatches);
+    document.getElementById('cl-loading') && document.getElementById('cl-loading').remove();
+  } catch (e) {
+    document.getElementById('cl-content').innerHTML = `<div class="cl-empty">Failed to load changelog: ${escHtml(e.message)}</div>`;
+  }
+}
+
+// ── Event wiring ──────────────────────────────────────────────────────────────
+document.getElementById('f-apply-btn').addEventListener('click', async () => {
+  page = 0;
+  const data = await loadData().catch(() => ({ entries: [] }));
+  allBatches = groupIntoBatches(data.entries || []);
+  filteredBatches = applyClientFilters(allBatches);
+  render(filteredBatches);
+});
+
+document.getElementById('f-clear-btn').addEventListener('click', () => {
+  document.getElementById('f-search').value = '';
+  document.getElementById('f-field').value = '';
+  document.getElementById('f-from').value = '';
+  document.getElementById('f-to').value = '';
+  document.getElementById('f-expand-bulk').checked = false;
+  document.getElementById('f-only-sensitive').checked = false;
+  document.querySelectorAll('#f-entity-types input, #f-operations input, #f-sources input').forEach(i => i.checked = true);
+  page = 0;
+  filteredBatches = applyClientFilters(allBatches);
+  render(filteredBatches);
+});
+
+// Live search filter (no server round-trip)
+document.getElementById('f-search').addEventListener('input', () => {
+  page = 0;
+  filteredBatches = applyClientFilters(allBatches);
+  render(filteredBatches);
+});
+
+// Checkboxes trigger immediate re-render (client-side only)
+['f-entity-types', 'f-operations', 'f-sources'].forEach(id => {
+  document.getElementById(id).addEventListener('change', () => {
+    page = 0;
+    filteredBatches = applyClientFilters(allBatches);
+    render(filteredBatches);
+  });
+});
+document.getElementById('f-expand-bulk').addEventListener('change', () => {
+  page = 0;
+  filteredBatches = applyClientFilters(allBatches);
+  render(filteredBatches);
+});
+document.getElementById('f-only-sensitive').addEventListener('change', () => {
+  page = 0;
+  filteredBatches = applyClientFilters(allBatches);
+  render(filteredBatches);
+});
+
+document.getElementById('pg-prev').addEventListener('click', () => { page--; render(filteredBatches); document.getElementById('cl-content').scrollTop = 0; });
+document.getElementById('pg-next').addEventListener('click', () => { page++; render(filteredBatches); document.getElementById('cl-content').scrollTop = 0; });
+
+// ── Start ─────────────────────────────────────────────────────────────────────
+init();
+</script>
+
+</body>
+</html>

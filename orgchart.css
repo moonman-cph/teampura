@@ -20,6 +20,17 @@ body:not(.page-ready) #columns > .dept-column:nth-child(8) { animation-delay: 31
 body:not(.page-ready) #columns > .dept-column:nth-child(n+9) { animation-delay: 360ms; }
 @media (prefers-reduced-motion: reduce) { .dept-column { animation: none; } }
 
+/* ── Drag-drop & add animations ──────────────────────────────── */
+@keyframes colHighlight {
+  0%   { box-shadow: none; }
+  30%  { box-shadow: 0 0 0 4px rgba(90,103,216,0.25); }
+  100% { box-shadow: none; }
+}
+.dept-column.col-highlight { animation: colHighlight 0.5s ease both; }
+@media (prefers-reduced-motion: reduce) {
+  .dept-column.col-highlight { animation: none; }
+}
+
 /* ── Header ───────────────────────────────────────────────────── */
 #app-header {
   background: var(--surface);
@@ -564,7 +575,7 @@ body.view-only .dept-drag-handle { display: none; }
   cursor: pointer;
   user-select: none;
   background: var(--surface);
-  transition: background 0.12s, border-color 0.12s, box-shadow 0.12s, opacity 0.12s;
+  transition: none;
   position: relative;
 }
 .emp-card:hover {
