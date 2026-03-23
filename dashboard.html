@@ -5,345 +5,13 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Dashboard — OrgChart</title>
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-<style>
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+<link rel="stylesheet" href="shared.css">
+<link rel="stylesheet" href="dashboard.css">
 
-:root {
-  --bg: #f0f2f7;
-  --surface: #ffffff;
-  --surface-2: #f8fafc;
-  --border: #e2e8f0;
-  --border-hover: #cbd5e1;
-  --nav-bg: #0f3d4a;
-  --nav-border: rgba(255,255,255,0.06);
-  --text-1: #0f172a;
-  --text-2: #475569;
-  --text-3: #94a3b8;
-  --accent: #6366f1;
-  --accent-2: #8b5cf6;
-  --accent-light: #eef2ff;
-  --accent-border: #c7d2fe;
-  --green: #10b981; --green-light: #d1fae5;
-  --amber: #f59e0b; --amber-light: #fef3c7;
-  --red: #ef4444;   --red-light: #fee2e2;
-  --blue: #3b82f6;  --blue-light: #dbeafe;
-  --r: 12px; --r-lg: 16px;
-  --shadow-sm: 0 1px 2px rgba(15,23,42,0.05);
-  --shadow: 0 1px 3px rgba(15,23,42,0.08), 0 4px 16px rgba(15,23,42,0.04);
-  --shadow-md: 0 4px 24px rgba(15,23,42,0.10), 0 1px 4px rgba(15,23,42,0.06);
-  --c-male: #6366f1; --c-female: #f43f5e; --c-other: #64748b; --c-unknown: #cbd5e1;
-}
-
-body {
-  font-family: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
-  background: var(--bg); color: var(--text-1);
-  height: 100vh; overflow: hidden; display: flex;
-  -webkit-font-smoothing: antialiased;
-}
-
-/* ── Layout ───────────────────────────────────────────────────── */
-#app-content { flex: 1; display: flex; flex-direction: column; min-width: 0; overflow: hidden; }
-
-/* ── Left Nav ─────────────────────────────────────────────────── */
-#left-nav {
-  width: 220px; flex-shrink: 0;
-  background: linear-gradient(180deg, #0f3d4a 0%, #0a2e3a 100%);
-  display: flex; flex-direction: column; height: 100vh;
-  overflow: hidden;
-}
-#nav-logo {
-  display: flex; align-items: center; gap: 10px;
-  padding: 18px 16px 14px; border-bottom: 1px solid rgba(255,255,255,0.08); flex-shrink: 0;
-}
-.nav-logo-icon {
-  width: 28px; height: 28px;
-  background: #e8622a;
-  border-radius: 7px; display: flex; align-items: center; justify-content: center;
-  flex-shrink: 0; box-shadow: 0 2px 8px rgba(232,98,42,0.4);
-}
-.nav-logo-name { font-size: 15px; font-weight: 700; color: #fff; letter-spacing: -0.2px; }
-#nav-body { flex: 1; overflow-y: auto; padding: 12px 0 8px; display: flex; flex-direction: column; gap: 0; }
-.nav-section { padding: 4px 0; }
-.nav-section-label {
-  font-size: 10px; font-weight: 700; letter-spacing: 0.8px; text-transform: uppercase;
-  color: rgba(255,255,255,0.3); padding: 8px 20px 4px;
-}
-.nav-item {
-  display: flex; align-items: center; gap: 10px;
-  padding: 9px 16px 9px 18px; margin: 1px 8px; border-radius: 7px;
-  cursor: pointer; user-select: none; color: rgba(255,255,255,0.65);
-  font-size: 13px; font-weight: 500; transition: background 0.12s, color 0.12s;
-  border-left: 2.5px solid transparent; text-decoration: none;
-}
-.nav-item:hover { background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.95); }
-.nav-item.active {
-  background: rgba(255,255,255,0.13); color: #fff;
-  border-left-color: rgba(255,255,255,0.7); font-weight: 600;
-}
-.nav-item svg { flex-shrink: 0; opacity: 0.75; }
-.nav-item.active svg, .nav-item:hover svg { opacity: 1; }
-.nav-spacer { flex: 1; }
-#nav-footer {
-  flex-shrink: 0; padding: 12px 16px;
-  border-top: 1px solid rgba(255,255,255,0.08);
-  display: flex; align-items: center; gap: 10px; cursor: pointer;
-}
-#nav-footer:hover { background: rgba(255,255,255,0.06); }
-.nav-user-avatar {
-  width: 32px; height: 32px; border-radius: 50%;
-  background: #e8622a;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 11px; font-weight: 700; color: white; flex-shrink: 0;
-  box-shadow: 0 2px 6px rgba(232,98,42,0.35);
-}
-.nav-user-info { min-width: 0; }
-.nav-user-name { font-size: 12.5px; font-weight: 600; color: rgba(255,255,255,0.9); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.nav-user-role { font-size: 11px; color: rgba(255,255,255,0.38); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-
-/* ── Header ───────────────────────────────────────────────────── */
-#app-header {
-  background: rgba(255,255,255,0.93);
-  backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
-  border-bottom: 1px solid var(--border);
-  padding: 0 24px; height: 54px;
-  display: flex; align-items: center; gap: 10px; flex-shrink: 0; z-index: 10;
-}
-.header-crumb { display: flex; align-items: center; gap: 6px; font-size: 13px; }
-.header-crumb-root { color: var(--text-3); }
-.header-crumb-sep { color: var(--text-3); font-size: 14px; line-height: 1; }
-.header-crumb-current { font-weight: 600; color: var(--text-1); }
-.header-spacer { flex: 1; }
-.header-last-updated { font-size: 11px; color: var(--text-3); white-space: nowrap; }
-.header-divider { width: 1px; height: 20px; background: var(--border); flex-shrink: 0; }
-.header-pill {
-  display: flex; align-items: center; gap: 5px; padding: 5px 11px;
-  border-radius: 8px; background: var(--surface-2); border: 1px solid var(--border);
-  font-size: 11.5px; font-weight: 500; color: var(--text-2); cursor: pointer; white-space: nowrap;
-}
-.header-pill:hover { border-color: var(--border-hover); }
-.header-icon-btn {
-  width: 32px; height: 32px; border-radius: 8px; background: transparent;
-  border: 1px solid var(--border); display: flex; align-items: center; justify-content: center;
-  color: var(--text-2); cursor: pointer; transition: background 0.1s, border-color 0.1s;
-}
-.header-icon-btn:hover { background: var(--surface-2); border-color: var(--border-hover); }
-.header-avatar {
-  width: 30px; height: 30px; border-radius: 50%;
-  background: #e8622a;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 10px; font-weight: 700; color: #fff; cursor: pointer;
-  box-shadow: 0 0 0 2px rgba(232,98,42,0.25);
-}
-
-/* ── Main / Grid ──────────────────────────────────────────────── */
-#main {
-  flex: 1; overflow-y: auto; min-height: 0; padding: 24px;
-  background-image: radial-gradient(circle, rgba(99,102,241,0.018) 1px, transparent 1px);
-  background-size: 22px 22px;
-}
-.dash-grid {
-  display: grid; grid-template-columns: repeat(4, 1fr);
-  gap: 16px; max-width: 1440px;
-}
-.span-1 { grid-column: span 1; }
-.span-2 { grid-column: span 2; }
-.span-3 { grid-column: span 3; }
-.span-4 { grid-column: span 4; }
-
-/* ── Cards ────────────────────────────────────────────────────── */
-.dash-card {
-  background: var(--surface); border: 1px solid var(--border);
-  border-radius: var(--r-lg); padding: 20px;
-  box-shadow: var(--shadow-sm);
-  display: flex; flex-direction: column; gap: 14px;
-  transition: box-shadow 0.2s ease, transform 0.2s ease;
-  position: relative; overflow: hidden;
-  animation: fadeUp 0.35s ease both;
-}
-.dash-card:hover { box-shadow: var(--shadow-md); transform: translateY(-1px); }
-
-.card-header {
-  display: flex; align-items: center; justify-content: space-between; gap: 8px;
-  position: relative; z-index: 1;
-}
-.card-title { font-size: 13px; font-weight: 700; color: var(--text-1); letter-spacing: -0.1px; }
-.card-badge {
-  font-size: 10.5px; font-weight: 600; padding: 2px 8px; border-radius: 99px;
-  background: var(--accent-light); color: var(--accent); border: 1px solid var(--accent-border);
-}
-
-/* ── KPI Cards ────────────────────────────────────────────────── */
-.kpi-card { padding: 22px; gap: 0; align-items: center; text-align: center; }
-.kpi-top { display: flex; align-items: center; justify-content: center; margin-bottom: 14px; }
-.kpi-icon {
-  width: 44px; height: 44px; border-radius: 12px;
-  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
-}
-.kpi-trend {
-  font-size: 10.5px; font-weight: 600; padding: 3px 8px;
-  border-radius: 99px; display: flex; align-items: center; gap: 3px;
-  position: absolute; top: 16px; right: 16px;
-}
-.kpi-trend.ok      { background: var(--green-light); color: #065f46; }
-.kpi-trend.warn    { background: var(--amber-light); color: #78350f; }
-.kpi-trend.danger  { background: var(--red-light);   color: #7f1d1d; }
-.kpi-trend.neutral { background: #f1f5f9; color: var(--text-2); }
-.kpi-value { font-size: 34px; font-weight: 800; letter-spacing: -1.5px; color: var(--text-1); line-height: 1; margin-bottom: 5px; }
-.kpi-label { font-size: 11.5px; color: var(--text-3); font-weight: 500; margin-bottom: 6px; }
-.kpi-sub { font-size: 11.5px; font-weight: 500; color: var(--text-2); }
-.kpi-sub.warn   { color: var(--amber); }
-.kpi-sub.ok     { color: var(--green); }
-.kpi-sub.danger { color: var(--red); }
-
-/* ── Donut ────────────────────────────────────────────────────── */
-.donut-svg { width: 130px; height: 130px; flex-shrink: 0; }
-.donut-segment { fill: none; stroke-width: 4; transition: stroke-width 0.15s; cursor: pointer; }
-.donut-segment:hover { stroke-width: 5.5; }
-.donut-center-text { font-size: 6px; font-weight: 800; fill: var(--text-1); text-anchor: middle; dominant-baseline: central; }
-.donut-center-sub { font-size: 2.8px; fill: var(--text-3); text-anchor: middle; dominant-baseline: central; }
-.donut-wrap { display: flex; align-items: center; gap: 20px; }
-.donut-legend { display: flex; flex-direction: column; gap: 8px; flex: 1; }
-.legend-item { display: flex; align-items: center; gap: 8px; font-size: 12px; }
-.legend-dot { width: 9px; height: 9px; border-radius: 3px; flex-shrink: 0; }
-.legend-label { color: var(--text-2); flex: 1; }
-.legend-value { font-weight: 700; color: var(--text-1); }
-.legend-pct { font-size: 10.5px; color: var(--text-3); min-width: 30px; text-align: right; }
-.gender-secondary { display: flex; flex-direction: column; gap: 6px; padding-top: 10px; border-top: 1px solid var(--border); }
-.gender-stat { display: flex; justify-content: space-between; align-items: center; font-size: 12px; }
-.gender-stat-label { color: var(--text-2); }
-.gender-stat-value { font-weight: 600; color: var(--text-1); }
-
-/* ── Bar Chart ────────────────────────────────────────────────── */
-.bar-chart { display: flex; flex-direction: column; gap: 0; }
-.bar-row { display: flex; align-items: center; gap: 10px; padding: 5px 0; }
-.bar-dept-name { font-size: 12px; font-weight: 500; color: var(--text-2); white-space: nowrap; min-width: 96px; overflow: hidden; text-overflow: ellipsis; }
-.bar-track { flex: 1; height: 9px; background: rgba(15,23,42,0.05); border-radius: 99px; overflow: hidden; }
-.bar-fill { height: 100%; border-radius: 99px; transition: width 0.55s cubic-bezier(.4,0,.2,1); }
-.bar-value { font-size: 12px; font-weight: 600; color: var(--text-1); white-space: nowrap; min-width: 36px; text-align: right; }
-.bar-row-group { display: flex; flex-direction: column; }
-.bar-row-sub { display: flex; align-items: center; gap: 10px; padding: 2px 0 6px; border-bottom: 1px solid var(--border); }
-.bar-row-sub:last-child { border-bottom: none; }
-.stacked-seg { height: 100%; transition: width 0.55s cubic-bezier(.4,0,.2,1); }
-
-/* ── Pay Gap Table ────────────────────────────────────────────── */
-.gap-table { width: 100%; border-collapse: collapse; font-size: 12px; }
-.gap-table th {
-  text-align: left; font-size: 10px; font-weight: 700; letter-spacing: 0.6px;
-  text-transform: uppercase; color: var(--text-3); padding: 0 10px 10px 0;
-  border-bottom: 1px solid var(--border);
-}
-.gap-table th:last-child { padding-right: 0; }
-.gap-table td {
-  padding: 8px 10px 8px 0; vertical-align: middle; color: var(--text-2);
-  border-bottom: 1px solid rgba(226,232,240,0.6);
-}
-.gap-table tbody tr:nth-child(even) td { background: rgba(248,250,252,0.8); }
-.gap-table tbody tr:last-child td { border-bottom: none; }
-.gap-table td:first-child { font-weight: 600; color: var(--text-1); }
-.gap-bar { display: inline-block; height: 5px; border-radius: 3px; background: var(--red); vertical-align: middle; margin-left: 6px; }
-.gap-pct { font-weight: 700; color: var(--red); }
-.gap-pct.ok { color: var(--green); }
-.gap-na { color: var(--text-3); font-style: italic; font-size: 11px; }
-.gap-headline {
-  display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap;
-  padding-bottom: 12px; border-bottom: 1px solid var(--border);
-}
-.gap-headline-val { font-size: 28px; font-weight: 800; letter-spacing: -1px; color: var(--red); }
-.gap-headline-label { font-size: 12px; color: var(--text-3); line-height: 1.6; }
-
-/* ── Flag Rows ────────────────────────────────────────────────── */
-.flag-row {
-  display: flex; align-items: center; gap: 10px;
-  padding: 10px 0; border-bottom: 1px solid var(--border);
-  cursor: pointer; user-select: none; transition: padding-left 0.12s;
-}
-.flag-row:last-child { border-bottom: none; padding-bottom: 0; }
-.flag-row:hover { padding-left: 4px; }
-.flag-row:hover .flag-label { color: var(--text-1); }
-.flag-pill { font-size: 10.5px; font-weight: 600; padding: 3px 9px; border-radius: 99px; white-space: nowrap; }
-.flag-pill.amber { background: var(--amber-light); color: #78350f; }
-.flag-pill.red   { background: var(--red-light);   color: #7f1d1d; }
-.flag-pill.green { background: var(--green-light);  color: #065f46; }
-.flag-pill.blue  { background: var(--blue-light);   color: #1e3a8a; }
-.flag-label { flex: 1; font-size: 12.5px; color: var(--text-2); }
-.flag-count {
-  font-size: 11.5px; font-weight: 700; padding: 2px 9px; border-radius: 99px;
-  background: var(--bg); border: 1px solid var(--border);
-  color: var(--text-2); min-width: 30px; text-align: center;
-}
-.flag-count.nonzero { background: var(--accent-light); border-color: var(--accent-border); color: var(--accent); }
-.flag-chevron { color: var(--text-3); transition: transform 0.15s; flex-shrink: 0; font-size: 13px; }
-.flag-row.open .flag-chevron { transform: rotate(90deg); }
-.flag-names { display: none; flex-wrap: wrap; gap: 5px; padding: 4px 0 10px 4px; }
-.flag-names.visible { display: flex; }
-.flag-name-chip {
-  font-size: 11px; padding: 2px 8px; background: var(--bg);
-  border: 1px solid var(--border); border-radius: 99px; color: var(--text-2);
-}
-
-/* ── Payroll hidden ───────────────────────────────────────────── */
-.payroll-hidden {
-  display: flex; flex-direction: column; align-items: center; justify-content: center;
-  gap: 8px; padding: 32px 0; color: var(--text-3); text-align: center;
-}
-.payroll-hidden p { font-size: 13px; }
-
-/* ── No data ──────────────────────────────────────────────────── */
-.no-data { text-align: center; color: var(--text-3); font-size: 13px; padding: 32px 0; }
-
-/* ── Band Health ──────────────────────────────────────────────── */
-.band-offenders { display: flex; flex-direction: column; gap: 3px; }
-.band-offender-row {
-  display: grid; grid-template-columns: 1fr 60px auto; align-items: center;
-  gap: 8px; font-size: 12px; padding: 6px 0; border-bottom: 1px solid var(--border);
-}
-.band-offender-row:last-child { border-bottom: none; }
-.band-offender-name { font-weight: 500; color: var(--text-1); }
-.band-offender-tag { font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 99px; }
-.band-offender-tag.below { background: var(--amber-light); color: #78350f; }
-.band-offender-tag.above { background: var(--red-light); color: #7f1d1d; }
-
-/* ── Org Health Grid ──────────────────────────────────────────── */
-.org-health-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
-.org-stat-tile {
-  background: var(--surface-2); border: 1px solid var(--border);
-  border-radius: var(--r); padding: 12px 14px;
-}
-.org-stat-label { font-size: 10.5px; color: var(--text-3); margin-bottom: 5px; font-weight: 500; }
-.org-stat-value { font-size: 15px; font-weight: 700; color: var(--text-1); line-height: 1.2; }
-.org-stat-value.warn   { color: var(--amber); }
-.org-stat-value.ok     { color: var(--green); }
-.org-stat-value.danger { color: var(--red); }
-
-/* ── Payroll Summary ──────────────────────────────────────────── */
-.payroll-summary { display: flex; border-top: 1px solid var(--border); padding-top: 12px; }
-.payroll-summary-item { flex: 1; padding: 0 16px; border-right: 1px solid var(--border); }
-.payroll-summary-item:first-child { padding-left: 0; }
-.payroll-summary-item:last-child { border-right: none; }
-.payroll-summary-label { font-size: 10.5px; color: var(--text-3); margin-bottom: 3px; }
-.payroll-summary-value { font-size: 14px; font-weight: 700; color: var(--text-1); }
-
-/* ── Animations ───────────────────────────────────────────────── */
-@keyframes fadeUp {
-  from { opacity: 0; transform: translateY(10px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-.dash-grid > *:nth-child(1)  { animation-delay:  0ms; }
-.dash-grid > *:nth-child(2)  { animation-delay: 40ms; }
-.dash-grid > *:nth-child(3)  { animation-delay: 80ms; }
-.dash-grid > *:nth-child(4)  { animation-delay:120ms; }
-.dash-grid > *:nth-child(5)  { animation-delay:160ms; }
-.dash-grid > *:nth-child(6)  { animation-delay:200ms; }
-.dash-grid > *:nth-child(7)  { animation-delay:240ms; }
-.dash-grid > *:nth-child(8)  { animation-delay:280ms; }
-.dash-grid > *:nth-child(9)  { animation-delay:320ms; }
-.dash-grid > *:nth-child(10) { animation-delay:360ms; }
-.dash-grid > *:nth-child(11) { animation-delay:400ms; }
-.dash-grid > *:nth-child(12) { animation-delay:440ms; }
-.dash-grid > *:nth-child(n+13) { animation-delay:480ms; }
-</style>
 </head>
 <body>
+
+<div id="loading-overlay" style="position:fixed;inset:0;background:#fff;display:flex;align-items:center;justify-content:center;font-family:inherit;color:#6b7280;z-index:9999;font-size:1.1rem;">Loading…</div>
 
 <nav id="left-nav">
   <div id="nav-logo">
@@ -374,6 +42,15 @@ body {
         </svg>
         Org Chart
       </a>
+      <a class="nav-item" href="ai.html">
+        <svg width="15" height="15" viewBox="0 0 16 16" fill="none"
+             stroke="currentColor" stroke-width="1.6"
+             stroke-linecap="round" stroke-linejoin="round">
+          <path d="M8 1l1.5 3.5L13 6l-3.5 1.5L8 11l-1.5-3.5L3 6l3.5-1.5z"/>
+          <path d="M13 10l.8 1.8L15.5 12l-1.7.8L13 15l-.8-1.7L10.5 12l1.7-.8z" opacity="0.6"/>
+        </svg>
+        AI Assistant
+      </a>
     </div>
     <div class="nav-section">
       <div class="nav-section-label">People</div>
@@ -383,20 +60,6 @@ body {
           <line x1="10" y1="7" x2="15" y2="7"/><line x1="10" y1="10" x2="15" y2="10"/><line x1="10" y1="13" x2="13" y2="13"/>
         </svg>
         Directory
-      </a>
-      <a class="nav-item" href="#">
-        <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-          <rect x="2" y="3" width="12" height="12" rx="1.5"/>
-          <line x1="5" y1="1" x2="5" y2="5"/><line x1="11" y1="1" x2="11" y2="5"/><line x1="2" y1="7" x2="14" y2="7"/>
-          <polyline points="5.5,11 7,12.5 10.5,9"/>
-        </svg>
-        Time Off
-      </a>
-      <a class="nav-item" href="#">
-        <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-          <rect x="1" y="6" width="14" height="9" rx="1.5"/><path d="M5 6V4.5a3 3 0 016 0V6"/>
-        </svg>
-        Hiring
       </a>
     </div>
     <div class="nav-spacer"></div>
@@ -427,6 +90,24 @@ body {
 </nav>
 
 <div id="app-content">
+  <div id="sim-banner">
+    <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M6 2h4M7 2v4L3 13a1 1 0 00.9 1.5h8.2A1 1 0 0013 13L9 6V2"/>
+      <path d="M5 10.5h6" opacity="0.5"/>
+    </svg>
+    <span id="sim-banner-label">Simulation Mode — data shown is not live</span>
+    <div style="display:flex;gap:8px;margin-left:auto">
+      <button onclick="location.reload()" style="padding:4px 12px;font-size:12px;background:rgba(146,64,14,0.08);border:1px solid rgba(146,64,14,0.2);color:#92400e;border-radius:6px;cursor:pointer;font-family:inherit;font-weight:500">Refresh data</button>
+    </div>
+  </div>
+  <div id="planned-change-banner">
+    <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="2" y="3" width="12" height="12" rx="1.5"/>
+      <line x1="5" y1="1" x2="5" y2="5"/><line x1="11" y1="1" x2="11" y2="5"/>
+      <line x1="2" y1="7" x2="14" y2="7"/>
+    </svg>
+    <span id="pc-banner-label">Planned change scheduled</span>
+  </div>
   <div id="app-header">
     <div class="header-crumb">
       <span class="header-crumb-root">OrgChart</span>
@@ -459,27 +140,12 @@ body {
 </div>
 
 <script>
-const STORAGE_KEY = 'orgchart_data_v4';
-
-// ── Load data ─────────────────────────────────────────────────────
+// ── Data (file scope) ─────────────────────────────────────────────
 let departments = [], roles = [], persons = [], roleAssignments = [],
     settings = { currency: 'DKK', hideSalaries: false, viewOnly: false },
     salaryBands = {};
 
-try {
-  const raw = localStorage.getItem(STORAGE_KEY);
-  if (raw) {
-    const saved = JSON.parse(raw);
-    if (saved.departments) departments = saved.departments;
-    if (saved.roles)       roles = saved.roles;
-    if (saved.persons)     persons = saved.persons;
-    if (saved.roleAssignments) roleAssignments = saved.roleAssignments;
-    if (saved.settings)    Object.assign(settings, saved.settings);
-    if (saved.salaryBands) salaryBands = saved.salaryBands;
-  }
-} catch (e) {}
-
-// ── Helpers ───────────────────────────────────────────────────────
+// ── Helpers (file scope — reference data variables above) ─────────
 function fmt(n) {
   if (!n) return settings.currency === 'EUR' ? '€0' : '0 kr';
   const rounded = Math.round(n);
@@ -509,8 +175,8 @@ function genderKey(person) {
   const g = (person.gender || '').toLowerCase().trim();
   if (g === 'male' || g === 'm') return 'male';
   if (g === 'female' || g === 'f') return 'female';
-  if (g === 'other') return 'other';
-  return 'unknown';
+  if (g === '') return 'unknown';
+  return 'other';
 }
 function levelSortKey(lvl) {
   if (!lvl) return 999;
@@ -522,6 +188,56 @@ function levelSortKey(lvl) {
   return 50;
 }
 function avg(arr) { return arr.length ? arr.reduce((a, b) => a + b, 0) / arr.length : 0; }
+
+async function init() {
+  const overlay = document.getElementById('loading-overlay');
+  let simActive = false;
+  let saved = {};
+  try {
+    // Check for active simulation first; fall back to live data
+    const simRes = await fetch('/api/sim-data');
+    const dataRes = simRes.ok ? simRes : await fetch('/api/data');
+    if (!dataRes.ok) throw new Error('Server returned ' + dataRes.status);
+    simActive = simRes.ok;
+    saved = await dataRes.json();
+    if (saved.departments) departments = saved.departments;
+    if (saved.roles)       roles = saved.roles;
+    if (saved.persons)     persons = saved.persons;
+    if (saved.roleAssignments) roleAssignments = saved.roleAssignments;
+    if (saved.settings)    Object.assign(settings, saved.settings);
+    if (saved.salaryBands) salaryBands = saved.salaryBands;
+  } catch (e) {
+    overlay.innerHTML = `
+      <div style="text-align:center;padding:2rem">
+        <div style="font-size:1.25rem;font-weight:600;color:#111110;margin-bottom:0.5rem">Cannot connect to server</div>
+        <div style="color:#57534e;margin-bottom:1.5rem">Make sure the server is running: <code style="background:#f0eeea;padding:2px 6px;border-radius:4px">npm start</code></div>
+        <button onclick="location.reload()" style="padding:0.5rem 1.5rem;background:#1a7a8a;color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:1rem">Retry</button>
+      </div>`;
+    return;
+  }
+
+  // Show sim banner and poll for state changes
+  if (simActive) {
+    document.body.classList.add('sim-mode');
+  }
+
+  // Show planned-change banner if one is scheduled
+  if (saved.plannedChange) {
+    const pc = saved.plannedChange;
+    const d = new Date(pc.effectiveAt);
+    const dateStr = d.toLocaleDateString(undefined, { year:'numeric', month:'short', day:'numeric' })
+      + ' at ' + d.toLocaleTimeString(undefined, { hour:'2-digit', minute:'2-digit' });
+    document.getElementById('pc-banner-label').textContent =
+      `Planned change scheduled: "${pc.label || 'Untitled'}" — effective ${dateStr}`;
+    document.body.classList.add('planned-change-mode');
+  }
+  setInterval(async () => {
+    try {
+      const r = await fetch('/api/sim-data');
+      if (simActive && !r.ok) location.reload(); // sim ended — reload to live data
+      if (!simActive && r.ok)  location.reload(); // sim started — reload to show sim data
+    } catch (e) { /* ignore network errors */ }
+  }, 4000);
 
 // ── Compute metrics ───────────────────────────────────────────────
 const activePersons = persons.filter(p => !p.noLongerHired);
@@ -580,7 +296,7 @@ const seniorFemaleCount = seniorPersons.filter(p => genderKey(p) === 'female').l
 const seniorFemalePct = seniorPersons.length ? Math.round(seniorFemaleCount / seniorPersons.length * 100) : 0;
 
 const deptStats = departments.map(d => {
-  const deptRoles = roles.filter(r => r.department === d.id);
+  const deptRoles = roles.filter(r => r.departmentId === d.id);
   const deptRoleIds = new Set(deptRoles.map(r => r.id));
   const deptPersonIds = new Set();
   roleAssignments.forEach(a => {
@@ -661,13 +377,13 @@ function buildDonut(segments, centerText, centerSub) {
   svg.setAttribute('class', 'donut-svg');
   const bg = document.createElementNS(ns, 'circle');
   bg.setAttribute('cx','18'); bg.setAttribute('cy','18'); bg.setAttribute('r','15.915');
-  bg.setAttribute('fill','none'); bg.setAttribute('stroke','#f1f5f9'); bg.setAttribute('stroke-width','4');
+  bg.setAttribute('fill','none'); bg.setAttribute('stroke','#ece9e3'); bg.setAttribute('stroke-width','4');
   svg.appendChild(bg);
   const total = segments.reduce((s, seg) => s + seg.value, 0);
   if (total === 0) {
     const empty = document.createElementNS(ns, 'circle');
     empty.setAttribute('cx','18'); empty.setAttribute('cy','18'); empty.setAttribute('r','15.915');
-    empty.setAttribute('fill','none'); empty.setAttribute('stroke','#e2e8f0'); empty.setAttribute('stroke-width','4');
+    empty.setAttribute('fill','none'); empty.setAttribute('stroke','#e6e4df'); empty.setAttribute('stroke-width','4');
     svg.appendChild(empty);
   } else {
     let offset = 25;
@@ -703,7 +419,7 @@ function buildDonut(segments, centerText, centerSub) {
 // ── Row 1: KPI Strip ───────────────────────────────────────────────
 const kpiDefs = [
   {
-    iconBg: '#eef2ff', iconColor: '#6366f1',
+    iconBg: '#e6f5f5', iconColor: '#1a7a8a',
     icon: `<svg width="18" height="18" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="7" cy="5" r="3"/><path d="M2 14c0-3.5 2.2-5.5 5-5.5s5 2 5 5.5"/></svg>`,
     value: activePersons.length,
     label: 'Total Employees',
@@ -751,8 +467,8 @@ kpiDefs.forEach(k => {
     <span class="kpi-trend ${k.trendCls}">${k.trendTxt}</span>
     <div class="kpi-top">
       <div class="kpi-icon" style="background:${k.iconBg};color:${k.iconColor}">${k.icon}</div>
+      <div class="kpi-value">${k.value}</div>
     </div>
-    <div class="kpi-value">${k.value}</div>
     <div class="kpi-label">${k.label}</div>
     <div class="kpi-sub ${k.subCls}">${k.sub}</div>
   `;
@@ -769,16 +485,16 @@ kpiDefs.forEach(k => {
   } else {
     const femalePct = total ? Math.round(genderCounts.female / total * 100) : 0;
     const segments = [
-      { label: 'Male',    value: genderCounts.male,    color: '#818cf8' },
-      { label: 'Female',  value: genderCounts.female,  color: '#fda4af' },
-      { label: 'Other',   value: genderCounts.other,   color: '#94a3b8' },
-      { label: 'Unknown', value: genderCounts.unknown, color: '#e2e8f0' },
+      { label: 'Male',    value: genderCounts.male,    color: '#2a9aaa' },
+      { label: 'Female',  value: genderCounts.female,  color: '#e8622a' },
+      { label: 'Other',   value: genderCounts.other,   color: '#a8a29e' },
+      { label: 'Unknown', value: genderCounts.unknown, color: '#e6e4df' },
     ].filter(s => s.value > 0);
     const allSegs = [
-      { label: 'Male',    value: genderCounts.male,    color: '#818cf8' },
-      { label: 'Female',  value: genderCounts.female,  color: '#fda4af' },
-      { label: 'Other',   value: genderCounts.other,   color: '#94a3b8' },
-      { label: 'Unknown', value: genderCounts.unknown, color: '#e2e8f0' },
+      { label: 'Male',    value: genderCounts.male,    color: '#2a9aaa' },
+      { label: 'Female',  value: genderCounts.female,  color: '#e8622a' },
+      { label: 'Other',   value: genderCounts.other,   color: '#a8a29e' },
+      { label: 'Unknown', value: genderCounts.unknown, color: '#e6e4df' },
     ];
     const wrap = document.createElement('div');
     wrap.className = 'donut-wrap';
@@ -827,24 +543,23 @@ kpiDefs.forEach(k => {
     const headline = document.createElement('div');
     headline.className = 'gap-headline';
     if (allMaleSalaries.length > 0 && allFemaleSalaries.length > 0) {
-      const otherNote = genderCounts.other > 0
-        ? ` <span style="color:var(--text-3)">· ${genderCounts.other} employee${genderCounts.other !== 1 ? 's' : ''} with gender 'Other' shown per level below</span>`
-        : '';
       headline.innerHTML = `
         <span class="gap-headline-val">${overallGap > 0 ? overallGap + '%' : '0%'}</span>
-        <span class="gap-headline-label">overall gender pay gap (men earn ${overallGap}% more on average)</span>${otherNote}`;
+        <span class="gap-headline-label">overall gender pay gap (men earn ${overallGap}% more on average)</span>`;
     } else {
       headline.innerHTML = `<span class="gap-headline-label" style="color:var(--text-3)">Insufficient data for overall pay gap calculation</span>`;
     }
     card.appendChild(headline);
+    const levels = Object.keys(levelGenderData).sort((a, b) => levelSortKey(a) - levelSortKey(b));
+    const hasOtherData = levels.some(lvl => levelGenderData[lvl].other.filter(v => v > 0).length >= 2);
+    const colCount = hasOtherData ? 5 : 4;
     const tbl = document.createElement('table');
     tbl.className = 'gap-table';
-    tbl.innerHTML = `<thead><tr><th>Level</th><th>Avg Male</th><th>Avg Female</th><th>Avg Other</th><th>Gap</th></tr></thead>`;
+    tbl.innerHTML = `<thead><tr><th>Level</th><th>Avg Male</th><th>Avg Female</th>${hasOtherData ? '<th>Avg Other</th>' : ''}<th>Gap</th></tr></thead>`;
     const tbody = document.createElement('tbody');
-    const levels = Object.keys(levelGenderData).sort((a, b) => levelSortKey(a) - levelSortKey(b));
     if (levels.length === 0) {
       const tr = document.createElement('tr');
-      tr.innerHTML = `<td colspan="5" class="gap-na">No level data available</td>`;
+      tr.innerHTML = `<td colspan="${colCount}" class="gap-na">No level data available</td>`;
       tbody.appendChild(tr);
     }
     levels.forEach(lvl => {
@@ -853,24 +568,30 @@ kpiDefs.forEach(k => {
       const mSalaries = d.male.filter(v => v > 0);
       const fSalaries = d.female.filter(v => v > 0);
       const oSalaries = d.other.filter(v => v > 0);
-      const avgOCell = oSalaries.length >= 2 ? fmt(avg(oSalaries)) : `<span class="gap-na">—</span>`;
       if (mSalaries.length < 2 || fSalaries.length < 2) {
-        tr.innerHTML = `<td>${lvl}</td><td colspan="4" class="gap-na">Insufficient data (need ≥2 per gender)</td>`;
+        tr.innerHTML = `<td>${lvl}</td><td colspan="${colCount - 1}" class="gap-na">Insufficient data (need ≥2 per gender)</td>`;
       } else {
         const avgM = avg(mSalaries), avgF = avg(fSalaries);
         const gap  = avgM > 0 ? Math.round((avgM - avgF) / avgM * 100) : 0;
         const barW = Math.min(Math.abs(gap) * 2, 60);
+        const avgOCell = hasOtherData ? `<td>${oSalaries.length >= 2 ? fmt(avg(oSalaries)) : '<span class="gap-na">—</span>'}</td>` : '';
         tr.innerHTML = `
           <td>${lvl}</td>
           <td>${fmt(avgM)}</td>
           <td>${fmt(avgF)}</td>
-          <td>${avgOCell}</td>
+          ${avgOCell}
           <td><span class="gap-pct ${gap <= 0 ? 'ok' : ''}">${gap > 0 ? '+' : ''}${gap}%</span>${gap > 0 ? `<span class="gap-bar" style="width:${barW}px"></span>` : ''}</td>`;
       }
       tbody.appendChild(tr);
     });
     tbl.appendChild(tbody);
     card.appendChild(tbl);
+    if (!hasOtherData && genderCounts.other > 0) {
+      const note = document.createElement('p');
+      note.style.cssText = 'margin:10px 0 0; font-size:12px; color:var(--text-3)';
+      note.textContent = `${genderCounts.other} employee${genderCounts.other !== 1 ? 's' : ''} with gender 'Other' — too few per level to calculate averages.`;
+      card.appendChild(note);
+    }
   }
   grid.appendChild(card);
 }
@@ -912,18 +633,18 @@ kpiDefs.forEach(k => {
       if (total > 0) {
         const subRow = document.createElement('div');
         subRow.className = 'bar-row-sub';
-        subRow.style.cssText = 'display:flex; align-items:center; gap:10px; padding-bottom:6px;';
+        subRow.style.paddingBottom = '6px';
         const spacer = document.createElement('div');
         spacer.className = 'bar-dept-name';
         spacer.style.visibility = 'hidden';
         spacer.textContent = '\u00a0';
         const stackWrap = document.createElement('div');
-        stackWrap.style.cssText = 'flex:1; display:flex; height:4px; border-radius:99px; overflow:hidden; background:var(--bg);';
+        stackWrap.style.cssText = 'display:flex; height:4px; border-radius:99px; overflow:hidden; background:var(--bg);';
         [
-          { key: 'male',    color: '#818cf8' },
-          { key: 'female',  color: '#fda4af' },
-          { key: 'other',   color: '#94a3b8' },
-          { key: 'unknown', color: '#e2e8f0' },
+          { key: 'male',    color: '#2a9aaa' },
+          { key: 'female',  color: '#e8622a' },
+          { key: 'other',   color: '#a8a29e' },
+          { key: 'unknown', color: '#e6e4df' },
         ].forEach(s => {
           if (d.gender[s.key] === 0) return;
           const seg = document.createElement('div');
@@ -972,7 +693,7 @@ kpiDefs.forEach(k => {
       const fill = document.createElement('div');
       fill.className = 'bar-fill';
       fill.style.width = pct + '%';
-      fill.style.background = 'linear-gradient(90deg, #6366f1, #8b5cf6)';
+      fill.style.background = 'linear-gradient(90deg, #0f3d4a, #2a9aaa)';
       track.appendChild(fill);
       const val = document.createElement('div');
       val.className = 'bar-value';
@@ -1168,8 +889,13 @@ kpiDefs.forEach(k => {
 }
 
 // ── Last updated ───────────────────────────────────────────────────
-document.getElementById('last-updated').textContent =
-  `Data as of ${new Date().toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}`;
+document.getElementById('last-updated').textContent = simActive
+  ? `Simulation data · refreshed ${new Date().toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })}`
+  : `Data as of ${new Date().toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}`;
+
+  overlay.style.display = 'none';
+} // end init()
+init();
 </script>
 </body>
 </html>

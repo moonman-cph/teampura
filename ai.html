@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Assistant — OrgChart</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="shared.css">
+<link rel="stylesheet" href="dashboard.css">
+<link rel="stylesheet" href="ai.css">
+</head>
+<body>
+
+<nav id="left-nav">
+  <div id="nav-logo">
+    <div class="nav-logo-icon">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+        <circle cx="8" cy="3" r="2" fill="white"/>
+        <circle cx="3" cy="11" r="2" fill="white" opacity="0.7"/>
+        <circle cx="13" cy="11" r="2" fill="white" opacity="0.7"/>
+        <line x1="8" y1="5" x2="3" y2="9" stroke="white" stroke-width="1.2" opacity="0.6"/>
+        <line x1="8" y1="5" x2="13" y2="9" stroke="white" stroke-width="1.2" opacity="0.6"/>
+      </svg>
+    </div>
+    <span class="nav-logo-name">OrgChart</span>
+  </div>
+  <div id="nav-body">
+    <div class="nav-section">
+      <a class="nav-item" href="dashboard.html">
+        <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M2 6.5L8 2l6 4.5V14a1 1 0 01-1 1H3a1 1 0 01-1-1V6.5z"/>
+          <path d="M6 15v-5h4v5"/>
+        </svg>
+        Dashboard
+      </a>
+      <a class="nav-item" href="orgchart.html">
+        <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="8" cy="3" r="1.8"/><circle cx="3" cy="12" r="1.8"/><circle cx="13" cy="12" r="1.8"/>
+          <line x1="8" y1="4.8" x2="3" y2="10.2"/><line x1="8" y1="4.8" x2="13" y2="10.2"/>
+        </svg>
+        Org Chart
+      </a>
+      <a class="nav-item active" href="ai.html">
+        <svg width="15" height="15" viewBox="0 0 16 16" fill="none"
+             stroke="currentColor" stroke-width="1.6"
+             stroke-linecap="round" stroke-linejoin="round">
+          <path d="M8 1l1.5 3.5L13 6l-3.5 1.5L8 11l-1.5-3.5L3 6l3.5-1.5z"/>
+          <path d="M13 10l.8 1.8L15.5 12l-1.7.8L13 15l-.8-1.7L10.5 12l1.7-.8z" opacity="0.6"/>
+        </svg>
+        AI Assistant
+      </a>
+    </div>
+    <div class="nav-section">
+      <div class="nav-section-label">People</div>
+      <a class="nav-item" href="directory.html">
+        <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="6" cy="5" r="2.5"/><path d="M1 14c0-3 2-5 5-5"/>
+          <line x1="10" y1="7" x2="15" y2="7"/><line x1="10" y1="10" x2="15" y2="10"/><line x1="10" y1="13" x2="13" y2="13"/>
+        </svg>
+        Directory
+      </a>
+    </div>
+    <div class="nav-spacer"></div>
+    <div class="nav-section">
+      <div class="nav-section-label">Admin</div>
+      <a class="nav-item" href="orgchart.html#snapshots">
+        <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="8" cy="8" r="6"/><polyline points="8,4 8,8 11,10"/>
+        </svg>
+        Snapshots
+      </a>
+      <a class="nav-item" href="orgchart.html#settings">
+        <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="8" cy="8" r="2.5"/>
+          <path d="M8 1v1.5M8 13.5V15M1 8h1.5M13.5 8H15M3.05 3.05l1.06 1.06M11.89 11.89l1.06 1.06M3.05 12.95l1.06-1.06M11.89 4.11l1.06-1.06"/>
+        </svg>
+        Settings
+      </a>
+    </div>
+  </div>
+  <div id="nav-footer">
+    <div class="nav-user-avatar">DM</div>
+    <div class="nav-user-info">
+      <div class="nav-user-name">David Miller</div>
+      <div class="nav-user-role">HR Admin</div>
+    </div>
+  </div>
+</nav>
+
+<div id="app-content">
+  <div id="app-header">
+    <div class="header-crumb">
+      <span class="header-crumb-root">OrgChart</span>
+      <span class="header-crumb-sep">/</span>
+      <span class="header-crumb-current">AI Assistant</span>
+    </div>
+    <div class="header-spacer"></div>
+    <div class="header-divider"></div>
+    <div class="header-avatar">DM</div>
+  </div>
+  <div id="main">
+
+    <!-- Empty state (shown on load) -->
+    <div id="ai-empty">
+      <div class="ai-icon">✦</div>
+      <h1 class="ai-title">OrgChart AI</h1>
+      <p class="ai-subtitle">Ask anything about your organisation</p>
+      <p class="ai-subtitle" style="margin-top:2px;opacity:0.75;">Powered by Claude &middot; Your data stays private</p>
+      <div class="ai-chips">
+        <button class="ai-chip" data-prompt="Who has the highest salary?">
+          <div class="ai-chip-icon">💰</div>
+          <div class="ai-chip-text">Who has the highest salary?</div>
+        </button>
+        <button class="ai-chip" data-prompt="Which is the largest team?">
+          <div class="ai-chip-icon">👥</div>
+          <div class="ai-chip-text">Which is the largest team?</div>
+        </button>
+        <button class="ai-chip" data-prompt="Are there any pay gap issues?">
+          <div class="ai-chip-icon">⚖️</div>
+          <div class="ai-chip-text">Are there any pay gap issues?</div>
+        </button>
+        <button class="ai-chip" data-prompt="Who is on leave?">
+          <div class="ai-chip-icon">🏖️</div>
+          <div class="ai-chip-text">Who is on leave?</div>
+        </button>
+      </div>
+      <div class="ai-input-area">
+        <div class="ai-input-wrap" id="empty-input-wrap">
+          <input class="ai-input" id="empty-input" type="text" placeholder="Ask a question about your org…" autocomplete="off">
+          <button class="ai-send-btn" id="empty-send-btn" disabled title="Send">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="8" y1="13" x2="8" y2="3"/>
+              <polyline points="4,7 8,3 12,7"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Chat state (hidden until first message) -->
+    <div id="ai-chat" style="display:none;">
+      <div class="ai-messages" id="ai-messages"></div>
+      <div class="ai-input-area">
+        <div class="ai-input-wrap" id="chat-input-wrap">
+          <input class="ai-input" id="chat-input" type="text" placeholder="Ask a follow-up question…" autocomplete="off">
+          <button class="ai-send-btn" id="chat-send-btn" disabled title="Send">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="8" y1="13" x2="8" y2="3"/>
+              <polyline points="4,7 8,3 12,7"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  // ── Mock response lookup ───────────────────────────────────────
+  function getMockResponse(text) {
+    const t = text.toLowerCase();
+    if (/salary|paid|earn/.test(t)) {
+      return 'The highest-paid employee is <strong>Sarah Chen</strong> (L8, Engineering) at <strong>$310,000/yr</strong>. She reports directly to the CEO and leads a team of 14. The next highest earners are James Wu (L8, Finance) at $295,000 and Priya Sharma (L7, Product) at $248,000.';
+    }
+    if (/team|largest|department|big/.test(t)) {
+      return 'The largest department is <strong>Engineering</strong> with <strong>34 employees</strong> across 4 teams (Platform, Frontend, Data, and Infrastructure). It also has the highest total payroll at $4.2M annually. The second largest is Sales with 22 employees.';
+    }
+    if (/pay gap|gap|equity|gender/.test(t)) {
+      return 'There is a <strong>12.4% gender pay gap</strong> — women earn 12.4% less than men on average. The gap is most pronounced in <strong>Engineering</strong> (18.2%) and <strong>Sales</strong> (14.7%). There are also 3 employees flagged as below their salary band, all in Customer Success.';
+    }
+    if (/leave|absence|off/.test(t)) {
+      return 'There are currently <strong>4 employees on leave</strong>: Maria Santos (Marketing), Tom Eriksen (Engineering), Yuki Tanaka (HR), and Ben Okafor (Sales). Maria and Tom are on parental leave; Yuki and Ben are on medical leave.';
+    }
+    return 'I can see your organisation has <strong>127 employees</strong> across <strong>9 departments</strong>. I can answer questions about salaries, headcount, team structure, pay gaps, and org health. Try one of the suggested questions, or ask me anything!';
+  }
+
+  // ── DOM refs ───────────────────────────────────────────────────
+  const emptyState   = document.getElementById('ai-empty');
+  const chatState    = document.getElementById('ai-chat');
+  const messagesEl   = document.getElementById('ai-messages');
+  const emptyInput   = document.getElementById('empty-input');
+  const emptySendBtn = document.getElementById('empty-send-btn');
+  const chatInput    = document.getElementById('chat-input');
+  const chatSendBtn  = document.getElementById('chat-send-btn');
+
+  // ── Input enable/disable ───────────────────────────────────────
+  emptyInput.addEventListener('input', function () {
+    emptySendBtn.disabled = !this.value.trim();
+  });
+  chatInput.addEventListener('input', function () {
+    chatSendBtn.disabled = !this.value.trim();
+  });
+
+  // ── Submit helpers ─────────────────────────────────────────────
+  function appendUserMessage(text) {
+    const row = document.createElement('div');
+    row.className = 'ai-msg-user';
+    const bubble = document.createElement('div');
+    bubble.className = 'ai-msg-user-bubble';
+    bubble.textContent = text;
+    row.appendChild(bubble);
+    messagesEl.appendChild(row);
+    scrollBottom();
+  }
+
+  function appendTyping() {
+    const row = document.createElement('div');
+    row.className = 'ai-msg-ai';
+    const avatar = document.createElement('div');
+    avatar.className = 'ai-avatar';
+    avatar.textContent = '✦';
+    const bubble = document.createElement('div');
+    bubble.className = 'ai-bubble ai-typing';
+    bubble.innerHTML = '<span></span><span></span><span></span>';
+    row.appendChild(avatar);
+    row.appendChild(bubble);
+    messagesEl.appendChild(row);
+    scrollBottom();
+    return row;
+  }
+
+  function replaceTypingWithResponse(typingRow, html) {
+    const bubble = typingRow.querySelector('.ai-bubble');
+    bubble.classList.remove('ai-typing');
+    bubble.innerHTML = html;
+    scrollBottom();
+  }
+
+  function scrollBottom() {
+    messagesEl.scrollTop = messagesEl.scrollHeight;
+  }
+
+  let busy = false;
+
+  function submitQuery(text) {
+    if (!text || busy) return;
+    busy = true;
+
+    // Switch to chat state
+    emptyState.style.display = 'none';
+    chatState.style.display = 'flex';
+
+    appendUserMessage(text);
+
+    // Clear both inputs
+    emptyInput.value = '';
+    emptySendBtn.disabled = true;
+    chatInput.value = '';
+    chatSendBtn.disabled = true;
+
+    const typingRow = appendTyping();
+
+    setTimeout(function () {
+      const response = getMockResponse(text);
+      replaceTypingWithResponse(typingRow, response);
+      busy = false;
+    }, 1400);
+  }
+
+  // ── Event bindings ─────────────────────────────────────────────
+  emptySendBtn.addEventListener('click', function () {
+    submitQuery(emptyInput.value.trim());
+  });
+
+  emptyInput.addEventListener('keydown', function (e) {
+    if (e.key === 'Enter' && this.value.trim()) submitQuery(this.value.trim());
+  });
+
+  chatSendBtn.addEventListener('click', function () {
+    submitQuery(chatInput.value.trim());
+  });
+
+  chatInput.addEventListener('keydown', function (e) {
+    if (e.key === 'Enter' && this.value.trim()) submitQuery(this.value.trim());
+  });
+
+  // Chips: populate input and auto-submit
+  document.querySelectorAll('.ai-chip').forEach(function (chip) {
+    chip.addEventListener('click', function () {
+      const prompt = this.dataset.prompt;
+      submitQuery(prompt);
+    });
+  });
+
+}());
+</script>
+
+</body>
+</html>
