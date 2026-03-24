@@ -71,8 +71,8 @@
 /* ── Grid ─────────────────────────────────────────────────────── */
 #dir-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 14px; padding: 20px 24px; max-width: 1400px;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 14px; padding: 20px 24px;
 }
 
 .dir-card {
@@ -104,7 +104,11 @@
 
 /* ── Table ────────────────────────────────────────────────────── */
 #dir-table-wrap { padding: 20px 24px; overflow-x: auto; }
-#dir-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+#dir-table {
+  width: 100%; border-collapse: collapse; font-size: 13px;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 12px; overflow: hidden;
+}
 #dir-table th {
   text-align: left; padding: 8px 12px; font-size: 11px; font-weight: 700;
   letter-spacing: 0.5px; text-transform: uppercase; color: var(--text-muted);
@@ -116,7 +120,8 @@
 #dir-table th .sort-icon { margin-left: 4px; opacity: 0.5; }
 #dir-table th.sort-active { color: var(--accent); }
 #dir-table th.sort-active .sort-icon { opacity: 1; }
-#dir-table td { padding: 10px 12px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+#dir-table td { padding: 10px 12px; border-bottom: 1px solid var(--border); vertical-align: middle; background: var(--surface); }
+#dir-table tbody tr:last-child td { border-bottom: none; }
 #dir-table tr:hover td { background: var(--bg); }
 #dir-table tr.terminated td { opacity: 0.5; }
 .tbl-name-cell { display: flex; align-items: center; gap: 10px; cursor: pointer; }
@@ -347,10 +352,3 @@ textarea.form-control { resize: vertical; min-height: 72px; }
 }
 .dir-empty-icon { font-size: 32px; margin-bottom: 8px; }
 
-/* Responsive: 2 cols below 1100px */
-@media (max-width: 1100px) {
-  #dir-grid { grid-template-columns: repeat(2, 1fr); }
-}
-@media (max-width: 720px) {
-  #dir-grid { grid-template-columns: 1fr; }
-}
