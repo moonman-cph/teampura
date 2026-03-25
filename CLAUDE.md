@@ -65,7 +65,8 @@ Before committing and pushing any meaningful change, prepend a new entry to the 
   id: 'release-YYYY-MM-DD-topic',   // unique slug — date + short topic, e.g. release-2026-03-25-logo
   date: 'Mon YYYY',                  // e.g. 'Mar 2026'
   title: 'Short title of change',
-  body: 'One sentence describing what was added or fixed.',
+  body: 'One sentence summary shown in the notification panel.',
+  detail: 'Full description shown when the user clicks the entry. Can be a paragraph or two.',
 },
 ```
 

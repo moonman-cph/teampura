@@ -1,50 +1,59 @@
 /**
  * notifications.js — Shared notification bell for all Teampura pages.
- * Auto-injects a bell icon into #app-header. Computes live notifications
- * from /api/data. Read state persisted in localStorage.
+ * Auto-injects a bell icon into #app-header. Shows software release notes only.
+ * Click any entry to read the full release note in a modal.
+ * Read state persisted in localStorage.
  */
 (function () {
   'use strict';
 
   // ── Static Release Notes ──────────────────────────────────────────────────
+  // Prepend newest entry first before every push. Fields:
+  //   id     — unique slug, e.g. 'release-2026-03-25-topic'
+  //   date   — human-readable, e.g. 'Mar 2026'
+  //   title  — short headline
+  //   body   — one-sentence summary shown in the panel
+  //   detail — full description shown in the modal (plain text or simple HTML)
   const RELEASE_NOTES = [
     {
       id: 'release-2026-03-25-logo',
       date: 'Mar 2026',
       title: 'Brand logo update',
       body: 'The Teampura logo now appears across the sidebar and login page.',
+      detail: 'The Teampura brand logo now appears in two locations across the app: the left navigation sidebar uses the petrol/teal variant, and the login page uses the light/white variant. The previous placeholder org-chart icon has been replaced throughout.',
     },
     {
       id: 'release-v1.5-permissions',
       date: 'Mar 2026',
       title: 'Permissions & Groups (v1.5)',
       body: 'Permission groups, assignment policies, and role-based access control are now live.',
+      detail: 'You can now define permission groups with fine-grained access controls, set assignment policies for roles, and configure role-based access control across the organisation. Manage these from the Permissions page in the left navigation.',
     },
     {
       id: 'release-v1.4-assignment-preview',
       date: 'Feb 2026',
       title: 'Assignment Preview (v1.4)',
       body: 'Preview assignments before applying, with policy override support and conflict detection.',
+      detail: 'Before confirming a role assignment, you can now preview the outcome — including any policy conflicts, capacity warnings, and override requirements. Bulk assignments also support preview mode so large changes can be reviewed before they go live.',
     },
     {
       id: 'release-v1.3-changelog',
       date: 'Jan 2026',
       title: 'Changelog & Audit Log (v1.3)',
       body: 'Full audit trail of every data change with field-level detail, filters, and bulk-op grouping.',
+      detail: 'Every change to org data is now recorded with field-level granularity — who changed what, from which value, to which value, and when. The Changelog page lets you filter by entity type, date range, and operation. Bulk operations (CSV imports, mass updates) are grouped into a single collapsed row for readability.',
     },
     {
       id: 'release-v1.2-paybands',
       date: 'Dec 2025',
       title: 'Pay Bands & Salary Analysis (v1.2)',
       body: 'Configure salary bands by level, add location multipliers, and spot out-of-band employees.',
+      detail: 'The Pay Bands page lets you define min/max/midpoint ranges per level, apply location-based multipliers for distributed teams, and instantly see which employees fall outside their band. Salary data is hidden by default and only visible to users with the appropriate role.',
     },
   ];
 
   // ── Constants ─────────────────────────────────────────────────────────────
   const LS_KEY = 'notif_dismissed_ids';
-  const SPAN_THRESHOLD = 8;          // max direct reports before warning
-  const BIRTHDAY_WINDOW_DAYS = 14;   // days ahead to show birthdays
-  const NEW_HIRE_DAYS = 30;          // days since hire to show "new hire"
 
   // ── State ─────────────────────────────────────────────────────────────────
   let _panelOpen = false;
@@ -56,219 +65,14 @@
   }
   function isRead(id) { return _dismissed.has(id); }
 
-  // ── Date helpers ──────────────────────────────────────────────────────────
-  function daysUntilBirthday(dateOfBirth) {
-    if (!dateOfBirth) return null;
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const parts = dateOfBirth.split('-').map(Number);
-    const m = parts[1], dd = parts[2];
-    let next = new Date(today.getFullYear(), m - 1, dd);
-    if (next < today) next = new Date(today.getFullYear() + 1, m - 1, dd);
-    return Math.ceil((next - today) / 86400000);
-  }
-
-  function anniversaryYearsThisMonth(hireDate) {
-    if (!hireDate) return null;
-    const today = new Date();
-    const parts = hireDate.split('-').map(Number);
-    const hy = parts[0], hm = parts[1];
-    if (hm !== today.getMonth() + 1) return null;
-    const years = today.getFullYear() - hy;
-    return years >= 1 ? years : null;
-  }
-
-  function daysSinceHire(hireDate) {
-    if (!hireDate) return null;
-    const hired = new Date(hireDate + 'T00:00:00');
-    const days = Math.floor((new Date() - hired) / 86400000);
-    return days;
-  }
-
-  function fmtDate(iso) {
-    if (!iso) return '';
-    try {
-      return new Date(iso + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-    } catch (_) { return iso; }
-  }
-
-  function fmtBirthday(dateOfBirth) {
-    if (!dateOfBirth) return '';
-    try {
-      const parts = dateOfBirth.split('-').map(Number);
-      return new Date(2000, parts[1] - 1, parts[2]).toLocaleDateString('en-US', { month: 'long', day: 'numeric' });
-    } catch (_) { return ''; }
-  }
-
   // ── Notification computation ──────────────────────────────────────────────
-  function computeNotifications(data) {
-    const notifs = [];
-    const {
-      persons = [],
-      roles = [],
-      departments = [],
-      roleAssignments = [],
-    } = data;
-
-    const assignedRoleIds    = new Set(roleAssignments.map(a => String(a.roleId)));
-    const assignedPersonIds  = new Set(roleAssignments.map(a => String(a.personId)));
-
-    // ── Data Alerts ───────────────────────────────────────────────
-    const salaryReview = persons.filter(p => p.salaryReviewNeeded);
-    if (salaryReview.length) {
-      const names = salaryReview.slice(0, 3).map(p => p.name).join(', ');
-      notifs.push({
-        id: `alert-salary-review-${salaryReview.length}`,
-        category: 'alerts',
-        icon: 'salary',
-        title: `${salaryReview.length} ${salaryReview.length === 1 ? 'person needs' : 'people need'} salary review`,
-        body: names + (salaryReview.length > 3 ? ` +${salaryReview.length - 3} more` : ''),
-      });
-    }
-
-    const perfReview = persons.filter(p => p.performanceReviewNeeded);
-    if (perfReview.length) {
-      const names = perfReview.slice(0, 3).map(p => p.name).join(', ');
-      notifs.push({
-        id: `alert-perf-review-${perfReview.length}`,
-        category: 'alerts',
-        icon: 'perf',
-        title: `${perfReview.length} ${perfReview.length === 1 ? 'person needs' : 'people need'} performance review`,
-        body: names + (perfReview.length > 3 ? ` +${perfReview.length - 3} more` : ''),
-      });
-    }
-
-    const vacantRoles = roles.filter(r => !assignedRoleIds.has(String(r.id)));
-    if (vacantRoles.length) {
-      const titles = vacantRoles.slice(0, 3).map(r => r.title).join(', ');
-      notifs.push({
-        id: `alert-vacant-${vacantRoles.length}`,
-        category: 'alerts',
-        icon: 'vacant',
-        title: `${vacantRoles.length} vacant ${vacantRoles.length === 1 ? 'role' : 'roles'}`,
-        body: titles + (vacantRoles.length > 3 ? ` +${vacantRoles.length - 3} more` : ''),
-      });
-    }
-
-    const unassigned = persons.filter(p => !assignedPersonIds.has(String(p.id)));
-    if (unassigned.length) {
-      const names = unassigned.slice(0, 3).map(p => p.name).join(', ');
-      notifs.push({
-        id: `alert-unassigned-${unassigned.length}`,
-        category: 'alerts',
-        icon: 'person',
-        title: `${unassigned.length} ${unassigned.length === 1 ? 'employee has' : 'employees have'} no role`,
-        body: names + (unassigned.length > 3 ? ` +${unassigned.length - 3} more` : ''),
-      });
-    }
-
-    // ── Org Health ────────────────────────────────────────────────
-    const reportCount = {};
-    roles.forEach(r => {
-      if (r.managerRoleId != null) {
-        reportCount[r.managerRoleId] = (reportCount[r.managerRoleId] || 0) + 1;
-      }
-    });
-    Object.entries(reportCount).forEach(([mgrid, count]) => {
-      if (count > SPAN_THRESHOLD) {
-        const mgr = roles.find(r => String(r.id) === String(mgrid));
-        const mgrTitle = mgr ? mgr.title : `Role #${mgrid}`;
-        notifs.push({
-          id: `health-span-${mgrid}-${count}`,
-          category: 'health',
-          icon: 'span',
-          title: `${mgrTitle} has ${count} direct reports`,
-          body: `Recommended max is ${SPAN_THRESHOLD}. Consider restructuring.`,
-        });
-      }
-    });
-
-    departments.forEach(dept => {
-      if (!dept.headRoleId) {
-        notifs.push({
-          id: `health-no-head-${dept.id}`,
-          category: 'health',
-          icon: 'dept',
-          title: `${dept.name} has no department head`,
-          body: 'Assign a head role in the org chart.',
-        });
-      }
-    });
-
-    // ── People Milestones ─────────────────────────────────────────
-    persons.forEach(p => {
-      // Birthdays in the next N days
-      const daysUntil = daysUntilBirthday(p.dateOfBirth);
-      if (daysUntil !== null && daysUntil <= BIRTHDAY_WINDOW_DAYS) {
-        const year = new Date().getFullYear();
-        notifs.push({
-          id: `milestone-bday-${p.id}-${year}`,
-          category: 'milestones',
-          icon: 'birthday',
-          title: daysUntil === 0
-            ? `${p.name}'s birthday is today!`
-            : `${p.name}'s birthday in ${daysUntil} day${daysUntil === 1 ? '' : 's'}`,
-          body: fmtBirthday(p.dateOfBirth),
-        });
-      }
-
-      // Work anniversaries this calendar month
-      const years = anniversaryYearsThisMonth(p.hireDate);
-      if (years !== null) {
-        notifs.push({
-          id: `milestone-anniv-${p.id}-${years}`,
-          category: 'milestones',
-          icon: 'anniversary',
-          title: `${p.name} — ${years}-year work anniversary`,
-          body: `Joined ${fmtDate(p.hireDate)}`,
-        });
-      }
-
-      // New hires in the last 30 days
-      const sinceHire = daysSinceHire(p.hireDate);
-      if (sinceHire !== null && sinceHire >= 0 && sinceHire <= NEW_HIRE_DAYS) {
-        // Skip if we also flagged an anniversary (hire was years ago on this month)
-        if (years === null) {
-          notifs.push({
-            id: `milestone-newhire-${p.id}`,
-            category: 'milestones',
-            icon: 'newhire',
-            title: `New hire: ${p.name}`,
-            body: sinceHire === 0 ? 'Starts today' : `Joined ${fmtDate(p.hireDate)}`,
-          });
-        }
-      }
-    });
-
-    // ── Release Notes (static) ────────────────────────────────────
-    RELEASE_NOTES.forEach(r => {
-      notifs.push({ ...r, category: 'releases', icon: 'release' });
-    });
-
-    return notifs;
+  function computeNotifications() {
+    return RELEASE_NOTES.map(r => ({ ...r, category: 'releases', icon: 'release' }));
   }
 
   // ── SVG icons ─────────────────────────────────────────────────────────────
-  const ICONS = {
-    salary: `<svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="6.5"/><path d="M8 4.5v7M6 6a2 2 0 012-1.5 2 2 0 012 1.5c0 .8-.5 1.3-2 1.5-1.5.2-2 .8-2 1.5a2 2 0 002 1.5 2 2 0 002-1.5"/></svg>`,
-    perf:   `<svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><polyline points="2,12 5.5,8 8.5,10.5 12,5.5 14,7.5"/><polyline points="11,5.5 14,5.5 14,8.5"/></svg>`,
-    vacant: `<svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="12" height="12" rx="2.5"/><line x1="5" y1="8" x2="11" y2="8"/></svg>`,
-    person: `<svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="5" r="3"/><path d="M2 14c0-3.3 2.7-6 6-6s6 2.7 6 6"/></svg>`,
-    span:   `<svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="3.5" r="2"/><circle cx="3" cy="12.5" r="2"/><circle cx="8" cy="12.5" r="2"/><circle cx="13" cy="12.5" r="2"/><line x1="8" y1="5.5" x2="8" y2="8"/><line x1="3" y1="8" x2="13" y2="8"/><line x1="3" y1="8" x2="3" y2="10.5"/><line x1="8" y1="8" x2="8" y2="10.5"/><line x1="13" y1="8" x2="13" y2="10.5"/></svg>`,
-    dept:   `<svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="5.5" y="1.5" width="5" height="4" rx="1"/><rect x="1" y="10.5" width="5" height="4" rx="1"/><rect x="10" y="10.5" width="5" height="4" rx="1"/><line x1="8" y1="5.5" x2="8" y2="8"/><line x1="3.5" y1="8" x2="12.5" y2="8"/><line x1="3.5" y1="8" x2="3.5" y2="10.5"/><line x1="12.5" y1="8" x2="12.5" y2="10.5"/></svg>`,
-    birthday:   `<svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="1.5" y="7" width="13" height="7.5" rx="1.5"/><line x1="4.5" y1="7" x2="4.5" y2="10"/><line x1="8" y1="7" x2="8" y2="10"/><line x1="11.5" y1="7" x2="11.5" y2="10"/><path d="M4.5 7C4.5 5.5 3 4 4.5 3s2 2 1.5 2.5"/><path d="M8 7C8 5.5 6.5 4 8 3s2 2 1.5 2.5"/><path d="M11.5 7C11.5 5.5 10 4 11.5 3s2 2 1.5 2.5"/></svg>`,
-    anniversary:`<svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><polygon points="8,1.5 9.9,6 14.5,6.5 11,9.5 12.2,14 8,11.5 3.8,14 5,9.5 1.5,6.5 6.1,6"/></svg>`,
-    newhire:    `<svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="7" cy="5" r="3"/><path d="M1.5 14c0-3 2.5-5.5 5.5-5.5"/><line x1="11.5" y1="9" x2="11.5" y2="14"/><line x1="9" y1="11.5" x2="14" y2="11.5"/></svg>`,
-    release:    `<svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M8 1.5l2 4h4l-3.5 3 1.5 4.5L8 10.5 4 13l1.5-4.5L2 5.5h4z"/></svg>`,
-  };
-
-  // ── Category config ───────────────────────────────────────────────────────
-  const CATEGORIES = [
-    { key: 'alerts',     label: 'Data Alerts',        color: '#92400e', bg: '#fef3c7' },
-    { key: 'milestones', label: 'People Milestones',  color: '#5b21b6', bg: '#ede9fe' },
-    { key: 'health',     label: 'Org Health',         color: '#0e7490', bg: '#cffafe' },
-    { key: 'releases',   label: "What's New",         color: '#166534', bg: '#dcfce7' },
-  ];
+  const ICON_RELEASE = `<svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M8 1.5l2 4h4l-3.5 3 1.5 4.5L8 10.5 4 13l1.5-4.5L2 5.5h4z"/></svg>`;
+  const ICON_CHEVRON = `<svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="4,2 8,6 4,10"/></svg>`;
 
   // ── CSS injection ─────────────────────────────────────────────────────────
   function injectStyles() {
@@ -386,7 +190,6 @@
         color: #9ca3af;
         font-family: inherit;
       }
-      .nc-label:not(:first-child) { border-top: 1px solid #f3f4f6; margin-top: 4px; padding-top: 12px; }
       .notif-row {
         display: flex;
         align-items: flex-start;
@@ -394,6 +197,7 @@
         padding: 7px 15px;
         transition: background 0.1s;
         position: relative;
+        cursor: pointer;
       }
       .notif-row:hover { background: #f9fafb; }
       .notif-row.unread { background: #f8faff; }
@@ -434,6 +238,13 @@
         flex-shrink: 0;
         margin-top: 6px;
       }
+      .notif-chevron {
+        color: #d1d5db;
+        flex-shrink: 0;
+        margin-top: 7px;
+        transition: color 0.1s;
+      }
+      .notif-row:hover .notif-chevron { color: #9ca3af; }
       .notif-empty {
         padding: 44px 20px;
         text-align: center;
@@ -447,6 +258,99 @@
         inset: 0;
         z-index: 9997;
       }
+
+      /* ── Release note modal ── */
+      #release-modal-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,0.45);
+        z-index: 10000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+        animation: rmoFadeIn 0.15s ease;
+      }
+      @keyframes rmoFadeIn {
+        from { opacity: 0; }
+        to   { opacity: 1; }
+      }
+      #release-modal {
+        background: #fff;
+        border-radius: 14px;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.22), 0 4px 16px rgba(0,0,0,0.1);
+        width: 100%;
+        max-width: 480px;
+        overflow: hidden;
+        animation: rmoSlideIn 0.18s ease;
+        font-family: inherit;
+      }
+      @keyframes rmoSlideIn {
+        from { transform: translateY(10px) scale(0.98); opacity: 0; }
+        to   { transform: none; opacity: 1; }
+      }
+      #release-modal-hd {
+        padding: 22px 22px 0;
+      }
+      #release-modal-meta {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 12px;
+      }
+      #release-modal-icon {
+        width: 32px;
+        height: 32px;
+        border-radius: 8px;
+        background: #dcfce7;
+        color: #166534;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+      }
+      #release-modal-date {
+        font-size: 11.5px;
+        font-weight: 600;
+        color: #9ca3af;
+        letter-spacing: 0.02em;
+        font-family: inherit;
+      }
+      #release-modal-title {
+        font-size: 17px;
+        font-weight: 700;
+        color: #111827;
+        line-height: 1.3;
+        letter-spacing: -0.2px;
+        margin: 0 0 14px;
+        font-family: inherit;
+      }
+      #release-modal-body {
+        padding: 0 22px 22px;
+        font-size: 13.5px;
+        color: #374151;
+        line-height: 1.65;
+        font-family: inherit;
+      }
+      #release-modal-footer {
+        padding: 14px 22px 18px;
+        border-top: 1px solid #f3f4f6;
+        display: flex;
+        justify-content: flex-end;
+      }
+      #release-modal-close {
+        font-size: 13px;
+        font-weight: 500;
+        color: #fff;
+        background: #111827;
+        border: none;
+        padding: 8px 18px;
+        border-radius: 7px;
+        cursor: pointer;
+        font-family: inherit;
+        transition: background 0.12s;
+      }
+      #release-modal-close:hover { background: #1f2937; }
     `;
     document.head.appendChild(s);
   }
@@ -458,44 +362,70 @@
 
   function buildPanelHTML() {
     const uc = unreadCount();
-    const hasAny = _notifications.length > 0;
 
-    let h = `<div id="notif-panel-hd"><h3>Notifications</h3>`;
+    let h = `<div id="notif-panel-hd"><h3>What's New</h3>`;
     if (uc > 0) {
       h += `<span id="notif-unread-count">${uc}</span>`;
       h += `<button id="notif-mark-all">Mark all read</button>`;
     }
     h += `</div><div id="notif-body">`;
 
-    if (!hasAny) {
+    if (!_notifications.length) {
       h += `<div class="notif-empty">
         <svg width="32" height="32" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round">
           <path d="M8 1.5a4.5 4.5 0 014.5 4.5c0 2.5.5 4 1.5 5H2c1-1 1.5-2.5 1.5-5A4.5 4.5 0 018 1.5z"/>
           <line x1="6.5" y1="14" x2="9.5" y2="14"/>
         </svg>
-        You're all caught up
+        No updates yet
       </div>`;
     } else {
-      CATEGORIES.forEach(cat => {
-        const items = _notifications.filter(n => n.category === cat.key);
-        if (!items.length) return;
-        h += `<div class="nc-label">${cat.label}</div>`;
-        items.forEach(n => {
-          const read = isRead(n.id);
-          h += `<div class="notif-row${read ? '' : ' unread'}">
-            <div class="notif-ico" style="background:${cat.bg};color:${cat.color}">${ICONS[n.icon] || ICONS.vacant}</div>
-            <div class="notif-txt">
-              <div class="notif-title">${n.title}</div>
-              ${n.body ? `<div class="notif-sub">${n.body}</div>` : ''}
-            </div>
-            ${read ? '' : '<div class="notif-dot"></div>'}
-          </div>`;
-        });
+      _notifications.forEach(n => {
+        const read = isRead(n.id);
+        h += `<div class="notif-row${read ? '' : ' unread'}" data-release-id="${n.id}">
+          <div class="notif-ico" style="background:#dcfce7;color:#166534">${ICON_RELEASE}</div>
+          <div class="notif-txt">
+            <div class="notif-title">${n.title}</div>
+            ${n.body ? `<div class="notif-sub">${n.body}</div>` : ''}
+          </div>
+          ${read ? '' : '<div class="notif-dot"></div>'}
+          <div class="notif-chevron">${ICON_CHEVRON}</div>
+        </div>`;
       });
     }
 
     h += `</div>`;
     return h;
+  }
+
+  // ── Release note modal ────────────────────────────────────────────────────
+  function openReleaseModal(note) {
+    const overlay = document.createElement('div');
+    overlay.id = 'release-modal-overlay';
+    overlay.innerHTML = `
+      <div id="release-modal">
+        <div id="release-modal-hd">
+          <div id="release-modal-meta">
+            <div id="release-modal-icon">${ICON_RELEASE}</div>
+            <span id="release-modal-date">${note.date}</span>
+          </div>
+          <div id="release-modal-title">${note.title}</div>
+        </div>
+        <div id="release-modal-body">${note.detail || note.body}</div>
+        <div id="release-modal-footer">
+          <button id="release-modal-close">Got it</button>
+        </div>
+      </div>
+    `;
+    overlay.addEventListener('click', e => {
+      if (e.target === overlay) closeReleaseModal();
+    });
+    overlay.querySelector('#release-modal-close').addEventListener('click', closeReleaseModal);
+    document.body.appendChild(overlay);
+  }
+
+  function closeReleaseModal() {
+    const el = document.getElementById('release-modal-overlay');
+    if (el) el.remove();
   }
 
   // ── Panel open / close ────────────────────────────────────────────────────
@@ -506,7 +436,6 @@
     const btn = document.getElementById('notif-bell-btn');
     if (btn) btn.classList.add('active');
 
-    // Position panel below the bell button
     const overlay = document.createElement('div');
     overlay.id = 'notif-overlay';
     overlay.addEventListener('click', closePanel);
@@ -517,25 +446,37 @@
     panel.innerHTML = buildPanelHTML();
     document.body.appendChild(panel);
 
-    // Position dynamically relative to button
+    // Position below the bell button
     if (btn) {
       const r = btn.getBoundingClientRect();
-      panel.style.top  = (r.bottom + 8) + 'px';
+      panel.style.top   = (r.bottom + 8) + 'px';
       panel.style.right = Math.max(8, window.innerWidth - r.right) + 'px';
     } else {
       panel.style.top   = '57px';
       panel.style.right = '12px';
     }
 
-    // Mark all read
     panel.addEventListener('click', e => {
+      // Mark all read
       if (e.target.id === 'notif-mark-all' || e.target.closest('#notif-mark-all')) {
         e.stopPropagation();
         _notifications.forEach(n => _dismissed.add(n.id));
         saveDismissed();
         panel.innerHTML = buildPanelHTML();
         updateBadge();
-        // Rebind after re-render (mark all button gone now)
+        return;
+      }
+      // Click on a release row → mark read + open modal
+      const row = e.target.closest('[data-release-id]');
+      if (row) {
+        e.stopPropagation();
+        const id = row.dataset.releaseId;
+        const note = RELEASE_NOTES.find(r => r.id === id);
+        _dismissed.add(id);
+        saveDismissed();
+        updateBadge();
+        closePanel();
+        if (note) openReleaseModal(note);
       }
     });
   }
@@ -568,14 +509,13 @@
     const header = document.getElementById('app-header');
     if (!header) return;
 
-    // Remove any pre-existing manual notification icon (e.g. dashboard.html)
     const existingIconBtn = header.querySelector('.header-icon-btn');
     if (existingIconBtn) existingIconBtn.remove();
 
     const btn = document.createElement('button');
     btn.id = 'notif-bell-btn';
-    btn.title = 'Notifications';
-    btn.setAttribute('aria-label', 'Notifications');
+    btn.title = 'What\'s New';
+    btn.setAttribute('aria-label', 'What\'s New');
     btn.innerHTML = `<svg width="20" height="20" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
       <path d="M8 1.5a4.5 4.5 0 014.5 4.5c0 2.5.5 4 1.5 5H2c1-1 1.5-2.5 1.5-5A4.5 4.5 0 018 1.5z"/>
       <line x1="6.5" y1="14" x2="9.5" y2="14"/>
@@ -587,7 +527,6 @@
       else openPanel();
     });
 
-    // Insert before the avatar if present, otherwise append
     const avatar = header.querySelector('.header-avatar');
     if (avatar) {
       header.insertBefore(btn, avatar);
@@ -596,33 +535,16 @@
     }
   }
 
-  // ── Data load ─────────────────────────────────────────────────────────────
-  async function fetchAndCompute() {
-    try {
-      const res = await fetch('/api/data');
-      if (!res.ok) return;
-      const data = await res.json();
-      _notifications = computeNotifications(data);
-      updateBadge();
-      // Refresh panel if open
-      const panel = document.getElementById('notif-panel');
-      if (panel) panel.innerHTML = buildPanelHTML();
-    } catch (_) { /* silently ignore on pages without server */ }
-  }
-
-  // Pages that already load /api/data can hand it off here to avoid a second fetch
-  window.notificationsSetData = function (data) {
-    _notifications = computeNotifications(data);
-    updateBadge();
-    const panel = document.getElementById('notif-panel');
-    if (panel) panel.innerHTML = buildPanelHTML();
-  };
-
   // ── Boot ──────────────────────────────────────────────────────────────────
+  // No API fetch needed — release notes are static.
+  // window.notificationsSetData kept as no-op for backward compatibility.
+  window.notificationsSetData = function () {};
+
   document.addEventListener('DOMContentLoaded', () => {
     injectStyles();
     injectBell();
-    fetchAndCompute();
+    _notifications = computeNotifications();
+    updateBadge();
   });
 
 })();
