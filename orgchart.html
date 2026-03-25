@@ -1241,6 +1241,7 @@ let settings = { currency: 'DKK', hideSalaries: false, hideLevels: false, viewOn
 
 let snapshots = [];
 let permissionGroups = [];
+let assignmentPolicies = [];
 let personPermissionOverrides = [];
 let simMode   = false;
 let simBackup = null;
@@ -3845,7 +3846,7 @@ function saveToStorage(opts = {}) {
     fetch(endpoint, {
       method: 'POST',
       headers,
-      body: JSON.stringify({ departments, roles, persons, roleAssignments, titles: TITLES, teams, settings, salaryBands: SALARY_BANDS, levelOrder: LEVELS.map(l => l.id), locationMultipliers, permissionGroups, personPermissionOverrides, snapshots, _simLabel: simLabel, plannedChange })
+      body: JSON.stringify({ departments, roles, persons, roleAssignments, titles: TITLES, teams, settings, salaryBands: SALARY_BANDS, levelOrder: LEVELS.map(l => l.id), locationMultipliers, permissionGroups, assignmentPolicies, personPermissionOverrides, snapshots, _simLabel: simLabel, plannedChange })
     }).catch(e => console.warn('Save failed:', e));
   }, 300);
 }
@@ -3883,6 +3884,7 @@ async function loadFromStorage() {
     }
     if (saved.locationMultipliers) Object.assign(locationMultipliers, saved.locationMultipliers);
     if (saved.permissionGroups) permissionGroups.splice(0, permissionGroups.length, ...saved.permissionGroups);
+    if (saved.assignmentPolicies) assignmentPolicies.splice(0, assignmentPolicies.length, ...saved.assignmentPolicies);
     if (saved.personPermissionOverrides) personPermissionOverrides.splice(0, personPermissionOverrides.length, ...saved.personPermissionOverrides);
     if (saved.snapshots)     snapshots.splice(0, snapshots.length, ...saved.snapshots);
     if (saved.plannedChange) plannedChange = saved.plannedChange;

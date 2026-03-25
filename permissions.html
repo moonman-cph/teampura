@@ -21,58 +21,37 @@
   flex-shrink: 0; position: sticky; top: 0; z-index: 10;
 }
 .header-crumb { display: flex; align-items: center; gap: 6px; }
-.header-crumb-root { font-size: 13px; color: var(--text-muted); }
-.header-crumb-sep  { font-size: 13px; color: var(--text-muted); }
+.header-crumb-root    { font-size: 13px; color: var(--text-muted); }
+.header-crumb-sep     { font-size: 13px; color: var(--text-muted); }
 .header-crumb-current { font-size: 13px; font-weight: 600; color: var(--text-primary); }
 #perm-save-indicator { font-size: 12px; color: var(--text-muted); opacity: 0; transition: opacity 0.3s; }
 #perm-save-indicator.visible { opacity: 1; }
 
 /* ── Layout ──────────────────────────────────────────────── */
-#perm-main {
-  flex: 1;
-  padding: 0 0 40px 0;
-  display: flex;
-  flex-direction: column;
-}
+#perm-main { flex: 1; padding: 0 0 40px; }
 #perm-inner {
-  display: flex;
-  flex-direction: column;
-  gap: 28px;
-  max-width: 1100px;
-  margin: 0 auto;
-  width: 100%;
-  padding: 28px 32px;
-  box-sizing: border-box;
+  display: flex; flex-direction: column; gap: 28px;
+  max-width: 1100px; margin: 0 auto; width: 100%;
+  padding: 28px 32px; box-sizing: border-box;
 }
 
-/* ── Notice banner ───────────────────────────────────────── */
+/* ── Notice ──────────────────────────────────────────────── */
 .perm-notice {
-  background: #fffbeb;
-  border: 1px solid #fde68a;
-  border-radius: 8px;
-  padding: 10px 14px;
-  font-size: 12px;
-  color: #92400e;
-  display: flex;
-  align-items: flex-start;
-  gap: 8px;
+  background: #fffbeb; border: 1px solid #fde68a;
+  border-radius: 8px; padding: 10px 14px;
+  font-size: 12px; color: #92400e;
+  display: flex; align-items: flex-start; gap: 8px;
 }
 .perm-notice svg { flex-shrink: 0; margin-top: 1px; }
 
-/* ── Sections ────────────────────────────────────────────── */
+/* ── Section ─────────────────────────────────────────────── */
 .perm-section {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  overflow: hidden;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 10px; overflow: hidden;
 }
 .perm-section-header {
-  padding: 16px 20px;
-  border-bottom: 1px solid var(--border);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
+  padding: 16px 20px; border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
 }
 .perm-section-title { font-size: 14px; font-weight: 600; color: var(--text-primary); }
 .perm-section-sub   { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
@@ -97,46 +76,46 @@
 }
 .perm-table .empty-row:hover td { background: none; }
 
+/* ── Type badge ──────────────────────────────────────────── */
+.type-badge {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 2px 8px; border-radius: 20px;
+  font-size: 11px; font-weight: 600; white-space: nowrap;
+}
+.type-badge.allow { background: #f0fdf4; color: #15803d; border: 1px solid #86efac; }
+.type-badge.deny  { background: #fff0f0; color: #b91c1c; border: 1px solid #fca5a5; }
+
 /* ── Right pills ─────────────────────────────────────────── */
-.rights-pills { display: flex; flex-wrap: wrap; gap: 4px; }
-.right-pill {
+.pills { display: flex; flex-wrap: wrap; gap: 4px; }
+.pill {
   display: inline-flex; align-items: center;
   padding: 2px 7px; border-radius: 20px;
-  font-size: 11px; font-weight: 500;
-  background: var(--accent-light); color: var(--accent);
-  border: 1px solid var(--accent-border);
-  white-space: nowrap;
+  font-size: 11px; font-weight: 500; white-space: nowrap;
+  background: var(--accent-light); color: var(--accent); border: 1px solid var(--accent-border);
 }
-.right-pill.admin { background: #fef3c7; color: #92400e; border-color: #fde68a; }
-.right-pill.comp  { background: #f0fdf4; color: #15803d; border-color: #86efac; }
-.right-pill.write { background: #fff0f0; color: #b91c1c; border-color: #fca5a5; }
+.pill.admin { background: #fef3c7; color: #92400e; border-color: #fde68a; }
+.pill.comp  { background: #f0fdf4; color: #15803d; border-color: #86efac; }
+.pill.write { background: #fff0f0; color: #b91c1c; border-color: #fca5a5; }
+.pill.deny-pill  { background: #fff0f0; color: #b91c1c; border-color: #fca5a5; }
+.pill.group-pill { background: #f5f3ff; color: #6d28d9; border-color: #c4b5fd; }
+.pill.policy-pill { background: #eff6ff; color: #1d4ed8; border-color: #93c5fd; }
 
-/* ── Rules display ───────────────────────────────────────── */
-.rules-summary { display: flex; flex-direction: column; gap: 2px; }
+/* ── Azure badge ─────────────────────────────────────────── */
+.azure-badge {
+  font-size: 11px; padding: 1px 6px; border-radius: 4px;
+  background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe;
+  display: inline-block;
+}
+
+/* ── Rule tag ────────────────────────────────────────────── */
 .rule-tag {
   font-size: 11px; color: var(--text-secondary);
   background: var(--bg); border: 1px solid var(--border);
   border-radius: 4px; padding: 1px 6px; display: inline-block;
-}
-.no-rules { font-size: 12px; color: var(--text-muted); font-style: italic; }
-
-/* ── Azure badge ─────────────────────────────────────────── */
-.azure-groups { display: flex; flex-wrap: wrap; gap: 3px; }
-.azure-badge {
-  font-size: 11px; padding: 1px 6px; border-radius: 4px;
-  background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe;
+  white-space: nowrap;
 }
 
-/* ── Member count badge ──────────────────────────────────── */
-.member-badge {
-  display: inline-flex; align-items: center; justify-content: center;
-  min-width: 24px; height: 20px; padding: 0 6px;
-  border-radius: 10px; font-size: 11px; font-weight: 600;
-  background: var(--bg); color: var(--text-secondary);
-  border: 1px solid var(--border);
-}
-
-/* ── Action buttons ──────────────────────────────────────── */
+/* ── Buttons ─────────────────────────────────────────────── */
 .btn {
   display: inline-flex; align-items: center; gap: 5px;
   padding: 6px 12px; border-radius: 6px; font-size: 13px;
@@ -151,30 +130,26 @@
 .btn-danger:hover { background: #fff0f0; }
 .btn-icon {
   background: none; border: none; cursor: pointer; padding: 4px 6px;
-  border-radius: 5px; color: var(--text-muted); font-size: 14px;
-  transition: color 0.12s, background 0.12s;
+  border-radius: 5px; color: var(--text-muted); transition: color 0.12s, background 0.12s;
 }
 .btn-icon:hover { color: var(--text-primary); background: var(--bg); }
 .btn-icon.danger:hover { color: #ef4444; }
 
-/* ── Group editor panel ──────────────────────────────────── */
-#group-editor {
+/* ── Inline editor panel ─────────────────────────────────── */
+.editor-panel {
   border-top: 1px solid var(--border);
-  background: #fafaf9;
-  padding: 20px;
-  display: none;
+  background: #fafaf9; padding: 20px; display: none;
 }
-#group-editor.open { display: block; }
+.editor-panel.open { display: block; }
 .editor-title { font-size: 13px; font-weight: 600; color: var(--text-primary); margin-bottom: 16px; }
-.editor-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 16px;
-}
-@media (max-width: 700px) { .editor-grid { grid-template-columns: 1fr; } }
+.editor-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
 .editor-field { display: flex; flex-direction: column; gap: 5px; }
 .editor-field.full { grid-column: 1 / -1; }
-.editor-label { font-size: 11px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; }
+.editor-label {
+  font-size: 11px; font-weight: 600; color: var(--text-muted);
+  text-transform: uppercase; letter-spacing: 0.05em;
+}
+.editor-label .sub { font-weight: 400; text-transform: none; letter-spacing: 0; }
 .editor-input {
   padding: 7px 10px; border: 1px solid var(--border); border-radius: 6px;
   font-family: inherit; font-size: 13px; background: var(--surface);
@@ -182,13 +157,20 @@
 }
 .editor-input:focus { outline: none; border-color: var(--accent); }
 .editor-textarea { resize: vertical; min-height: 50px; }
+.editor-actions { display: flex; align-items: center; gap: 8px; margin-top: 16px; }
 
-/* ── Rights checkboxes ───────────────────────────────────── */
-.rights-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-  gap: 6px;
+/* ── Type toggle ─────────────────────────────────────────── */
+.type-toggle { display: flex; gap: 0; border: 1px solid var(--border); border-radius: 6px; overflow: hidden; }
+.type-toggle-opt {
+  flex: 1; padding: 6px 14px; font-size: 12px; font-weight: 600;
+  font-family: inherit; cursor: pointer; border: none;
+  background: var(--surface); color: var(--text-muted); transition: background 0.12s, color 0.12s;
 }
+.type-toggle-opt.active-allow { background: #f0fdf4; color: #15803d; }
+.type-toggle-opt.active-deny  { background: #fff0f0; color: #b91c1c; }
+
+/* ── Rights grid ─────────────────────────────────────────── */
+.rights-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 6px; }
 .rights-group-label {
   grid-column: 1 / -1;
   font-size: 10px; font-weight: 700; text-transform: uppercase;
@@ -196,7 +178,7 @@
 }
 .rights-group-label:first-child { margin-top: 0; }
 .right-check { display: flex; align-items: center; gap: 7px; cursor: pointer; }
-.right-check input[type=checkbox] { width: 14px; height: 14px; cursor: pointer; accent-color: var(--accent); }
+.right-check input { width: 14px; height: 14px; cursor: pointer; accent-color: var(--accent); }
 .right-check-label { font-size: 12px; color: var(--text-primary); }
 
 /* ── Rules builder ───────────────────────────────────────── */
@@ -204,13 +186,12 @@
 .rule-row { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
 .rule-row select, .rule-row input {
   padding: 5px 8px; border: 1px solid var(--border); border-radius: 6px;
-  font-family: inherit; font-size: 12px; background: var(--surface);
-  color: var(--text-primary);
+  font-family: inherit; font-size: 12px; background: var(--surface); color: var(--text-primary);
 }
 .rule-row select:focus, .rule-row input:focus { outline: none; border-color: var(--accent); }
 .rule-row-field { min-width: 130px; }
-.rule-row-op { min-width: 100px; }
-.rule-row-val { min-width: 150px; flex: 1; }
+.rule-row-op    { min-width: 110px; }
+.rule-row-val   { min-width: 150px; flex: 1; }
 .add-rule-btn {
   font-size: 12px; color: var(--accent); background: none; border: none;
   cursor: pointer; padding: 2px 4px; font-family: inherit;
@@ -218,47 +199,42 @@
 .add-rule-btn:hover { text-decoration: underline; }
 .rules-hint { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
 
-/* ── Editor actions ──────────────────────────────────────── */
-.editor-actions { display: flex; align-items: center; gap: 8px; margin-top: 16px; }
+/* ── Group multi-select ──────────────────────────────────── */
+.group-picker { display: flex; flex-direction: column; gap: 4px; }
+.group-pick-item { display: flex; align-items: center; gap: 7px; cursor: pointer; }
+.group-pick-item input { accent-color: var(--accent); width: 14px; height: 14px; cursor: pointer; }
+.group-pick-label { font-size: 12px; }
 
-/* ── Override panel ──────────────────────────────────────── */
-#override-panel {
-  padding: 20px;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-.person-search-row { display: flex; align-items: center; gap: 8px; }
-.person-search-row input {
+/* ── Person search ───────────────────────────────────────── */
+.person-search-wrap { position: relative; }
+.person-search-wrap input {
   padding: 7px 10px; border: 1px solid var(--border); border-radius: 6px;
   font-family: inherit; font-size: 13px; background: var(--surface);
   color: var(--text-primary); width: 260px;
 }
-.person-search-row input:focus { outline: none; border-color: var(--accent); }
+.person-search-wrap input:focus { outline: none; border-color: var(--accent); }
 .person-search-results {
   position: absolute; top: 100%; left: 0;
   background: var(--surface); border: 1px solid var(--border);
   border-radius: 8px; box-shadow: var(--shadow-md);
-  width: 280px; max-height: 200px; overflow-y: auto; z-index: 50;
-  display: none;
+  width: 280px; max-height: 200px; overflow-y: auto; z-index: 50; display: none;
 }
-.person-search-wrap { position: relative; }
 .person-search-results.open { display: block; }
-.person-search-result {
+.person-result {
   padding: 8px 12px; cursor: pointer; font-size: 13px;
   border-bottom: 1px solid var(--border);
 }
-.person-search-result:last-child { border-bottom: none; }
-.person-search-result:hover { background: var(--accent-light); }
-.person-search-result .sub { font-size: 11px; color: var(--text-muted); }
+.person-result:last-child { border-bottom: none; }
+.person-result:hover { background: var(--accent-light); }
+.person-result .sub { font-size: 11px; color: var(--text-muted); }
 
-#override-detail { display: none; }
-#override-detail.open { display: block; }
+/* ── Override detail ─────────────────────────────────────── */
+.override-detail { display: none; margin-top: 12px; }
+.override-detail.open { display: block; }
 .override-person-header {
   display: flex; align-items: center; gap: 10px;
-  padding: 12px 16px;
-  background: var(--bg); border: 1px solid var(--border);
-  border-radius: 8px; margin-bottom: 12px;
+  padding: 12px 16px; background: var(--bg);
+  border: 1px solid var(--border); border-radius: 8px; margin-bottom: 16px;
 }
 .override-avatar {
   width: 32px; height: 32px; border-radius: 50%;
@@ -266,27 +242,26 @@
   display: flex; align-items: center; justify-content: center;
   font-size: 12px; font-weight: 700; flex-shrink: 0;
 }
-.override-name { font-size: 13px; font-weight: 600; }
-.override-sub  { font-size: 11px; color: var(--text-muted); }
 
-.override-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-@media (max-width: 700px) { .override-cols { grid-template-columns: 1fr; } }
+/* ── Override groups two-column ──────────────────────────── */
+.override-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
 .override-col-title {
   font-size: 11px; font-weight: 700; text-transform: uppercase;
   letter-spacing: 0.05em; color: var(--text-muted); margin-bottom: 8px;
 }
-.group-check { display: flex; align-items: center; gap: 7px; margin-bottom: 5px; cursor: pointer; }
-.group-check input { accent-color: var(--accent); }
-.group-check-label { font-size: 12px; }
-.group-check.auto .group-check-label { color: var(--text-muted); font-style: italic; }
-.group-check.manual .group-check-label { color: var(--text-primary); font-weight: 500; }
-.deny-check { display: flex; align-items: center; gap: 7px; margin-bottom: 5px; cursor: pointer; }
-.deny-check input { accent-color: #ef4444; }
-.deny-check-label { font-size: 12px; }
+.override-group-item {
+  display: flex; align-items: center; gap: 8px;
+  padding: 6px 10px; border-radius: 6px; margin-bottom: 4px;
+  border: 1px solid var(--border); background: var(--surface);
+}
+.override-group-item.auto   { background: #fafaf9; }
+.override-group-item.manual-add { background: #f0fdf4; border-color: #86efac; }
+.override-group-item.manual-rem { background: #fff0f0; border-color: #fca5a5; }
+.override-group-check { width: 14px; height: 14px; cursor: pointer; accent-color: var(--accent); }
+.override-group-label { font-size: 12px; flex: 1; }
+.override-group-source { font-size: 10px; color: var(--text-muted); font-style: italic; }
 
-.override-actions { margin-top: 12px; display: flex; gap: 8px; }
-
-/* ── Preview table ───────────────────────────────────────── */
+/* ── Preview ─────────────────────────────────────────────── */
 .preview-filters {
   display: flex; align-items: center; gap: 8px;
   padding: 12px 16px; border-bottom: 1px solid var(--border);
@@ -294,8 +269,7 @@
 }
 .preview-filters select {
   padding: 5px 8px; border: 1px solid var(--border); border-radius: 6px;
-  font-family: inherit; font-size: 12px; background: var(--surface);
-  color: var(--text-primary);
+  font-family: inherit; font-size: 12px; background: var(--surface); color: var(--text-primary);
 }
 .preview-filters select:focus { outline: none; border-color: var(--accent); }
 .preview-filters label { font-size: 12px; color: var(--text-muted); }
@@ -308,7 +282,6 @@
 <script src="shared-nav.js"></script>
 
 <div id="app-content">
-
   <div id="app-header">
     <div class="header-crumb">
       <span class="header-crumb-root">OrgChart</span>
@@ -322,114 +295,166 @@
   <div id="perm-main">
     <div id="perm-inner">
 
-      <!-- Notice banner -->
+      <!-- Notice -->
       <div class="perm-notice">
-        <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="8" cy="8" r="7"/><line x1="8" y1="5" x2="8" y2="8.5"/><circle cx="8" cy="11" r="0.6" fill="currentColor" stroke="none"/>
-        </svg>
-        <span><strong>M1 — Configuration only.</strong> Groups and rules defined here are stored and can be reviewed in the Assignment Preview, but are not enforced yet. Enforcement is introduced in M3 (Authentication). Azure AD provisioning also lands in M3.</span>
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="7"/><line x1="8" y1="5" x2="8" y2="8.5"/><circle cx="8" cy="11" r="0.6" fill="currentColor" stroke="none"/></svg>
+        <span><strong>M1 — Configuration only.</strong> Groups and policies are stored and previewed here but not enforced yet. Enforcement and Entra ID provisioning land in M3. <strong>Deny groups always override Allow groups</strong> — if an employee is in both, the denial wins.</span>
       </div>
 
-      <!-- ── Section 1: Permission Groups ──────────────────── -->
+      <!-- ── Section 1: Permission Groups ─────────────────── -->
       <div class="perm-section" id="groups-section">
         <div class="perm-section-header">
           <div>
             <div class="perm-section-title">Permission Groups</div>
-            <div class="perm-section-sub">Define clusters of rights. Assign groups to employees via rules or individually.</div>
+            <div class="perm-section-sub">Define what each group grants or restricts. Groups contain rights only — assignment rules are configured separately below.</div>
           </div>
           <button class="btn btn-primary" onclick="openGroupEditor(null)">
-            <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
-              <line x1="6" y1="1" x2="6" y2="11"/><line x1="1" y1="6" x2="11" y2="6"/>
-            </svg>
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="6" y1="1" x2="6" y2="11"/><line x1="1" y1="6" x2="11" y2="6"/></svg>
             Add Group
           </button>
         </div>
 
-        <table class="perm-table" id="groups-table">
+        <table class="perm-table">
           <thead>
             <tr>
               <th>Group</th>
+              <th style="width:80px">Type</th>
               <th>Rights</th>
-              <th>Assignment Rules</th>
-              <th>Azure AD Groups</th>
-              <th style="width:60px">Members</th>
+              <th>Entra ID / Azure AD</th>
               <th style="width:80px"></th>
             </tr>
           </thead>
           <tbody id="groups-tbody"></tbody>
         </table>
 
-        <!-- Inline group editor -->
-        <div id="group-editor">
-          <div class="editor-title" id="editor-title">New Permission Group</div>
+        <div class="editor-panel" id="group-editor">
+          <div class="editor-title" id="group-editor-title">New Permission Group</div>
           <div class="editor-grid">
             <div class="editor-field">
               <div class="editor-label">Group Name</div>
-              <input class="editor-input" id="ed-name" type="text" placeholder="e.g. HR Read Access">
+              <input class="editor-input" id="ed-g-name" type="text" placeholder="e.g. HR Full Access">
             </div>
             <div class="editor-field">
-              <div class="editor-label">Azure AD Groups <span style="font-weight:400;text-transform:none;letter-spacing:0">(comma-separated, informational in M1)</span></div>
-              <input class="editor-input" id="ed-azure" type="text" placeholder="e.g. AAD-HR-Readers, AAD-Salary-View">
+              <div class="editor-label">Type</div>
+              <div class="type-toggle">
+                <button class="type-toggle-opt" id="type-allow-btn" onclick="setGroupType('allow')">✓ Allow</button>
+                <button class="type-toggle-opt" id="type-deny-btn"  onclick="setGroupType('deny')">✗ Deny</button>
+              </div>
             </div>
             <div class="editor-field full">
               <div class="editor-label">Description</div>
-              <textarea class="editor-input editor-textarea" id="ed-desc" placeholder="What does this group allow?"></textarea>
+              <textarea class="editor-input editor-textarea" id="ed-g-desc" placeholder="What does this group allow or restrict?"></textarea>
             </div>
             <div class="editor-field full">
-              <div class="editor-label">Rights</div>
-              <div class="rights-grid" id="rights-checkboxes"></div>
+              <div class="editor-label">Rights <span class="sub">(what this group grants if Allow, or blocks if Deny)</span></div>
+              <div class="rights-grid" id="group-rights-grid"></div>
             </div>
             <div class="editor-field full">
-              <div class="editor-label">Assignment Rules <span style="font-weight:400;text-transform:none;letter-spacing:0">(employees matching ALL rules are automatically added)</span></div>
-              <div class="rules-builder" id="rules-builder"></div>
-              <button class="add-rule-btn" onclick="addRuleRow()">+ Add rule</button>
-              <div class="rules-hint">AND logic — all rules must match. Leave empty to create a manual-only group.</div>
+              <div class="editor-label">Entra ID / Azure AD Group Names <span class="sub">(comma-separated — informational in M1, provisioned in M3)</span></div>
+              <input class="editor-input" id="ed-g-azure" type="text" placeholder="e.g. AAD-HR-Readers, AAD-Salary-View">
             </div>
           </div>
           <div class="editor-actions">
             <button class="btn btn-primary" onclick="saveGroup()">Save Group</button>
-            <button class="btn btn-ghost" onclick="closeGroupEditor()">Cancel</button>
-            <button class="btn btn-danger" id="ed-delete-btn" onclick="deleteGroup()" style="margin-left:auto;display:none">Delete Group</button>
+            <button class="btn btn-ghost"   onclick="closeGroupEditor()">Cancel</button>
+            <button class="btn btn-danger"  id="group-delete-btn" onclick="deleteGroup()" style="margin-left:auto;display:none">Delete Group</button>
           </div>
         </div>
       </div>
 
-      <!-- ── Section 2: Individual Overrides ───────────────── -->
+      <!-- ── Section 2: Assignment Policies ───────────────── -->
+      <div class="perm-section" id="policies-section">
+        <div class="perm-section-header">
+          <div>
+            <div class="perm-section-title">Assignment Policies</div>
+            <div class="perm-section-sub">Define who gets which groups. A policy matches employees by rules and assigns one or more permission groups to them.</div>
+          </div>
+          <button class="btn btn-primary" onclick="openPolicyEditor(null)">
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="6" y1="1" x2="6" y2="11"/><line x1="1" y1="6" x2="11" y2="6"/></svg>
+            Add Policy
+          </button>
+        </div>
+
+        <table class="perm-table">
+          <thead>
+            <tr>
+              <th>Policy</th>
+              <th>Matching Rules</th>
+              <th>Assigns Groups</th>
+              <th style="width:60px">Matches</th>
+              <th style="width:80px"></th>
+            </tr>
+          </thead>
+          <tbody id="policies-tbody"></tbody>
+        </table>
+
+        <div class="editor-panel" id="policy-editor">
+          <div class="editor-title" id="policy-editor-title">New Assignment Policy</div>
+          <div class="editor-grid">
+            <div class="editor-field">
+              <div class="editor-label">Policy Name</div>
+              <input class="editor-input" id="ed-p-name" type="text" placeholder="e.g. Senior Engineers">
+            </div>
+            <div class="editor-field">
+              <div class="editor-label">Description</div>
+              <input class="editor-input" id="ed-p-desc" type="text" placeholder="Optional description">
+            </div>
+            <div class="editor-field full">
+              <div class="editor-label">Matching Rules <span class="sub">(ALL rules must match — AND logic)</span></div>
+              <div class="rules-builder" id="policy-rules-builder"></div>
+              <button class="add-rule-btn" onclick="addPolicyRuleRow()">+ Add rule</button>
+              <div class="rules-hint">Leave empty to create a manual-assignment-only policy.</div>
+            </div>
+            <div class="editor-field full">
+              <div class="editor-label">Assigned Groups <span class="sub">(employees matching the rules above will be placed into these groups)</span></div>
+              <div class="group-picker" id="policy-group-picker"></div>
+              <div id="policy-group-empty" style="font-size:12px;color:var(--text-muted);font-style:italic;display:none">No permission groups defined yet. Create groups above first.</div>
+            </div>
+          </div>
+          <div class="editor-actions">
+            <button class="btn btn-primary" onclick="savePolicy()">Save Policy</button>
+            <button class="btn btn-ghost"   onclick="closePolicyEditor()">Cancel</button>
+            <button class="btn btn-danger"  id="policy-delete-btn" onclick="deletePolicy()" style="margin-left:auto;display:none">Delete Policy</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Section 3: Individual Overrides ──────────────── -->
       <div class="perm-section">
         <div class="perm-section-header">
           <div>
             <div class="perm-section-title">Individual Overrides</div>
-            <div class="perm-section-sub">Add or remove a person from groups, or grant/deny individual rights.</div>
+            <div class="perm-section-sub">Manually add or remove a person from specific groups, on top of what policies assign.</div>
           </div>
         </div>
-        <div id="override-panel">
-          <div class="person-search-row">
+        <div style="padding:20px;display:flex;flex-direction:column;gap:16px;">
+          <div style="display:flex;align-items:center;gap:8px;">
             <div class="person-search-wrap">
               <input type="text" id="person-search" placeholder="Search employee…" autocomplete="off"
                      oninput="onPersonSearch(this.value)" onfocus="onPersonSearch(this.value)">
               <div class="person-search-results" id="person-search-results"></div>
             </div>
           </div>
-          <div id="override-detail">
+          <div class="override-detail" id="override-detail">
             <div class="override-person-header">
               <div class="override-avatar" id="override-avatar">?</div>
               <div>
-                <div class="override-name" id="override-name"></div>
-                <div class="override-sub" id="override-sub"></div>
+                <div style="font-size:13px;font-weight:600" id="override-name"></div>
+                <div style="font-size:11px;color:var(--text-muted)" id="override-sub"></div>
               </div>
               <button class="btn btn-ghost" style="margin-left:auto" onclick="clearPersonSelection()">Clear</button>
             </div>
             <div class="override-cols">
               <div>
-                <div class="override-col-title">Group Membership</div>
-                <div id="override-groups-list"></div>
+                <div class="override-col-title">Allow Groups</div>
+                <div id="override-allow-list"></div>
               </div>
               <div>
-                <div class="override-col-title">Individual Rights (beyond groups)</div>
-                <div id="override-rights-list"></div>
+                <div class="override-col-title">Deny Groups</div>
+                <div id="override-deny-list"></div>
               </div>
             </div>
-            <div class="override-actions">
+            <div style="margin-top:12px;display:flex;gap:8px;">
               <button class="btn btn-primary" onclick="saveOverride()">Save Override</button>
               <button class="btn btn-danger" id="override-delete-btn" onclick="deleteOverride()" style="display:none">Remove All Overrides</button>
             </div>
@@ -437,37 +462,31 @@
         </div>
       </div>
 
-      <!-- ── Section 3: Assignment Preview ─────────────────── -->
+      <!-- ── Section 4: Assignment Preview ────────────────── -->
       <div class="perm-section">
         <div class="perm-section-header">
           <div>
             <div class="perm-section-title">Assignment Preview</div>
-            <div class="perm-section-sub">Read-only view of every employee's computed group memberships (rules + manual overrides).</div>
+            <div class="perm-section-sub">Read-only view of each employee's effective groups and resolved rights. Deny always wins.</div>
           </div>
         </div>
         <div class="preview-filters">
           <label>Group:</label>
-          <select id="filter-group" onchange="renderPreview()">
-            <option value="">All groups</option>
-          </select>
+          <select id="filter-group" onchange="renderPreview()"><option value="">All groups</option></select>
           <label>Department:</label>
-          <select id="filter-dept" onchange="renderPreview()">
-            <option value="">All departments</option>
-          </select>
+          <select id="filter-dept"  onchange="renderPreview()"><option value="">All departments</option></select>
           <label>Level:</label>
-          <select id="filter-level" onchange="renderPreview()">
-            <option value="">All levels</option>
-          </select>
+          <select id="filter-level" onchange="renderPreview()"><option value="">All levels</option></select>
           <span class="preview-count" id="preview-count"></span>
         </div>
-        <table class="perm-table" id="preview-table">
+        <table class="perm-table">
           <thead>
             <tr>
               <th>Employee</th>
               <th>Role / Level</th>
               <th>Department</th>
               <th>Effective Groups</th>
-              <th>Has Overrides</th>
+              <th>Effective Rights</th>
             </tr>
           </thead>
           <tbody id="preview-tbody"></tbody>
@@ -479,28 +498,28 @@
 </div>
 
 <script>
-// ── Data ───────────────────────────────────────────────────────────────────────
+// ── Data ──────────────────────────────────────────────────────────────────────
 
 let data = {
   departments: [], teams: [], roles: [], persons: [], roleAssignments: [],
-  settings: {}, salaryBands: {}, locationMultipliers: {},
-  permissionGroups: [], personPermissionOverrides: []
+  settings: {}, salaryBands: {}, levelOrder: [],
+  permissionGroups: [], assignmentPolicies: [], personPermissionOverrides: []
 };
 
-// ── Right definitions ──────────────────────────────────────────────────────────
+// ── Right definitions ─────────────────────────────────────────────────────────
 
 const RIGHTS = [
-  { group: 'Org Chart',    key: 'view_org_chart',   label: 'View Org Chart' },
-  { group: 'Org Chart',    key: 'edit_org_chart',   label: 'Edit Org Chart', write: true },
-  { group: 'People',       key: 'view_directory',   label: 'View Directory' },
-  { group: 'People',       key: 'edit_directory',   label: 'Edit Directory', write: true },
-  { group: 'People',       key: 'view_salaries',    label: 'View Salaries' },
-  { group: 'People',       key: 'edit_salaries',    label: 'Edit Salaries', write: true },
-  { group: 'Compensation', key: 'view_pay_bands',   label: 'View Pay Bands', comp: true },
-  { group: 'Compensation', key: 'edit_pay_bands',   label: 'Edit Pay Bands', comp: true, write: true },
-  { group: 'Admin',        key: 'view_changelog',   label: 'View Changelog', admin: true },
-  { group: 'Admin',        key: 'manage_settings',  label: 'Manage Settings', admin: true, write: true },
-  { group: 'Admin',        key: 'manage_permissions', label: 'Manage Permissions', admin: true, write: true },
+  { group: 'Org Chart',    key: 'view_org_chart',      label: 'View Org Chart' },
+  { group: 'Org Chart',    key: 'edit_org_chart',      label: 'Edit Org Chart',      write: true },
+  { group: 'People',       key: 'view_directory',      label: 'View Directory' },
+  { group: 'People',       key: 'edit_directory',      label: 'Edit Directory',      write: true },
+  { group: 'People',       key: 'view_salaries',       label: 'View Salaries' },
+  { group: 'People',       key: 'edit_salaries',       label: 'Edit Salaries',       write: true },
+  { group: 'Compensation', key: 'view_pay_bands',      label: 'View Pay Bands',      comp: true },
+  { group: 'Compensation', key: 'edit_pay_bands',      label: 'Edit Pay Bands',      comp: true, write: true },
+  { group: 'Admin',        key: 'view_changelog',      label: 'View Changelog',      admin: true },
+  { group: 'Admin',        key: 'manage_settings',     label: 'Manage Settings',     admin: true, write: true },
+  { group: 'Admin',        key: 'manage_permissions',  label: 'Manage Permissions',  admin: true, write: true },
 ];
 
 const RULE_FIELDS = [
@@ -510,7 +529,15 @@ const RULE_FIELDS = [
   { value: 'nationality',  label: 'Nationality',   ops: ['eq'] },
 ];
 
-// ── Level comparison ──────────────────────────────────────────────────────────
+// ── Helpers ───────────────────────────────────────────────────────────────────
+
+function uuid() {
+  return crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).slice(2) + Date.now().toString(36);
+}
+
+function escHtml(s) {
+  return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
 
 function levelIndex(l) {
   const order = (data.levelOrder && data.levelOrder.length) ? data.levelOrder : ['L1','L2','L3','L4','L5','L6','L7','L8'];
@@ -518,55 +545,10 @@ function levelIndex(l) {
   return i >= 0 ? i : -1;
 }
 
-// ── UUID ──────────────────────────────────────────────────────────────────────
-
-function uuid() {
-  return crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).slice(2) + Date.now().toString(36);
+function levelLabel(l) {
+  const band = data.salaryBands && data.salaryBands[l];
+  return (band && band.label) ? `${l} · ${band.label}` : l;
 }
-
-// ── Load ──────────────────────────────────────────────────────────────────────
-
-async function loadData() {
-  try {
-    const res = await fetch('/api/data');
-    data = await res.json();
-    if (!data.permissionGroups)         data.permissionGroups = [];
-    if (!data.personPermissionOverrides) data.personPermissionOverrides = [];
-  } catch (e) {
-    console.warn('Failed to load data', e);
-  }
-  render();
-}
-
-// ── Save ──────────────────────────────────────────────────────────────────────
-
-let _saveTimer = null;
-function scheduleSave() {
-  clearTimeout(_saveTimer);
-  _saveTimer = setTimeout(doSave, 400);
-}
-
-async function doSave() {
-  showSaveIndicator();
-  try {
-    await fetch('/api/data', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data)
-    });
-  } catch (e) {
-    console.warn('Save failed', e);
-  }
-}
-
-function showSaveIndicator() {
-  const el = document.getElementById('perm-save-indicator');
-  el.classList.add('visible');
-  clearTimeout(el._t);
-  el._t = setTimeout(() => el.classList.remove('visible'), 2000);
-}
-
-// ── Rule evaluation ───────────────────────────────────────────────────────────
 
 function getPersonRoles(personId) {
   return (data.roleAssignments || [])
@@ -575,18 +557,107 @@ function getPersonRoles(personId) {
     .filter(Boolean);
 }
 
+function rightPillHtml(rightKey, isDeny) {
+  const def = RIGHTS.find(r => r.key === rightKey);
+  if (!def) return `<span class="pill">${escHtml(rightKey)}</span>`;
+  if (isDeny) return `<span class="pill deny-pill">${def.label}</span>`;
+  const cls = def.admin ? 'pill admin' : def.comp ? 'pill comp' : def.write ? 'pill write' : 'pill';
+  return `<span class="${cls}">${def.label}</span>`;
+}
+
+// ── Load / save ───────────────────────────────────────────────────────────────
+
+async function loadData() {
+  try {
+    const res = await fetch('/api/data');
+    const loaded = await res.json();
+    data = loaded;
+    if (!data.permissionGroups)          data.permissionGroups = [];
+    if (!data.assignmentPolicies)        data.assignmentPolicies = [];
+    if (!data.personPermissionOverrides) data.personPermissionOverrides = [];
+    if (!data.levelOrder)                data.levelOrder = [];
+  } catch (e) {
+    console.warn('Failed to load data', e);
+  }
+  render();
+}
+
+let _saveTimer = null;
+function scheduleSave() {
+  clearTimeout(_saveTimer);
+  _saveTimer = setTimeout(doSave, 400);
+}
+async function doSave() {
+  const el = document.getElementById('perm-save-indicator');
+  el.textContent = 'Saving…';
+  el.classList.add('visible');
+  try {
+    await fetch('/api/data', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+    el.textContent = 'Saved';
+  } catch (e) {
+    el.textContent = 'Save failed';
+  }
+  clearTimeout(el._t);
+  el._t = setTimeout(() => el.classList.remove('visible'), 2000);
+}
+
+// ── Effective group/rights resolution ────────────────────────────────────────
+
+function getEffectiveGroupIds(person) {
+  // Groups assigned via policies (rules match)
+  const policyGroupIds = new Set();
+  for (const policy of (data.assignmentPolicies || [])) {
+    if (policyMatchesPerson(policy, person)) {
+      for (const gid of (policy.groupIds || [])) policyGroupIds.add(gid);
+    }
+  }
+
+  const override = (data.personPermissionOverrides || []).find(o => o.personId === person.id);
+  const addIds    = new Set((override && override.addGroupIds)    || []);
+  const removeIds = new Set((override && override.removeGroupIds) || []);
+
+  const result = new Set([...policyGroupIds, ...addIds]);
+  for (const id of removeIds) result.delete(id);
+  return result;
+}
+
+function getEffectiveRights(person) {
+  const groupIds = getEffectiveGroupIds(person);
+  const allowRights = new Set();
+  const denyRights  = new Set();
+
+  for (const gid of groupIds) {
+    const group = (data.permissionGroups || []).find(g => g.id === gid);
+    if (!group) continue;
+    const target = group.type === 'deny' ? denyRights : allowRights;
+    for (const r of (group.rights || [])) target.add(r);
+  }
+
+  // Deny always wins
+  for (const r of denyRights) allowRights.delete(r);
+  return { allow: allowRights, deny: denyRights };
+}
+
+function policyMatchesPerson(policy, person) {
+  if (!policy.rules || policy.rules.length === 0) return false;
+  return policy.rules.every(rule => personMatchesRule(person, rule));
+}
+
 function personMatchesRule(person, rule) {
   const { field, operator, value } = rule;
-  if (!field || !operator || value === undefined || value === '' || value === null) return true; // incomplete rule — skip
+  if (!field || !operator || value === undefined || value === null || value === '') return true;
 
   if (field === 'level') {
     const roles = getPersonRoles(person.id);
     if (!roles.length) return false;
-    const personLevel = roles[0].level; // primary role
-    if (operator === 'eq')  return personLevel === value;
-    if (operator === 'gte') return levelIndex(personLevel) >= levelIndex(value);
-    if (operator === 'lte') return levelIndex(personLevel) <= levelIndex(value);
-    return false;
+    const lv = roles[0].level;
+    if (operator === 'eq')  return lv === value;
+    if (operator === 'gte') return levelIndex(lv) >= levelIndex(value);
+    if (operator === 'lte') return levelIndex(lv) <= levelIndex(value);
   }
   if (field === 'departmentId') {
     const roles = getPersonRoles(person.id);
@@ -594,87 +665,55 @@ function personMatchesRule(person, rule) {
     const deptId = roles[0].departmentId;
     if (operator === 'eq') return String(deptId) === String(value);
     if (operator === 'in') return Array.isArray(value) && value.map(String).includes(String(deptId));
-    return false;
   }
   if (field === 'contractType') {
     if (operator === 'eq') return (person.contractType || '').toLowerCase() === String(value).toLowerCase();
-    return false;
   }
   if (field === 'nationality') {
     if (operator === 'eq') return (person.nationality || '').toLowerCase() === String(value).toLowerCase();
-    return false;
   }
   return false;
 }
 
-function personMatchesGroup(person, group) {
-  if (!group.rules || group.rules.length === 0) return false; // manual-only group
-  return group.rules.every(rule => personMatchesRule(person, rule));
-}
-
-function getEffectiveGroups(person) {
-  const override = (data.personPermissionOverrides || []).find(o => o.personId === person.id);
-  const removeIds = new Set((override && override.removeGroupIds) || []);
-  const addIds    = new Set((override && override.addGroupIds)    || []);
-
-  const autoGroups = (data.permissionGroups || [])
-    .filter(g => personMatchesGroup(person, g) && !removeIds.has(g.id));
-  const manualGroups = (data.permissionGroups || [])
-    .filter(g => addIds.has(g.id) && !autoGroups.find(ag => ag.id === g.id));
-
-  return { autoGroups, manualGroups, all: [...autoGroups, ...manualGroups] };
-}
-
-// ── Render groups table ───────────────────────────────────────────────────────
+// ── Render ────────────────────────────────────────────────────────────────────
 
 function render() {
   renderGroupsTable();
+  renderPoliciesTable();
   renderPreviewFilters();
   renderPreview();
 }
 
-function rightPillHtml(rightKey) {
-  const def = RIGHTS.find(r => r.key === rightKey);
-  if (!def) return `<span class="right-pill">${rightKey}</span>`;
-  const cls = def.admin ? 'right-pill admin' : def.comp ? 'right-pill comp' : def.write ? 'right-pill write' : 'right-pill';
-  return `<span class="${cls}">${def.label}</span>`;
-}
-
-function memberCount(group) {
-  return (data.persons || []).filter(p => personMatchesGroup(p, group)).length;
-}
+// ── Groups table ──────────────────────────────────────────────────────────────
 
 function renderGroupsTable() {
   const tbody = document.getElementById('groups-tbody');
   const groups = data.permissionGroups || [];
   if (!groups.length) {
-    tbody.innerHTML = `<tr class="empty-row"><td colspan="6">No permission groups yet. Click "Add Group" to create one.</td></tr>`;
+    tbody.innerHTML = `<tr class="empty-row"><td colspan="5">No permission groups yet. Click "Add Group" to create the first one.</td></tr>`;
     return;
   }
   tbody.innerHTML = groups.map(g => {
-    const rightsHtml = g.rights && g.rights.length
-      ? `<div class="rights-pills">${g.rights.map(rightPillHtml).join('')}</div>`
-      : `<span class="no-rules">None</span>`;
+    const typeBadge = g.type === 'deny'
+      ? `<span class="type-badge deny">✗ Deny</span>`
+      : `<span class="type-badge allow">✓ Allow</span>`;
 
-    const rulesHtml = g.rules && g.rules.length
-      ? `<div class="rules-summary">${g.rules.map(r => `<span class="rule-tag">${ruleLabel(r)}</span>`).join('')}</div>`
-      : `<span class="no-rules">Manual only</span>`;
+    const rightsHtml = (g.rights && g.rights.length)
+      ? `<div class="pills">${g.rights.map(r => rightPillHtml(r, g.type === 'deny')).join('')}</div>`
+      : `<span style="color:var(--text-muted);font-size:12px;font-style:italic">None</span>`;
 
-    const azureHtml = g.externalGroups && g.externalGroups.length
-      ? `<div class="azure-groups">${g.externalGroups.map(a => `<span class="azure-badge">${escHtml(a)}</span>`).join('')}</div>`
+    const azureHtml = (g.externalGroups && g.externalGroups.length)
+      ? g.externalGroups.map(a => `<span class="azure-badge">${escHtml(a)}</span>`).join(' ')
       : `<span style="color:var(--text-muted);font-size:12px">—</span>`;
-
-    const count = memberCount(g);
 
     return `<tr>
       <td>
         <div style="font-weight:600;font-size:13px">${escHtml(g.name)}</div>
         ${g.description ? `<div style="font-size:11px;color:var(--text-muted);margin-top:2px">${escHtml(g.description)}</div>` : ''}
       </td>
+      <td>${typeBadge}</td>
       <td>${rightsHtml}</td>
-      <td>${rulesHtml}</td>
       <td>${azureHtml}</td>
-      <td><span class="member-badge">${count}</span></td>
       <td>
         <button class="btn-icon" title="Edit" onclick="openGroupEditor('${g.id}')">
           <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M11 2l3 3-9 9H2v-3z"/></svg>
@@ -684,51 +723,37 @@ function renderGroupsTable() {
   }).join('');
 }
 
-function ruleLabel(rule) {
-  const fieldDef = RULE_FIELDS.find(f => f.value === rule.field);
-  const fieldLabel = fieldDef ? fieldDef.label : rule.field;
-  const opLabel = { eq: '=', gte: '≥', lte: '≤', in: 'in' }[rule.operator] || rule.operator;
-  let val = rule.value;
-  if (rule.field === 'departmentId') {
-    if (Array.isArray(val)) {
-      val = val.map(id => {
-        const d = (data.departments || []).find(d => String(d.id) === String(id));
-        return d ? d.name : id;
-      }).join(', ');
-    } else {
-      const d = (data.departments || []).find(d => String(d.id) === String(val));
-      val = d ? d.name : val;
-    }
-  }
-  if (Array.isArray(val)) val = val.join(', ');
-  return `${fieldLabel} ${opLabel} ${val}`;
-}
-
-function escHtml(s) {
-  return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-}
-
 // ── Group editor ──────────────────────────────────────────────────────────────
 
 let editingGroupId = null;
+let currentGroupType = 'allow';
+
+function setGroupType(type) {
+  currentGroupType = type;
+  document.getElementById('type-allow-btn').className = 'type-toggle-opt' + (type === 'allow' ? ' active-allow' : '');
+  document.getElementById('type-deny-btn').className  = 'type-toggle-opt' + (type === 'deny'  ? ' active-deny'  : '');
+}
 
 function openGroupEditor(groupId) {
   editingGroupId = groupId;
+  const group = groupId ? (data.permissionGroups || []).find(g => g.id === groupId) : null;
+
+  document.getElementById('group-editor-title').textContent = group ? `Edit: ${group.name}` : 'New Permission Group';
+  document.getElementById('ed-g-name').value  = group ? group.name : '';
+  document.getElementById('ed-g-desc').value  = group ? (group.description || '') : '';
+  document.getElementById('ed-g-azure').value = group ? (group.externalGroups || []).join(', ') : '';
+  document.getElementById('group-delete-btn').style.display = group ? 'inline-flex' : 'none';
+
+  setGroupType(group ? (group.type || 'allow') : 'allow');
+  buildRightsGrid('group-rights-grid', group ? (group.rights || []) : []);
+
+  // Close policy editor if open
+  document.getElementById('policy-editor').classList.remove('open');
+
   const editor = document.getElementById('group-editor');
-  const group  = groupId ? (data.permissionGroups || []).find(g => g.id === groupId) : null;
-
-  document.getElementById('editor-title').textContent  = group ? `Edit Group: ${group.name}` : 'New Permission Group';
-  document.getElementById('ed-name').value             = group ? group.name : '';
-  document.getElementById('ed-desc').value             = group ? (group.description || '') : '';
-  document.getElementById('ed-azure').value            = group ? (group.externalGroups || []).join(', ') : '';
-  document.getElementById('ed-delete-btn').style.display = group ? 'inline-flex' : 'none';
-
-  buildRightsCheckboxes(group ? group.rights : []);
-  buildRulesBuilder(group ? group.rules : []);
-
   editor.classList.add('open');
   editor.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-  document.getElementById('ed-name').focus();
+  document.getElementById('ed-g-name').focus();
 }
 
 function closeGroupEditor() {
@@ -736,155 +761,34 @@ function closeGroupEditor() {
   editingGroupId = null;
 }
 
-function buildRightsCheckboxes(selectedRights) {
-  const container = document.getElementById('rights-checkboxes');
+function buildRightsGrid(containerId, selected) {
+  const container = document.getElementById(containerId);
   const groups = [...new Set(RIGHTS.map(r => r.group))];
   container.innerHTML = groups.map(grp => {
     const items = RIGHTS.filter(r => r.group === grp);
     return `<div class="rights-group-label">${grp}</div>
-      ${items.map(r => `
-        <label class="right-check">
-          <input type="checkbox" value="${r.key}" ${selectedRights.includes(r.key) ? 'checked' : ''}>
-          <span class="right-check-label">${r.label}</span>
-        </label>`).join('')}`;
+      ${items.map(r => `<label class="right-check">
+        <input type="checkbox" value="${r.key}" ${selected.includes(r.key) ? 'checked' : ''}>
+        <span class="right-check-label">${r.label}</span>
+      </label>`).join('')}`;
   }).join('');
 }
 
-function buildRulesBuilder(rules) {
-  const builder = document.getElementById('rules-builder');
-  builder.innerHTML = '';
-  (rules || []).forEach(rule => addRuleRow(rule));
-}
-
-function addRuleRow(existing) {
-  const builder = document.getElementById('rules-builder');
-  const row = document.createElement('div');
-  row.className = 'rule-row';
-
-  const fieldSel = document.createElement('select');
-  fieldSel.className = 'rule-row-field';
-  fieldSel.innerHTML = RULE_FIELDS.map(f => `<option value="${f.value}" ${existing && existing.field === f.value ? 'selected' : ''}>${f.label}</option>`).join('');
-
-  const opSel = document.createElement('select');
-  opSel.className = 'rule-row-op';
-
-  function updateOps() {
-    const fd = RULE_FIELDS.find(f => f.value === fieldSel.value);
-    opSel.innerHTML = (fd ? fd.ops : ['eq']).map(op => {
-      const labels = { eq: 'equals', gte: '≥ (at least)', lte: '≤ (at most)', in: 'is one of' };
-      return `<option value="${op}" ${existing && existing.operator === op ? 'selected' : ''}>${labels[op] || op}</option>`;
-    }).join('');
-    updateValueField();
-  }
-
-  const valContainer = document.createElement('span');
-  valContainer.className = 'rule-row-val';
-
-  function updateValueField() {
-    const field = fieldSel.value;
-    const op    = opSel.value;
-    valContainer.innerHTML = '';
-
-    if (field === 'level') {
-      const sel = document.createElement('select');
-      sel.style.width = '100%';
-      const levels = (data.levelOrder && data.levelOrder.length) ? data.levelOrder : ['L1','L2','L3','L4','L5','L6','L7','L8'];
-      sel.innerHTML = levels.map(l => {
-        const band = data.salaryBands && data.salaryBands[l];
-        const label = band && band.label ? `${l} · ${band.label}` : l;
-        return `<option value="${l}" ${existing && existing.value === l ? 'selected' : ''}>${label}</option>`;
-      }).join('');
-      valContainer.appendChild(sel);
-    } else if (field === 'departmentId') {
-      if (op === 'in') {
-        // multi-select via checkboxes shown inline
-        const wrap = document.createElement('div');
-        wrap.style.cssText = 'display:flex;flex-wrap:wrap;gap:4px;';
-        (data.departments || []).forEach(dept => {
-          const inList = existing && Array.isArray(existing.value) && existing.value.map(String).includes(String(dept.id));
-          const lbl = document.createElement('label');
-          lbl.style.cssText = 'display:flex;align-items:center;gap:3px;font-size:11px;cursor:pointer;';
-          lbl.innerHTML = `<input type="checkbox" value="${dept.id}" ${inList ? 'checked' : ''}> ${escHtml(dept.name)}`;
-          wrap.appendChild(lbl);
-        });
-        valContainer.appendChild(wrap);
-      } else {
-        const sel = document.createElement('select');
-        sel.style.width = '100%';
-        sel.innerHTML = (data.departments || []).map(d => `<option value="${d.id}" ${existing && String(existing.value) === String(d.id) ? 'selected' : ''}>${escHtml(d.name)}</option>`).join('');
-        valContainer.appendChild(sel);
-      }
-    } else {
-      const inp = document.createElement('input');
-      inp.type  = 'text';
-      inp.style.width = '100%';
-      inp.placeholder = field === 'contractType' ? 'e.g. Permanent' : 'e.g. DK';
-      inp.value = (existing && !Array.isArray(existing.value)) ? (existing.value || '') : '';
-      valContainer.appendChild(inp);
-    }
-  }
-
-  fieldSel.addEventListener('change', () => { existing = null; updateOps(); });
-  opSel.addEventListener('change',    () => { existing = null; updateValueField(); });
-
-  updateOps();
-
-  const removeBtn = document.createElement('button');
-  removeBtn.className = 'btn-icon danger';
-  removeBtn.title = 'Remove rule';
-  removeBtn.innerHTML = `<svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="1" y1="1" x2="11" y2="11"/><line x1="11" y1="1" x2="1" y2="11"/></svg>`;
-  removeBtn.onclick = () => row.remove();
-
-  row.append(fieldSel, opSel, valContainer, removeBtn);
-  builder.appendChild(row);
-}
-
-function collectRules() {
-  const rows = document.querySelectorAll('#rules-builder .rule-row');
-  const rules = [];
-  rows.forEach(row => {
-    const sels   = row.querySelectorAll('select');
-    const field   = sels[0] ? sels[0].value : null;
-    const op      = sels[1] ? sels[1].value : null;
-    const valWrap = row.querySelector('.rule-row-val');
-    if (!field || !op || !valWrap) return;
-
-    let value;
-    const fieldDef = RULE_FIELDS.find(f => f.value === field);
-    if (field === 'departmentId' && op === 'in') {
-      const checks = valWrap.querySelectorAll('input[type=checkbox]:checked');
-      value = [...checks].map(c => isNaN(c.value) ? c.value : Number(c.value));
-      if (!value.length) return;
-    } else {
-      const sel = valWrap.querySelector('select');
-      const inp = valWrap.querySelector('input[type=text]');
-      value = sel ? (isNaN(sel.value) ? sel.value : Number(sel.value)) : (inp ? inp.value.trim() : null);
-      if (value === null || value === '') return;
-    }
-    rules.push({ field, operator: op, value });
-  });
-  return rules;
-}
-
 function saveGroup() {
-  const name = document.getElementById('ed-name').value.trim();
-  if (!name) { document.getElementById('ed-name').focus(); return; }
+  const name = document.getElementById('ed-g-name').value.trim();
+  if (!name) { document.getElementById('ed-g-name').focus(); return; }
 
-  const rights = [...document.querySelectorAll('#rights-checkboxes input[type=checkbox]:checked')].map(c => c.value);
-  const rules  = collectRules();
-  const azureRaw = document.getElementById('ed-azure').value;
-  const externalGroups = azureRaw.split(',').map(s => s.trim()).filter(Boolean);
-  const description = document.getElementById('ed-desc').value.trim();
+  const rights = [...document.querySelectorAll('#group-rights-grid input[type=checkbox]:checked')].map(c => c.value);
+  const externalGroups = document.getElementById('ed-g-azure').value.split(',').map(s => s.trim()).filter(Boolean);
+  const description = document.getElementById('ed-g-desc').value.trim();
 
   if (!data.permissionGroups) data.permissionGroups = [];
 
   if (editingGroupId) {
     const idx = data.permissionGroups.findIndex(g => g.id === editingGroupId);
-    if (idx >= 0) {
-      Object.assign(data.permissionGroups[idx], { name, description, rights, rules, externalGroups });
-    }
+    if (idx >= 0) Object.assign(data.permissionGroups[idx], { name, description, type: currentGroupType, rights, externalGroups });
   } else {
-    data.permissionGroups.push({ id: uuid(), orgId: 'default', name, description, rights, rules, externalGroups });
+    data.permissionGroups.push({ id: uuid(), orgId: 'default', name, description, type: currentGroupType, rights, externalGroups });
   }
 
   closeGroupEditor();
@@ -895,17 +799,271 @@ function saveGroup() {
 function deleteGroup() {
   if (!editingGroupId) return;
   const group = (data.permissionGroups || []).find(g => g.id === editingGroupId);
-  if (!group) return;
-  if (!confirm(`Delete group "${group.name}"? This cannot be undone.`)) return;
+  if (!group || !confirm(`Delete group "${group.name}"? It will be removed from all policies.`)) return;
 
-  data.permissionGroups = (data.permissionGroups || []).filter(g => g.id !== editingGroupId);
-  // Remove references from overrides
+  data.permissionGroups = data.permissionGroups.filter(g => g.id !== editingGroupId);
+  // Remove from policies
+  (data.assignmentPolicies || []).forEach(p => {
+    p.groupIds = (p.groupIds || []).filter(id => id !== editingGroupId);
+  });
+  // Remove from overrides
   (data.personPermissionOverrides || []).forEach(o => {
     o.addGroupIds    = (o.addGroupIds    || []).filter(id => id !== editingGroupId);
     o.removeGroupIds = (o.removeGroupIds || []).filter(id => id !== editingGroupId);
   });
 
   closeGroupEditor();
+  render();
+  scheduleSave();
+}
+
+// ── Policies table ────────────────────────────────────────────────────────────
+
+function policyMatchCount(policy) {
+  if (!policy.rules || !policy.rules.length) return 0;
+  return (data.persons || []).filter(p => policyMatchesPerson(policy, p)).length;
+}
+
+function ruleLabel(rule) {
+  const fd = RULE_FIELDS.find(f => f.value === rule.field);
+  const fieldLabel = fd ? fd.label : rule.field;
+  const opLabel = { eq: '=', gte: '≥', lte: '≤', in: 'in' }[rule.operator] || rule.operator;
+  let val = rule.value;
+  if (rule.field === 'departmentId') {
+    const ids = Array.isArray(val) ? val : [val];
+    val = ids.map(id => { const d = (data.departments || []).find(d => String(d.id) === String(id)); return d ? d.name : id; }).join(', ');
+  }
+  if (rule.field === 'level' && !Array.isArray(val)) val = levelLabel(val);
+  if (Array.isArray(val)) val = val.join(', ');
+  return `${fieldLabel} ${opLabel} ${val}`;
+}
+
+function renderPoliciesTable() {
+  const tbody = document.getElementById('policies-tbody');
+  const policies = data.assignmentPolicies || [];
+  if (!policies.length) {
+    tbody.innerHTML = `<tr class="empty-row"><td colspan="5">No assignment policies yet. Click "Add Policy" to create one.</td></tr>`;
+    return;
+  }
+  tbody.innerHTML = policies.map(p => {
+    const rulesHtml = (p.rules && p.rules.length)
+      ? p.rules.map(r => `<span class="rule-tag">${escHtml(ruleLabel(r))}</span>`).join(' ')
+      : `<span style="color:var(--text-muted);font-size:12px;font-style:italic">Manual only</span>`;
+
+    const groups = (p.groupIds || [])
+      .map(id => (data.permissionGroups || []).find(g => g.id === id))
+      .filter(Boolean);
+    const groupsHtml = groups.length
+      ? `<div class="pills">${groups.map(g => `<span class="pill ${g.type === 'deny' ? 'deny-pill' : 'group-pill'}">${escHtml(g.name)}</span>`).join('')}</div>`
+      : `<span style="color:var(--text-muted);font-size:12px;font-style:italic">None</span>`;
+
+    const count = policyMatchCount(p);
+
+    return `<tr>
+      <td>
+        <div style="font-weight:600;font-size:13px">${escHtml(p.name)}</div>
+        ${p.description ? `<div style="font-size:11px;color:var(--text-muted);margin-top:2px">${escHtml(p.description)}</div>` : ''}
+      </td>
+      <td><div style="display:flex;flex-wrap:wrap;gap:4px;">${rulesHtml}</div></td>
+      <td>${groupsHtml}</td>
+      <td><span style="font-size:13px;font-weight:500;color:var(--text-secondary)">${count}</span></td>
+      <td>
+        <button class="btn-icon" title="Edit" onclick="openPolicyEditor('${p.id}')">
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M11 2l3 3-9 9H2v-3z"/></svg>
+        </button>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+// ── Policy editor ─────────────────────────────────────────────────────────────
+
+let editingPolicyId = null;
+
+function openPolicyEditor(policyId) {
+  editingPolicyId = policyId;
+  const policy = policyId ? (data.assignmentPolicies || []).find(p => p.id === policyId) : null;
+
+  document.getElementById('policy-editor-title').textContent = policy ? `Edit: ${policy.name}` : 'New Assignment Policy';
+  document.getElementById('ed-p-name').value = policy ? policy.name : '';
+  document.getElementById('ed-p-desc').value = policy ? (policy.description || '') : '';
+  document.getElementById('policy-delete-btn').style.display = policy ? 'inline-flex' : 'none';
+
+  // Rules
+  const builder = document.getElementById('policy-rules-builder');
+  builder.innerHTML = '';
+  (policy && policy.rules || []).forEach(rule => addPolicyRuleRow(rule));
+
+  // Group picker
+  buildGroupPicker(policy ? (policy.groupIds || []) : []);
+
+  // Close group editor if open
+  document.getElementById('group-editor').classList.remove('open');
+
+  const editor = document.getElementById('policy-editor');
+  editor.classList.add('open');
+  editor.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  document.getElementById('ed-p-name').focus();
+}
+
+function closePolicyEditor() {
+  document.getElementById('policy-editor').classList.remove('open');
+  editingPolicyId = null;
+}
+
+function buildGroupPicker(selectedIds) {
+  const picker = document.getElementById('policy-group-picker');
+  const empty  = document.getElementById('policy-group-empty');
+  const groups = data.permissionGroups || [];
+  if (!groups.length) {
+    picker.innerHTML = '';
+    empty.style.display = 'block';
+    return;
+  }
+  empty.style.display = 'none';
+  picker.innerHTML = groups.map(g => {
+    const badge = g.type === 'deny'
+      ? `<span class="type-badge deny" style="font-size:10px;padding:1px 6px">✗ Deny</span>`
+      : `<span class="type-badge allow" style="font-size:10px;padding:1px 6px">✓ Allow</span>`;
+    return `<label class="group-pick-item">
+      <input type="checkbox" value="${g.id}" ${selectedIds.includes(g.id) ? 'checked' : ''}>
+      <span class="group-pick-label">${escHtml(g.name)}</span>
+      ${badge}
+    </label>`;
+  }).join('');
+}
+
+function addPolicyRuleRow(existing) {
+  const builder = document.getElementById('policy-rules-builder');
+  const row = document.createElement('div');
+  row.className = 'rule-row';
+
+  const fieldSel = document.createElement('select');
+  fieldSel.className = 'rule-row-field';
+  fieldSel.innerHTML = RULE_FIELDS.map(f =>
+    `<option value="${f.value}" ${existing && existing.field === f.value ? 'selected' : ''}>${f.label}</option>`
+  ).join('');
+
+  const opSel = document.createElement('select');
+  opSel.className = 'rule-row-op';
+
+  const valWrap = document.createElement('span');
+  valWrap.className = 'rule-row-val';
+
+  function updateOps() {
+    const fd = RULE_FIELDS.find(f => f.value === fieldSel.value);
+    const opLabels = { eq: 'equals', gte: '≥ (at least)', lte: '≤ (at most)', in: 'is one of' };
+    opSel.innerHTML = (fd ? fd.ops : ['eq']).map(op =>
+      `<option value="${op}" ${existing && existing.operator === op ? 'selected' : ''}>${opLabels[op] || op}</option>`
+    ).join('');
+    updateVal();
+  }
+
+  function updateVal() {
+    const field = fieldSel.value;
+    const op    = opSel.value;
+    valWrap.innerHTML = '';
+
+    if (field === 'level') {
+      const sel = document.createElement('select');
+      sel.style.width = '100%';
+      const levels = (data.levelOrder && data.levelOrder.length) ? data.levelOrder : ['L1','L2','L3','L4','L5','L6','L7','L8'];
+      sel.innerHTML = levels.map(l => `<option value="${l}" ${existing && existing.value === l ? 'selected' : ''}>${levelLabel(l)}</option>`).join('');
+      valWrap.appendChild(sel);
+    } else if (field === 'departmentId' && op === 'in') {
+      const wrap = document.createElement('div');
+      wrap.style.cssText = 'display:flex;flex-wrap:wrap;gap:6px;';
+      (data.departments || []).forEach(dept => {
+        const checked = existing && Array.isArray(existing.value) && existing.value.map(String).includes(String(dept.id));
+        const lbl = document.createElement('label');
+        lbl.style.cssText = 'display:flex;align-items:center;gap:3px;font-size:11px;cursor:pointer;';
+        lbl.innerHTML = `<input type="checkbox" value="${dept.id}" ${checked ? 'checked' : ''}> ${escHtml(dept.name)}`;
+        wrap.appendChild(lbl);
+      });
+      valWrap.appendChild(wrap);
+    } else if (field === 'departmentId') {
+      const sel = document.createElement('select');
+      sel.style.width = '100%';
+      sel.innerHTML = (data.departments || []).map(d =>
+        `<option value="${d.id}" ${existing && String(existing.value) === String(d.id) ? 'selected' : ''}>${escHtml(d.name)}</option>`
+      ).join('');
+      valWrap.appendChild(sel);
+    } else {
+      const inp = document.createElement('input');
+      inp.type  = 'text';
+      inp.style.width = '100%';
+      inp.placeholder = field === 'contractType' ? 'e.g. Permanent' : 'e.g. DK';
+      inp.value = (existing && !Array.isArray(existing.value)) ? (existing.value || '') : '';
+      valWrap.appendChild(inp);
+    }
+  }
+
+  fieldSel.addEventListener('change', () => { existing = null; updateOps(); });
+  opSel.addEventListener('change',    () => { existing = null; updateVal(); });
+  updateOps();
+
+  const removeBtn = document.createElement('button');
+  removeBtn.className = 'btn-icon danger';
+  removeBtn.title = 'Remove';
+  removeBtn.innerHTML = `<svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="1" y1="1" x2="11" y2="11"/><line x1="11" y1="1" x2="1" y2="11"/></svg>`;
+  removeBtn.onclick = () => row.remove();
+
+  row.append(fieldSel, opSel, valWrap, removeBtn);
+  builder.appendChild(row);
+}
+
+function collectPolicyRules() {
+  const rules = [];
+  document.querySelectorAll('#policy-rules-builder .rule-row').forEach(row => {
+    const sels  = row.querySelectorAll('select');
+    const field = sels[0] ? sels[0].value : null;
+    const op    = sels[1] ? sels[1].value : null;
+    const vw    = row.querySelector('.rule-row-val');
+    if (!field || !op || !vw) return;
+
+    let value;
+    if (field === 'departmentId' && op === 'in') {
+      value = [...vw.querySelectorAll('input[type=checkbox]:checked')].map(c => isNaN(c.value) ? c.value : Number(c.value));
+      if (!value.length) return;
+    } else {
+      const sel = vw.querySelector('select');
+      const inp = vw.querySelector('input[type=text]');
+      value = sel ? (isNaN(sel.value) ? sel.value : Number(sel.value)) : (inp ? inp.value.trim() : null);
+      if (value === null || value === '') return;
+    }
+    rules.push({ field, operator: op, value });
+  });
+  return rules;
+}
+
+function savePolicy() {
+  const name = document.getElementById('ed-p-name').value.trim();
+  if (!name) { document.getElementById('ed-p-name').focus(); return; }
+
+  const description = document.getElementById('ed-p-desc').value.trim();
+  const rules    = collectPolicyRules();
+  const groupIds = [...document.querySelectorAll('#policy-group-picker input[type=checkbox]:checked')].map(c => c.value);
+
+  if (!data.assignmentPolicies) data.assignmentPolicies = [];
+
+  if (editingPolicyId) {
+    const idx = data.assignmentPolicies.findIndex(p => p.id === editingPolicyId);
+    if (idx >= 0) Object.assign(data.assignmentPolicies[idx], { name, description, rules, groupIds });
+  } else {
+    data.assignmentPolicies.push({ id: uuid(), orgId: 'default', name, description, rules, groupIds });
+  }
+
+  closePolicyEditor();
+  render();
+  scheduleSave();
+}
+
+function deletePolicy() {
+  if (!editingPolicyId) return;
+  const policy = (data.assignmentPolicies || []).find(p => p.id === editingPolicyId);
+  if (!policy || !confirm(`Delete policy "${policy.name}"?`)) return;
+  data.assignmentPolicies = data.assignmentPolicies.filter(p => p.id !== editingPolicyId);
+  closePolicyEditor();
   render();
   scheduleSave();
 }
@@ -919,17 +1077,14 @@ function onPersonSearch(query) {
   query = query.trim().toLowerCase();
   if (!query) { results.classList.remove('open'); return; }
 
-  const matches = (data.persons || [])
-    .filter(p => p.name.toLowerCase().includes(query))
-    .slice(0, 8);
-
+  const matches = (data.persons || []).filter(p => p.name.toLowerCase().includes(query)).slice(0, 8);
   if (!matches.length) {
-    results.innerHTML = `<div class="person-search-result" style="color:var(--text-muted)">No matches</div>`;
+    results.innerHTML = `<div class="person-result" style="color:var(--text-muted)">No matches</div>`;
   } else {
     results.innerHTML = matches.map(p => {
       const roles = getPersonRoles(p.id);
       const sub   = roles.length ? `${roles[0].title} · ${roles[0].level}` : '';
-      return `<div class="person-search-result" onclick="selectPerson(${p.id})">
+      return `<div class="person-result" onclick="selectPerson(${p.id})">
         <div>${escHtml(p.name)}</div>
         ${sub ? `<div class="sub">${escHtml(sub)}</div>` : ''}
       </div>`;
@@ -943,7 +1098,6 @@ function selectPerson(personId) {
   selectedPersonId = personId;
   const person = (data.persons || []).find(p => p.id === personId);
   if (!person) return;
-
   document.getElementById('person-search').value = person.name;
   renderOverrideDetail(person);
 }
@@ -958,111 +1112,106 @@ function renderOverrideDetail(person) {
   const detail = document.getElementById('override-detail');
   detail.classList.add('open');
 
-  const initials = person.name.split(' ').map(w => w[0]).join('').slice(0,2).toUpperCase();
-  document.getElementById('override-avatar').textContent = initials;
-  document.getElementById('override-name').textContent = person.name;
-
+  document.getElementById('override-avatar').textContent = person.name.split(' ').map(w => w[0]).join('').slice(0,2).toUpperCase();
+  document.getElementById('override-name').textContent   = person.name;
   const roles = getPersonRoles(person.id);
-  document.getElementById('override-sub').textContent = roles.length ? `${roles[0].title} · ${roles[0].level}` : 'No role assigned';
+  document.getElementById('override-sub').textContent    = roles.length ? `${roles[0].title} · ${roles[0].level}` : 'No role assigned';
 
-  const override = (data.personPermissionOverrides || []).find(o => o.personId === person.id);
+  const override  = (data.personPermissionOverrides || []).find(o => o.personId === person.id);
+  const addIds    = new Set((override && override.addGroupIds)    || []);
+  const removeIds = new Set((override && override.removeGroupIds) || []);
+
+  // Compute which groups this person gets from policies
+  const policyGroupIds = new Set();
+  for (const policy of (data.assignmentPolicies || [])) {
+    if (policyMatchesPerson(policy, person)) {
+      for (const gid of (policy.groupIds || [])) policyGroupIds.add(gid);
+    }
+  }
+
   document.getElementById('override-delete-btn').style.display = override ? 'inline-flex' : 'none';
 
-  // Groups
-  const { autoGroups } = getEffectiveGroups(person);
-  const autoIds = new Set(autoGroups.map(g => g.id));
-  const manualAddIds    = new Set((override && override.addGroupIds)    || []);
-  const manualRemoveIds = new Set((override && override.removeGroupIds) || []);
+  // Render allow/deny columns separately
+  const allGroups = data.permissionGroups || [];
+  const allowGroups = allGroups.filter(g => g.type !== 'deny');
+  const denyGroups  = allGroups.filter(g => g.type === 'deny');
 
-  const groupsList = document.getElementById('override-groups-list');
-  if (!(data.permissionGroups || []).length) {
-    groupsList.innerHTML = `<div style="font-size:12px;color:var(--text-muted);font-style:italic">No groups defined yet.</div>`;
-  } else {
-    groupsList.innerHTML = (data.permissionGroups || []).map(g => {
-      const isAuto    = autoIds.has(g.id) && !manualRemoveIds.has(g.id);
-      const isManAdd  = manualAddIds.has(g.id);
-      const isManRem  = manualRemoveIds.has(g.id);
-      // Checkbox checked = in group; indeterminate = auto but removed
-      const checked = (isAuto || isManAdd) ? 'checked' : '';
-      const cls     = isAuto && !isManAdd ? 'group-check auto' : 'group-check manual';
-      const note    = isAuto && !isManRem ? ' (auto)' : isManRem ? ' (removed)' : isManAdd ? ' (added)' : '';
-      return `<label class="${cls}">
-        <input type="checkbox" data-gid="${g.id}" data-auto="${isAuto}" ${checked}>
-        <span class="group-check-label">${escHtml(g.name)}${note}</span>
-      </label>`;
+  function renderGroupList(groups, containerId) {
+    const container = document.getElementById(containerId);
+    if (!groups.length) {
+      container.innerHTML = `<div style="font-size:12px;color:var(--text-muted);font-style:italic">No groups of this type defined.</div>`;
+      return;
+    }
+    container.innerHTML = groups.map(g => {
+      const fromPolicy = policyGroupIds.has(g.id);
+      const isAdded    = addIds.has(g.id);
+      const isRemoved  = removeIds.has(g.id);
+      const isActive   = (fromPolicy && !isRemoved) || isAdded;
+      let cls = 'override-group-item';
+      let source = '';
+      if (fromPolicy && !isRemoved) { cls += ' auto';  source = 'via policy'; }
+      if (isAdded)                   { cls += ' manual-add'; source = 'manually added'; }
+      if (fromPolicy && isRemoved)   { cls += ' manual-rem'; source = 'policy-removed'; }
+      return `<div class="${cls}">
+        <input type="checkbox" class="override-group-check" data-gid="${g.id}" data-from-policy="${fromPolicy}"
+               ${isActive ? 'checked' : ''}>
+        <span class="override-group-label">${escHtml(g.name)}</span>
+        ${source ? `<span class="override-group-source">${source}</span>` : ''}
+      </div>`;
     }).join('');
   }
 
-  // Individual rights
-  const additionalRights = (override && override.additionalRights) || [];
-  const deniedRights     = (override && override.deniedRights)     || [];
-
-  const rightsList = document.getElementById('override-rights-list');
-  rightsList.innerHTML = `
-    <div style="font-size:11px;color:var(--text-muted);margin-bottom:6px">Grant beyond groups:</div>
-    ${RIGHTS.map(r => `<label class="right-check" style="margin-bottom:4px">
-      <input type="checkbox" data-rkey="${r.key}" data-mode="add" ${additionalRights.includes(r.key) ? 'checked' : ''}>
-      <span class="right-check-label">${r.label}</span>
-    </label>`).join('')}
-    <div style="font-size:11px;color:var(--text-muted);margin-top:10px;margin-bottom:6px">Deny (overrides groups):</div>
-    ${RIGHTS.map(r => `<label class="deny-check" style="margin-bottom:4px">
-      <input type="checkbox" data-rkey="${r.key}" data-mode="deny" ${deniedRights.includes(r.key) ? 'checked' : ''}>
-      <span class="deny-check-label">${r.label}</span>
-    </label>`).join('')}`;
+  renderGroupList(allowGroups, 'override-allow-list');
+  renderGroupList(denyGroups,  'override-deny-list');
 }
 
 function saveOverride() {
   if (!selectedPersonId) return;
-
   if (!data.personPermissionOverrides) data.personPermissionOverrides = [];
 
-  // Collect group checkboxes
-  const allGroupCheckboxes = document.querySelectorAll('#override-groups-list input[type=checkbox]');
+  // Compute policy-assigned group IDs
+  const person = (data.persons || []).find(p => p.id === selectedPersonId);
+  const policyGroupIds = new Set();
+  if (person) {
+    for (const policy of (data.assignmentPolicies || [])) {
+      if (policyMatchesPerson(policy, person)) {
+        for (const gid of (policy.groupIds || [])) policyGroupIds.add(gid);
+      }
+    }
+  }
+
   const addGroupIds    = [];
   const removeGroupIds = [];
 
-  allGroupCheckboxes.forEach(cb => {
-    const gid    = cb.dataset.gid;
-    const isAuto = cb.dataset.auto === 'true';
-    const checked = cb.checked;
-    if (checked && !isAuto) addGroupIds.push(gid);    // manually added
-    if (!checked && isAuto) removeGroupIds.push(gid); // auto but user removed it
+  document.querySelectorAll('.override-group-check').forEach(cb => {
+    const gid        = cb.dataset.gid;
+    const fromPolicy = cb.dataset.fromPolicy === 'true';
+    const checked    = cb.checked;
+    if (checked && !fromPolicy)  addGroupIds.push(gid);    // manually added
+    if (!checked && fromPolicy)  removeGroupIds.push(gid); // policy group manually removed
   });
 
-  // Collect individual rights
-  const additionalRights = [...document.querySelectorAll('#override-rights-list input[data-mode=add]:checked')].map(c => c.dataset.rkey);
-  const deniedRights     = [...document.querySelectorAll('#override-rights-list input[data-mode=deny]:checked')].map(c => c.dataset.rkey);
-
-  const hasAnything = addGroupIds.length || removeGroupIds.length || additionalRights.length || deniedRights.length;
-
-  // Remove existing override
   data.personPermissionOverrides = data.personPermissionOverrides.filter(o => o.personId !== selectedPersonId);
-
-  if (hasAnything) {
-    data.personPermissionOverrides.push({
-      id: uuid(), orgId: 'default',
-      personId: selectedPersonId,
-      addGroupIds, removeGroupIds, additionalRights, deniedRights
-    });
+  if (addGroupIds.length || removeGroupIds.length) {
+    data.personPermissionOverrides.push({ id: uuid(), orgId: 'default', personId: selectedPersonId, addGroupIds, removeGroupIds });
   }
 
-  document.getElementById('override-delete-btn').style.display = hasAnything ? 'inline-flex' : 'none';
+  const override = data.personPermissionOverrides.find(o => o.personId === selectedPersonId);
+  document.getElementById('override-delete-btn').style.display = override ? 'inline-flex' : 'none';
+
   render();
   scheduleSave();
 }
 
 function deleteOverride() {
-  if (!selectedPersonId) return;
-  if (!confirm('Remove all overrides for this person?')) return;
+  if (!selectedPersonId || !confirm('Remove all overrides for this person?')) return;
   data.personPermissionOverrides = (data.personPermissionOverrides || []).filter(o => o.personId !== selectedPersonId);
-
   const person = (data.persons || []).find(p => p.id === selectedPersonId);
   if (person) renderOverrideDetail(person);
   render();
   scheduleSave();
 }
 
-// Close search results when clicking outside
 document.addEventListener('click', e => {
   if (!e.target.closest('.person-search-wrap')) {
     document.getElementById('person-search-results').classList.remove('open');
@@ -1075,26 +1224,23 @@ function renderPreviewFilters() {
   const groupSel = document.getElementById('filter-group');
   const deptSel  = document.getElementById('filter-dept');
   const levelSel = document.getElementById('filter-level');
-
-  const prevGroup = groupSel.value;
-  const prevDept  = deptSel.value;
-  const prevLevel = levelSel.value;
+  const pg = groupSel.value, pd = deptSel.value, pl = levelSel.value;
 
   groupSel.innerHTML = `<option value="">All groups</option>` +
-    (data.permissionGroups || []).map(g => `<option value="${g.id}" ${prevGroup === g.id ? 'selected' : ''}>${escHtml(g.name)}</option>`).join('');
+    (data.permissionGroups || []).map(g =>
+      `<option value="${g.id}" ${pg === g.id ? 'selected' : ''}>${escHtml(g.name)} (${g.type === 'deny' ? 'Deny' : 'Allow'})</option>`
+    ).join('');
 
   deptSel.innerHTML = `<option value="">All departments</option>` +
-    (data.departments || []).map(d => `<option value="${d.id}" ${prevDept === String(d.id) ? 'selected' : ''}>${escHtml(d.name)}</option>`).join('');
+    (data.departments || []).map(d =>
+      `<option value="${d.id}" ${pd === String(d.id) ? 'selected' : ''}>${escHtml(d.name)}</option>`
+    ).join('');
 
   const levels = (data.levelOrder && data.levelOrder.length)
     ? data.levelOrder
     : [...new Set((data.roles || []).map(r => r.level).filter(Boolean))].sort((a,b) => levelIndex(a) - levelIndex(b));
   levelSel.innerHTML = `<option value="">All levels</option>` +
-    levels.map(l => {
-      const band = data.salaryBands && data.salaryBands[l];
-      const label = band && band.label ? `${l} · ${band.label}` : l;
-      return `<option value="${l}" ${prevLevel === l ? 'selected' : ''}>${label}</option>`;
-    }).join('');
+    levels.map(l => `<option value="${l}" ${pl === l ? 'selected' : ''}>${levelLabel(l)}</option>`).join('');
 }
 
 function renderPreview() {
@@ -1108,18 +1254,15 @@ function renderPreview() {
     persons = persons.filter(p => {
       const roles = getPersonRoles(p.id);
       if (!roles.length) return false;
-      const role = roles[0];
-      if (filterDept  && String(role.departmentId) !== String(filterDept))  return false;
-      if (filterLevel && role.level !== filterLevel) return false;
+      const r = roles[0];
+      if (filterDept  && String(r.departmentId) !== String(filterDept)) return false;
+      if (filterLevel && r.level !== filterLevel) return false;
       return true;
     });
   }
 
   if (filterGroup) {
-    persons = persons.filter(p => {
-      const { all } = getEffectiveGroups(p);
-      return all.some(g => g.id === filterGroup);
-    });
+    persons = persons.filter(p => getEffectiveGroupIds(p).has(filterGroup));
   }
 
   document.getElementById('preview-count').textContent = `${persons.length} employee${persons.length !== 1 ? 's' : ''}`;
@@ -1131,38 +1274,44 @@ function renderPreview() {
   }
 
   tbody.innerHTML = persons.map(p => {
-    const roles = getPersonRoles(p.id);
-    const role  = roles[0];
-    const dept  = role ? (data.departments || []).find(d => d.id === role.departmentId) : null;
-    const { all: effectiveGroups } = getEffectiveGroups(p);
+    const roles  = getPersonRoles(p.id);
+    const role   = roles[0];
+    const dept   = role ? (data.departments || []).find(d => d.id === role.departmentId) : null;
+    const groupIds = getEffectiveGroupIds(p);
+    const { allow, deny } = getEffectiveRights(p);
     const override = (data.personPermissionOverrides || []).find(o => o.personId === p.id);
-    const hasOverride = !!(override && (
-      (override.addGroupIds && override.addGroupIds.length) ||
-      (override.removeGroupIds && override.removeGroupIds.length) ||
-      (override.additionalRights && override.additionalRights.length) ||
-      (override.deniedRights && override.deniedRights.length)
-    ));
 
-    const groupsHtml = effectiveGroups.length
-      ? `<div class="rights-pills">${effectiveGroups.map(g => `<span class="right-pill">${escHtml(g.name)}</span>`).join('')}</div>`
+    const groups = [...groupIds]
+      .map(id => (data.permissionGroups || []).find(g => g.id === id))
+      .filter(Boolean);
+    const groupsHtml = groups.length
+      ? `<div class="pills">${groups.map(g => `<span class="pill ${g.type === 'deny' ? 'deny-pill' : 'group-pill'}">${escHtml(g.name)}</span>`).join('')}</div>`
       : `<span style="color:var(--text-muted);font-size:12px">—</span>`;
 
-    const overrideHtml = hasOverride
-      ? `<span style="font-size:12px;color:var(--accent);font-weight:500;cursor:pointer" onclick="selectPerson(${p.id});document.getElementById('person-search').value=''">Yes</span>`
-      : `<span style="font-size:12px;color:var(--text-muted)">—</span>`;
+    let rightsHtml = '';
+    if (allow.size) {
+      rightsHtml += `<div class="pills" style="margin-bottom:2px">${[...allow].map(r => rightPillHtml(r, false)).join('')}</div>`;
+    }
+    if (deny.size) {
+      rightsHtml += `<div class="pills">${[...deny].map(r => rightPillHtml(r, true)).join('')}</div>`;
+    }
+    if (!allow.size && !deny.size) rightsHtml = `<span style="color:var(--text-muted);font-size:12px">—</span>`;
+
+    const overrideIndicator = override
+      ? `<span style="font-size:11px;color:var(--accent);font-weight:500;cursor:pointer" onclick="selectPerson(${p.id})" title="Has manual overrides">●</span>`
+      : '';
 
     return `<tr>
-      <td style="font-weight:500">${escHtml(p.name)}</td>
+      <td><span style="font-weight:500">${escHtml(p.name)}</span> ${overrideIndicator}</td>
       <td>${role ? `<span style="font-size:12px">${escHtml(role.title)}</span> <span style="font-size:11px;color:var(--text-muted)">${role.level}</span>` : '<span style="color:var(--text-muted)">—</span>'}</td>
       <td style="font-size:13px">${dept ? escHtml(dept.name) : '—'}</td>
       <td>${groupsHtml}</td>
-      <td>${overrideHtml}</td>
+      <td>${rightsHtml}</td>
     </tr>`;
   }).join('');
 }
 
 // ── Boot ──────────────────────────────────────────────────────────────────────
-
 loadData();
 </script>
 </body>
