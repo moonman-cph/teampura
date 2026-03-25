@@ -17,38 +17,38 @@
   const RELEASE_NOTES = [
     {
       id: 'release-0.4.1-logo',
-      date: 'Mar 2026',
+      date: '26 Mar 2026',
       title: 'Brand logo (0.4.1)',
       body: 'The Teampura logo now appears across the sidebar and login page.',
       detail: 'The Teampura brand logo now appears in two locations across the app: the left navigation sidebar uses the petrol/teal variant, and the login page uses the light/white variant. The previous placeholder org-chart icon has been replaced throughout.',
     },
     {
       id: 'release-0.4.0-permissions',
-      date: 'Mar 2026',
+      date: '25 Mar 2026',
       title: 'Permissions & Groups (0.4.0)',
       body: 'Permission groups, assignment policies, and role-based access control are now live.',
       detail: 'You can now define permission groups with fine-grained access controls, set assignment policies for roles, and configure role-based access control across the organisation. Manage these from the Permissions page in the left navigation.',
     },
     {
       id: 'release-0.3.0-assignment-preview',
-      date: 'Feb 2026',
+      date: '25 Mar 2026',
       title: 'Assignment Preview (0.3.0)',
       body: 'Preview assignments before applying, with policy override support and conflict detection.',
       detail: 'Before confirming a role assignment, you can now preview the outcome — including any policy conflicts, capacity warnings, and override requirements. Bulk assignments also support preview mode so large changes can be reviewed before they go live.',
     },
     {
-      id: 'release-0.2.0-changelog',
-      date: 'Jan 2026',
-      title: 'Changelog & Audit Log (0.2.0)',
-      body: 'Full audit trail of every data change with field-level detail, filters, and bulk-op grouping.',
-      detail: 'Every change to org data is now recorded with field-level granularity — who changed what, from which value, to which value, and when. The Changelog page lets you filter by entity type, date range, and operation. Bulk operations (CSV imports, mass updates) are grouped into a single collapsed row for readability.',
-    },
-    {
-      id: 'release-0.1.0-paybands',
-      date: 'Dec 2025',
-      title: 'Pay Bands & Salary Analysis (0.1.0)',
+      id: 'release-0.2.0-paybands',
+      date: '24 Mar 2026',
+      title: 'Pay Bands & Salary Analysis (0.2.0)',
       body: 'Configure salary bands by level, add location multipliers, and spot out-of-band employees.',
       detail: 'The Pay Bands page lets you define min/max/midpoint ranges per level, apply location-based multipliers for distributed teams, and instantly see which employees fall outside their band. Salary data is hidden by default and only visible to users with the appropriate role.',
+    },
+    {
+      id: 'release-0.1.0-changelog',
+      date: '23 Mar 2026',
+      title: 'Changelog & Audit Log (0.1.0)',
+      body: 'Full audit trail of every data change with field-level detail, filters, and bulk-op grouping.',
+      detail: 'Every change to org data is now recorded with field-level granularity — who changed what, from which value, to which value, and when. The Changelog page lets you filter by entity type, date range, and operation. Bulk operations (CSV imports, mass updates) are grouped into a single collapsed row for readability.',
     },
   ];
 

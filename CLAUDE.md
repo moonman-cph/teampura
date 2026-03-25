@@ -67,7 +67,7 @@ Before committing and pushing any meaningful change, prepend a new entry to the 
 ```js
 {
   id: 'release-0.5.0-topic',        // unique — version number + short topic slug
-  date: 'Mon YYYY',                  // e.g. 'Mar 2026'
+  date: 'DD Mon YYYY',               // e.g. '26 Mar 2026'
   title: 'Feature name (0.5.0)',     // include version number in the title
   body: 'One sentence summary shown in the notification panel.',
   detail: 'Full description shown when the user clicks the entry. Can be a paragraph or two.',
