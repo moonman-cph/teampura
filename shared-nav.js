@@ -57,16 +57,7 @@
   // ── Full nav HTML ──────────────────────────────────────────────────────────
   const html = `
   <div id="nav-logo">
-    <div class="nav-logo-icon">
-      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-        <circle cx="8" cy="3" r="2" fill="white"/>
-        <circle cx="3" cy="11" r="2" fill="white" opacity="0.7"/>
-        <circle cx="13" cy="11" r="2" fill="white" opacity="0.7"/>
-        <line x1="8" y1="5" x2="3" y2="9" stroke="white" stroke-width="1.2" opacity="0.6"/>
-        <line x1="8" y1="5" x2="13" y2="9" stroke="white" stroke-width="1.2" opacity="0.6"/>
-      </svg>
-    </div>
-    <span class="nav-logo-name">Teampura</span>
+    <img src="/images/teampura-petrol-small.svg" alt="Teampura" class="nav-logo-img">
   </div>
   <div id="nav-body">
     <div class="nav-section">
