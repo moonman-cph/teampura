@@ -58,13 +58,17 @@ git add orgchart.html && git commit -m "Your message here" && git push
 
 ### Release Notes (required before every push)
 
-Before committing and pushing any meaningful change, prepend a new entry to the **top** of the `RELEASE_NOTES` array in `notifications.js`:
+The app uses **semver** (`MAJOR.MINOR.PATCH`). Current version: `0.4.1`. MAJOR stays `0` until the product has a stable public launch (post-M3). Bump rules:
+- **MINOR** (`0.x.0`) — new user-visible feature (e.g. a new page, a new capability)
+- **PATCH** (`0.x.y`) — bug fix, UI improvement, or small change
+
+Before committing and pushing any meaningful change, prepend a new entry to the **top** of the `RELEASE_NOTES` array in `notifications.js` and update `package.json`:
 
 ```js
 {
-  id: 'release-YYYY-MM-DD-topic',   // unique slug — date + short topic, e.g. release-2026-03-25-logo
+  id: 'release-0.5.0-topic',        // unique — version number + short topic slug
   date: 'Mon YYYY',                  // e.g. 'Mar 2026'
-  title: 'Short title of change',
+  title: 'Feature name (0.5.0)',     // include version number in the title
   body: 'One sentence summary shown in the notification panel.',
   detail: 'Full description shown when the user clicks the entry. Can be a paragraph or two.',
 },
@@ -72,8 +76,8 @@ Before committing and pushing any meaningful change, prepend a new entry to the 
 
 Rules:
 - Always prepend (newest first).
-- `id` must be unique — use the date + a short topic slug to guarantee this.
-- Only add an entry for changes visible to the user (UI changes, new features, bug fixes). Skip pure infrastructure or config-only changes.
+- `id` must be unique — use the version number + a short topic slug.
+- Only add an entry for changes visible to the user. Skip pure infrastructure or config-only changes.
 - The entry will appear as unread in the notification bell for all users on their next page load.
 
 ## Product Roadmap
