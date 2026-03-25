@@ -467,14 +467,7 @@
         <div class="perm-section-header">
           <div>
             <div class="perm-section-title">Assignment Preview</div>
-            <div class="perm-section-sub">Read-only view of each employee's effective groups and resolved rights. Deny always wins. <span style="color:#f59e0b;font-weight:500">Reflects org data at the time this page was loaded — refresh to see the latest.</span></div>
-          </div>
-          <div style="display:flex;align-items:center;gap:10px;flex-shrink:0">
-            <span id="preview-loaded-at" style="font-size:11px;color:var(--text-muted)"></span>
-            <button class="btn btn-ghost" style="font-size:12px;padding:5px 10px" onclick="refreshPreviewData()">
-              <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M1 8a7 7 0 0 1 12-4.9M15 8a7 7 0 0 1-12 4.9"/><polyline points="11,3 15,3 15,7"/><polyline points="5,13 1,13 1,9"/></svg>
-              Refresh
-            </button>
+            <div class="perm-section-sub">Read-only view of each employee's active policies, effective groups, and resolved rights. Deny always wins.</div>
           </div>
         </div>
         <div class="preview-filters">
@@ -492,6 +485,7 @@
               <th>Employee</th>
               <th>Role / Level</th>
               <th>Department</th>
+              <th>Active Policies</th>
               <th>Effective Groups</th>
               <th>Effective Rights</th>
             </tr>
@@ -574,8 +568,6 @@ function rightPillHtml(rightKey, isDeny) {
 
 // ── Load / save ───────────────────────────────────────────────────────────────
 
-let dataLoadedAt = null;
-
 async function loadData() {
   try {
     const res = await fetch('/api/data');
@@ -585,26 +577,10 @@ async function loadData() {
     if (!data.assignmentPolicies)        data.assignmentPolicies = [];
     if (!data.personPermissionOverrides) data.personPermissionOverrides = [];
     if (!data.levelOrder)                data.levelOrder = [];
-    dataLoadedAt = new Date();
   } catch (e) {
     console.warn('Failed to load data', e);
   }
   render();
-  updateLoadedAtLabel();
-}
-
-function updateLoadedAtLabel() {
-  const el = document.getElementById('preview-loaded-at');
-  if (el && dataLoadedAt) {
-    el.textContent = `as of ${dataLoadedAt.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit', second: '2-digit' })}`;
-  }
-}
-
-async function refreshPreviewData() {
-  const btn = document.querySelector('[onclick="refreshPreviewData()"]');
-  if (btn) btn.disabled = true;
-  await loadData();
-  if (btn) btn.disabled = false;
 }
 
 let _saveTimer = null;
@@ -631,6 +607,23 @@ async function doSave() {
 }
 
 // ── Effective group/rights resolution ────────────────────────────────────────
+
+function getActivePolicies(person) {
+  return (data.assignmentPolicies || []).filter(policy => policyMatchesPerson(policy, person));
+}
+
+function getGroupPolicyMap(person) {
+  // Returns Map<groupId, policyName> — which policy first assigned each group
+  const map = new Map();
+  for (const policy of (data.assignmentPolicies || [])) {
+    if (policyMatchesPerson(policy, person)) {
+      for (const gid of (policy.groupIds || [])) {
+        if (!map.has(gid)) map.set(gid, policy.name);
+      }
+    }
+  }
+  return map;
+}
 
 function getEffectiveGroupIds(person) {
   // Groups assigned via policies (rules match)
@@ -1149,13 +1142,10 @@ function renderOverrideDetail(person) {
   const addIds    = new Set((override && override.addGroupIds)    || []);
   const removeIds = new Set((override && override.removeGroupIds) || []);
 
-  // Compute which groups this person gets from policies
+  // Compute which groups this person gets from policies, and track which policy assigned each
   const policyGroupIds = new Set();
-  for (const policy of (data.assignmentPolicies || [])) {
-    if (policyMatchesPerson(policy, person)) {
-      for (const gid of (policy.groupIds || [])) policyGroupIds.add(gid);
-    }
-  }
+  const groupPolicyMap = getGroupPolicyMap(person);
+  for (const gid of groupPolicyMap.keys()) policyGroupIds.add(gid);
 
   document.getElementById('override-delete-btn').style.display = override ? 'inline-flex' : 'none';
 
@@ -1172,14 +1162,15 @@ function renderOverrideDetail(person) {
     }
     container.innerHTML = groups.map(g => {
       const fromPolicy = policyGroupIds.has(g.id);
+      const policyName = groupPolicyMap.get(g.id);
       const isAdded    = addIds.has(g.id);
       const isRemoved  = removeIds.has(g.id);
       const isActive   = (fromPolicy && !isRemoved) || isAdded;
       let cls = 'override-group-item';
       let source = '';
-      if (fromPolicy && !isRemoved) { cls += ' auto';  source = 'via policy'; }
+      if (fromPolicy && !isRemoved) { cls += ' auto';  source = policyName ? `via ${policyName}` : 'via policy'; }
       if (isAdded)                   { cls += ' manual-add'; source = 'manually added'; }
-      if (fromPolicy && isRemoved)   { cls += ' manual-rem'; source = 'policy-removed'; }
+      if (fromPolicy && isRemoved)   { cls += ' manual-rem'; source = policyName ? `${policyName} (removed)` : 'policy-removed'; }
       return `<div class="${cls}">
         <input type="checkbox" class="override-group-check" data-gid="${g.id}" data-from-policy="${fromPolicy}"
                ${isActive ? 'checked' : ''}>
@@ -1297,7 +1288,7 @@ function renderPreview() {
 
   const tbody = document.getElementById('preview-tbody');
   if (!persons.length) {
-    tbody.innerHTML = `<tr class="empty-row"><td colspan="5">No employees match the current filters.</td></tr>`;
+    tbody.innerHTML = `<tr class="empty-row"><td colspan="6">No employees match the current filters.</td></tr>`;
     return;
   }
 
@@ -1308,6 +1299,11 @@ function renderPreview() {
     const groupIds = getEffectiveGroupIds(p);
     const { allow, deny } = getEffectiveRights(p);
     const override = (data.personPermissionOverrides || []).find(o => o.personId === p.id);
+
+    const activePolicies = getActivePolicies(p);
+    const policiesHtml = activePolicies.length
+      ? `<div class="pills">${activePolicies.map(pol => `<span class="pill" style="background:rgba(99,102,241,0.12);color:#818cf8;border:1px solid rgba(99,102,241,0.25)">${escHtml(pol.name)}</span>`).join('')}</div>`
+      : `<span style="color:var(--text-muted);font-size:12px">—</span>`;
 
     const groups = [...groupIds]
       .map(id => (data.permissionGroups || []).find(g => g.id === id))
@@ -1333,6 +1329,7 @@ function renderPreview() {
       <td><span style="font-weight:500">${escHtml(p.name)}</span> ${overrideIndicator}</td>
       <td>${role ? `<span style="font-size:12px">${escHtml(role.title)}</span> <span style="font-size:11px;color:var(--text-muted)">${role.level}</span>` : '<span style="color:var(--text-muted)">—</span>'}</td>
       <td style="font-size:13px">${dept ? escHtml(dept.name) : '—'}</td>
+      <td>${policiesHtml}</td>
       <td>${groupsHtml}</td>
       <td>${rightsHtml}</td>
     </tr>`;
