@@ -35,32 +35,15 @@ Introduce a versioned REST API: all routes move to `/api/v1/`. No route may be r
 | `audit_log` table | ✓ Done | Append-only, application-driven |
 | Changelog filtering API | ✓ Done | Full query/filter support |
 | Sensitive field detection | ✓ Done | `isSensitive` flag set in audit entries |
-| CDC triggers | ✗ Pending | Design in `db/schema.sql`, not yet deployed |
 | Normalized schema | ✗ Pending | 9-table design in `db/schema.sql`, not deployed — currently single JSONB blob in `org_state` |
 | Column-level encryption | ✗ Pending | `pgcrypto` placeholder in `.env.example` only |
-| Multi-tenancy isolation | ✗ Pending | No RLS or schema-per-tenant yet |
 | Input validation | ✗ Pending | API routes accept raw JSON without validation |
 
-Multi-tenancy is built into the data model from day one. Three deployment tiers will be supported by the same codebase, differing only in connection configuration:
-- **Shared** — schema-per-tenant in a shared PostgreSQL instance, row-level security enforced at DB level. For SME customers.
-- **Dedicated DB** — isolated database per customer on shared infrastructure. For mid-market or regulated customers.
-- **Single-tenant** — fully isolated stack (own container/server). For enterprise customers with strict data residency or compliance requirements (e.g. must remain within a specific country).
-
 Security foundations introduced in this milestone:
-- TLS enforced everywhere — no plain HTTP, including internal service communication.
-- Sensitive fields (salary, personal identifiers) encrypted at field level; encryption keys are tenant-isolated and managed via a key management service (e.g. AWS KMS or Azure Key Vault).
-- The changelog introduced in M1 migrates from `changelog.json` to a PostgreSQL `audit_log` table. The table is append-only (the application DB role has INSERT + SELECT only — no UPDATE or DELETE). Sensitive field values (`isSensitive: true`) are encrypted at column level using `pgcrypto` with tenant-isolated keys. The diff and data write occur in a single transaction.
+- TLS enforced everywhere — handled by Azure App Service.
+- Sensitive fields (salary, personal identifiers) encrypted at field level via `pgcrypto`; encryption keys managed via Azure Key Vault.
+- The changelog introduced in M1 migrates from `changelog.json` to a PostgreSQL `audit_log` table (done). The table is append-only (INSERT + SELECT only). The diff and data write should occur in a single transaction.
 - Input sanitisation and server-side validation on all API endpoints. No trust of client-supplied data.
-
-**Change Data Capture (CDC) — hard audit guarantee:** A `BEFORE INSERT OR UPDATE OR DELETE` trigger on every data table (`persons`, `roles`, `departments`, `teams`, `role_assignments`, `salary_bands`) writes a row to `audit_log` within the **same transaction** as the data change. This means: if the data write commits, the log entry commits; if the data write rolls back, the log entry rolls back — they cannot be separated. The trigger fires regardless of which code path caused the change (API, migration script, admin DB tool, etc.). The application-level diff introduced in M1 becomes supplementary context (providing `changeReason`, `correlationId`, `actorId` from the request) rather than the primary logging mechanism. The trigger provides the hard guarantee; the application layer enriches each entry.
-
-| | M1 | M2 |
-|---|---|---|
-| Mechanism | Server-side diff on `POST /api/data` | PostgreSQL trigger on every row change |
-| Atomicity | Two separate file writes (not atomic) | Same DB transaction |
-| Bypassed by direct file edit? | Yes | No (trigger fires on all DB writes) |
-| Bypassed by bug in diff code? | Yes | No |
-| Actor/reason enrichment | Yes (from headers) | Yes (from application layer via session variable) |
 
 **Architecture pattern — modular monolith:** The application is one deployable unit, but internally divided into strict modules (auth, org-data, compensation, workflows, AI, export). No module may import another module's internals — only its public interface. This allows a module to be extracted into a standalone microservice later by moving the module and updating the router, without rewriting business logic. The compensation module is the most likely candidate for early extraction due to its distinct security and access requirements.
 
@@ -118,7 +101,16 @@ Step-by-step onboarding flows per user role. Contextual tooltips and walkthrough
 
 ---
 
-## M10 — Mobile (separate codebase)
+## M10 — Infrastructure Hardening
+Advanced database and security features deferred from earlier milestones, to be tackled once the product has real customers and the complexity is justified:
+
+- **CDC Triggers** — PostgreSQL `BEFORE INSERT/UPDATE/DELETE` triggers on all data tables writing to `audit_log` in the same transaction, so the audit trail is guaranteed regardless of what writes to the DB (admin tools, migration scripts, etc.)
+- **Row-Level Security (RLS)** — PostgreSQL RLS policies enforcing tenant isolation at the database level, so Org A can never see Org B's data even if application code has a bug. Enables the shared multi-tenant deployment tier.
+- **Schema-per-tenant** — Full schema isolation for dedicated-DB and enterprise tiers.
+
+---
+
+## M11 — Mobile (separate codebase)
 A mobile application is out of scope for this codebase. It will be a separate app that consumes the versioned API from M2/M8. No decisions in this codebase should be made to accommodate mobile — keep the web app desktop-first.
 
 ---
