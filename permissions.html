@@ -789,7 +789,11 @@ function addRuleRow(existing) {
       const sel = document.createElement('select');
       sel.style.width = '100%';
       const levels = (data.levelOrder && data.levelOrder.length) ? data.levelOrder : ['L1','L2','L3','L4','L5','L6','L7','L8'];
-      sel.innerHTML = levels.map(l => `<option value="${l}" ${existing && existing.value === l ? 'selected' : ''}>${l}</option>`).join('');
+      sel.innerHTML = levels.map(l => {
+        const band = data.salaryBands && data.salaryBands[l];
+        const label = band && band.label ? `${l} · ${band.label}` : l;
+        return `<option value="${l}" ${existing && existing.value === l ? 'selected' : ''}>${label}</option>`;
+      }).join('');
       valContainer.appendChild(sel);
     } else if (field === 'departmentId') {
       if (op === 'in') {
@@ -1086,7 +1090,11 @@ function renderPreviewFilters() {
     ? data.levelOrder
     : [...new Set((data.roles || []).map(r => r.level).filter(Boolean))].sort((a,b) => levelIndex(a) - levelIndex(b));
   levelSel.innerHTML = `<option value="">All levels</option>` +
-    levels.map(l => `<option value="${l}" ${prevLevel === l ? 'selected' : ''}>${l}</option>`).join('');
+    levels.map(l => {
+      const band = data.salaryBands && data.salaryBands[l];
+      const label = band && band.label ? `${l} · ${band.label}` : l;
+      return `<option value="${l}" ${prevLevel === l ? 'selected' : ''}>${label}</option>`;
+    }).join('');
 }
 
 function renderPreview() {
