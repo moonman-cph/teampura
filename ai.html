@@ -307,6 +307,12 @@
     scrollBottom();
   }
 
+  // Only hr / org_admin / super_admin may write data — mirrors server WRITE_ROLES.
+  const WRITE_ROLES = ['hr', 'org_admin', 'super_admin'];
+  function canApplyChanges() {
+    return WRITE_ROLES.includes(window.__currentUser && window.__currentUser.role);
+  }
+
   function appendActionCard(action) {
     const fieldLabel = action.field.replace(/_/g, ' ');
     const fmtVal = v => {
@@ -325,13 +331,15 @@
         <div class="ai-action-detail">${detail}</div>
         <div class="ai-action-reason">Reason: ${escHtml(action.reason)}</div>
         <div class="ai-action-btns">
-          <button class="ai-action-apply-btn">Apply change</button>
+          ${canApplyChanges()
+            ? '<button class="ai-action-apply-btn">Apply change</button>'
+            : '<span class="ai-action-no-perm" title="You do not have permission to apply data changes">View only</span>'}
           <button class="ai-action-dismiss-btn">Dismiss</button>
         </div>
       </div>
     `;
 
-    card.querySelector('.ai-action-apply-btn').addEventListener('click', async function () {
+    if (canApplyChanges()) card.querySelector('.ai-action-apply-btn').addEventListener('click', async function () {
       this.disabled = true;
       this.textContent = 'Applying…';
       try {
