@@ -63,8 +63,55 @@ Sensitive fields (salary, band, personal data) are **opt-in from the API** — n
 
 ---
 
-## M4 — Admin Module
-Super-admin interface to create and configure customer organisations, manage licence tiers, and invite org admins. Org admins can invite users, assign roles, and manage their own org's settings.
+## M4 — Platform Operator Console & Org-Admin Self-Service
+The operator console is a protected `/admin` section of the app, accessible only to `super_admin` role. It is the internal tool for managing all customer organisations. Org-admin self-service (inviting users, managing their own org) ships in the same milestone.
+
+**Operator console — Organisation Management:**
+- Org list: name, plan tier, headcount, last activity, status (Trial / Active / Suspended)
+- Create org: name, slug (orgId), plan tier, org_admin email (sends invite)
+- Org detail: headcount, active users, last data write, trial expiry
+- Edit org: rename, change tier, adjust trial expiry date
+- Suspend / reactivate: blocks all logins for that org without touching data
+- Offboard: export org data as JSON, then permanently delete all rows for that `orgId`
+
+**Operator console — User Management (cross-org):**
+- Search users by email across all orgs
+- View a user: org, role, login history, last seen, account status
+- Reset password / force logout (invalidates all active sessions)
+- Lock / unlock account
+- Impersonation: "Login as this user" — creates a time-limited JWT (30 min) with claims `{ impersonating: true, originalActor: operatorId }`. Every action is written to `audit_log` with `source: 'impersonation'` so the trail is always attributable.
+
+**Operator console — Monitoring:**
+- Health status light: `/api/v1/health` checks DB connectivity, encryption key presence, and last successful write. Returns `{ status: 'green' | 'amber' | 'red', checks: [...] }`. Public endpoint — no auth required — usable as an uptime monitor. Built in M3 as a foundation piece.
+- Per-org activity: last login, last data write, headcount, active session count
+- Trial expiry alerts: orgs expiring within 14 days
+- Cross-org audit log viewer: same UI as changelog.html, filterable by org, user, entity type, date range
+
+**Operator console — Customer Support Tools:**
+- Audit log viewer filtered to a specific org (read-only)
+- Permission inspector: enter a user ID, see their effective role and data scope without logging in as them
+- Data export: download all data for an org as JSON (GDPR data portability)
+- Feature flags: enable/disable per-org features (AI, pay transparency, public API, CSV export) — stored in existing `org_config` table
+
+**Licence tiers** — gate both headcount and features:
+
+| Tier | Headcount | AI | Pay Transparency | Public API | Support |
+|------|-----------|----|-----------------|------------|---------|
+| Trial | ≤ 25 | ✓ | ✗ | ✗ | Email |
+| Starter | ≤ 100 | ✓ | ✗ | ✗ | Email |
+| Pro | ≤ 500 | ✓ | ✓ | ✓ | Priority |
+| Enterprise | Unlimited | ✓ | ✓ | ✓ | Dedicated |
+
+Trial orgs auto-suspend on expiry (30 days). Warning emails sent at T-7 and T-1. Headcount limit blocks new person creation when at or over the tier cap.
+
+**Org-admin self-service** (regular app pages, not /admin):
+- Invite users by email, assign roles (hr / manager / employee)
+- Remove users / revoke access
+- Edit org settings (name, currency, feature preferences)
+
+**New DB tables introduced in M4:**
+- `organisations` — `{ id (orgId), name, plan_tier, status, trial_expires_at, created_at }` — authoritative registry of valid org IDs; all existing tables already carry `org_id`
+- `users` table introduced in M3 (auth) is referenced here for user management
 
 ---
 
