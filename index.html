@@ -219,6 +219,76 @@
       background: #d6d3cc;
       border-radius: 50%;
     }
+
+    /* ── Demo credentials box ── */
+    .demo-box {
+      margin-top: 20px;
+      border: 1px dashed #d6d3cc;
+      border-radius: 8px;
+      padding: 14px 16px;
+      background: #faf9f7;
+    }
+
+    .demo-box-label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      color: #a8a29e;
+      margin-bottom: 10px;
+    }
+
+    .demo-credential {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 6px;
+    }
+
+    .demo-credential:last-child {
+      margin-bottom: 0;
+    }
+
+    .demo-cred-key {
+      font-size: 12px;
+      font-weight: 500;
+      color: #78716c;
+      width: 54px;
+      flex-shrink: 0;
+    }
+
+    .demo-cred-val {
+      font-size: 12px;
+      color: #111110;
+      font-family: 'Outfit', monospace;
+      flex: 1;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .demo-copy-btn {
+      font-family: 'Outfit', sans-serif;
+      font-size: 11px;
+      font-weight: 500;
+      color: #57534e;
+      background: #ffffff;
+      border: 1px solid #e6e4df;
+      border-radius: 5px;
+      padding: 3px 8px;
+      cursor: pointer;
+      transition: background 0.1s ease, color 0.1s ease;
+      flex-shrink: 0;
+    }
+
+    .demo-copy-btn:hover {
+      background: #f5f4f0;
+    }
+
+    .demo-copy-btn.copied {
+      color: #1a7a8a;
+      border-color: #1a7a8a;
+    }
   </style>
 </head>
 <body>
@@ -259,6 +329,21 @@
 
     <p class="demo-notice" id="loginError" style="display:none;color:#dc2626;font-style:normal;font-weight:500;"></p>
 
+    <!-- Demo credentials (populated by JS if DEMO_EMAIL is configured) -->
+    <div class="demo-box" id="demoBox" style="display:none;">
+      <div class="demo-box-label">Demo access</div>
+      <div class="demo-credential">
+        <span class="demo-cred-key">Email</span>
+        <span class="demo-cred-val" id="demo-email-val"></span>
+        <button class="demo-copy-btn" id="demo-email-btn" title="Fill email">Fill</button>
+      </div>
+      <div class="demo-credential">
+        <span class="demo-cred-key">Password</span>
+        <span class="demo-cred-val">••••••••</span>
+        <button class="demo-copy-btn" id="demo-pass-btn" title="Fill password">Fill</button>
+      </div>
+    </div>
+
     <div class="card-footer">
       <a href="#" class="footer-link">Privacy</a>
       <div class="footer-dot"></div>
@@ -274,6 +359,27 @@
     fetch('/api/v1/auth/me', { credentials: 'same-origin' })
       .then(function(r) { if (r.ok) location.replace('/dashboard.html'); })
       .catch(function() {});
+
+    // Load demo credentials if configured server-side
+    fetch('/api/v1/auth/demo')
+      .then(function(r) { return r.json(); })
+      .then(function(d) {
+        if (!d.enabled) return;
+        var box = document.getElementById('demoBox');
+        document.getElementById('demo-email-val').textContent = d.email;
+        document.getElementById('demo-email-btn').onclick = function() { fillField('email', d.email, this); };
+        document.getElementById('demo-pass-btn').onclick  = function() { fillField('password', d.password, this); };
+        box.style.display = '';
+      })
+      .catch(function() {});
+
+    function fillField(fieldId, value, btn) {
+      document.getElementById(fieldId).value = value;
+      var prev = btn.textContent;
+      btn.textContent = 'Done';
+      btn.classList.add('copied');
+      setTimeout(function() { btn.textContent = prev; btn.classList.remove('copied'); }, 1500);
+    }
 
     var form    = document.getElementById('loginForm');
     var btn     = form.querySelector('.btn-signin');

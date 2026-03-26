@@ -64,6 +64,14 @@ app.get('/api/v1/health', async (req, res) => {
   res.status(status === 'red' ? 503 : 200).json({ status, checks, timestamp: new Date().toISOString() });
 });
 
+// GET /api/v1/auth/demo — public; returns demo credentials if DEMO_EMAIL is set
+app.get('/api/v1/auth/demo', (req, res) => {
+  if (!process.env.DEMO_EMAIL || !process.env.DEMO_PASSWORD) {
+    return res.json({ enabled: false });
+  }
+  res.json({ enabled: true, email: process.env.DEMO_EMAIL, password: process.env.DEMO_PASSWORD });
+});
+
 // ── Simulation data (in-memory only, cleared on server restart) ───────────────
 let simData = null;
 

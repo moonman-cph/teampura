@@ -84,15 +84,22 @@ async function _initSchema() {
     migrationVersion = 3;
   }
 
-  // ── Migration v4: users table + seed first super_admin ────────────────────
+  // ── Migration v4: users table + seed first super_admin + demo user ────────
   if (migrationVersion < 4) {
     console.log('[db] Running migration v4 (users table)...');
     await _seedSuperAdmin(pg);
+    await _seedDemoUser(pg);
     await pg.query(`
       INSERT INTO org_config (org_id, key, value) VALUES ('default', '_migration_version', '4')
       ON CONFLICT (org_id, key) DO UPDATE SET value = '4'
     `);
     console.log('[db] Migration v4 complete.');
+  }
+
+  // ── Idempotent: re-seed demo user whenever DEMO_EMAIL / DEMO_PASSWORD change ─
+  // (runs every boot so Azure env var changes take effect without a migration bump)
+  if (process.env.DATABASE_URL) {
+    await _seedDemoUser(getPool());
   }
 }
 
@@ -257,6 +264,20 @@ async function _migrateToEncryption(pg) {
 }
 
 // ── Migration v4: seed first super_admin from env vars ───────────────────────
+
+async function _seedDemoUser(pg) {
+  const email    = process.env.DEMO_EMAIL;
+  const password = process.env.DEMO_PASSWORD;
+  if (!email || !password) return;
+  const bcrypt = require('bcryptjs');
+  const hash   = await bcrypt.hash(password, 12);
+  await pg.query(`
+    INSERT INTO users (org_id, email, password_hash, role)
+    VALUES ('default', $1, $2, 'hr')
+    ON CONFLICT (email) DO UPDATE SET password_hash = EXCLUDED.password_hash, role = 'hr'
+  `, [email.toLowerCase(), hash]);
+  console.log(`[db] Demo user ready: ${email}`);
+}
 
 async function _seedSuperAdmin(pg) {
   const email    = process.env.ADMIN_EMAIL;

@@ -16,6 +16,13 @@
   //   detail — full description shown in the modal (plain text or simple HTML)
   const RELEASE_NOTES = [
     {
+      id:     'release-0.7.1-demo-login',
+      date:   '26 Mar 2026',
+      title:  'Demo login box (0.7.1)',
+      body:   'The sign-in page now shows a demo credentials box when a demo account is configured.',
+      detail: 'A "Demo access" panel now appears on the login page when DEMO_EMAIL and DEMO_PASSWORD are set in the server environment. Clicking Fill pre-fills the email or password field, making it easy to share a live demo. The demo account is automatically created (or updated) on every server boot — no manual database setup needed.',
+    },
+    {
       id:     'release-0.7.0-auth',
       date:   '26 Mar 2026',
       title:  'Login & role-based access (0.7.0)',
