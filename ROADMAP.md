@@ -68,19 +68,38 @@ Sensitive fields (salary, band, personal data) are **opt-in from the API** — n
 | `users` DB table | ✓ Done | email + bcrypt hash + role + person_id link |
 | Super-admin seed on first boot | ✓ Done | `ADMIN_EMAIL` + `ADMIN_PASSWORD` env vars |
 | All routes protected | ✓ Done | `requireAuth` middleware on every API route |
-| Role-scoped GET /api/v1/data | ✓ Done | `lib/data-scope.js` — salary filtered by role |
-| Write restricted to hr/org_admin/super_admin | ✓ Done | `requireRole` on POST /api/v1/data |
+| Role-scoped GET /api/v1/data | ✓ Done | `lib/data-scope.js` — salary/DOB filtered by rights; dateOfBirth gated on `view_directory` not `view_salaries` |
+| Write gated on effective rights | ✓ Done | `POST /api/v1/data` checks effective rights via `getEffectiveRights`; allows personId-impersonated users with write rights |
 | Actor fields in audit log | ✓ Done | userId, email, role from JWT on every write |
-| Login page wired up | ✓ Done | `index.html` — real POST /api/v1/auth/login |
+| Login page wired up | ✓ Done | `index.html` — real POST /api/v1/auth/login; version number shown in footer |
 | All pages redirect to login | ✓ Done | `shared-auth.js` — fetch interceptor + initial check |
 | Nav shows logged-in user + logout | ✓ Done | `shared-nav.js` listens for auth:ready event |
 | `/api/v1/health` status endpoint | ✓ Done | Public — checks DB, encryption key, JWT secret |
 | `changeReason` mandatory for sensitive writes | ✗ Deferred to M5 | Tied to EU Pay Transparency compliance trail; enforced when M5 ships |
 | Role-based nav visibility + org chart constraints | ✓ Done | `lib/permissions.js` + `shared-nav.js` + `orgchart.html`; rights returned from `/api/v1/auth/me` |
+| Permission groups with allow/deny model | ✓ Done | Assignment policies match any role (not just primary); deny always wins over allow |
+| personId impersonation (switch-user) | ✓ Done | Super-admin can preview as any org person; rights derived from permission system, not JWT role |
+| Rights enforcement in `dashboard.html` | ✓ Done | Salary cards gated on `view_salaries`; age distribution on `view_directory`; awaits auth before render |
 | Rights enforcement in `directory.html` | ✓ Done | Salary column + edit controls gated on `view_salaries` / `edit_directory`; waits for auth:ready |
 | Rights enforcement in `paybands.html` | ✓ Done | Full page blocked for `!view_pay_bands`; read-only view for `!edit_pay_bands` |
+| Rights enforcement in `orgchart.html` modal | ✓ Done | Salary band section hidden without `view_salaries`; role edit button hidden without `edit_org_chart`; re-enforced after init() overwrites server settings |
+| AI assistant identity from session | ✓ Done | Person selector removed; identity derived from active JWT; apply gated on write rights |
+| AI context includes manager names | ✓ Done | `routes/v1/ai.js` builds `roleOccupant` map so "who is my manager?" resolves correctly |
 | AI action cards gated on write rights | ✓ Done | Apply button hidden for roles without write access; server enforces independently |
+| Modal UX — Close vs Save/Cancel | ✓ Done | Save only shown when actively editing a role; person-tab flags auto-save on click |
 | Employee self-service field edits | ✗ Deferred to M7 | Out of scope for M3 |
+
+---
+
+## 🐛 Known Bugs — Fix Next Session
+
+These regressions were introduced during M3 permissions work and need to be investigated before continuing with M4.
+
+| Bug | Symptom | Likely cause |
+|-----|---------|--------------|
+| **Settings panel broken** | Settings modal fails to open or save | Probable conflict between `settings.viewOnly` enforcement in `applyRoleConstraints` and modal open logic |
+| **Snapshots broken** | Snapshot creation or restore fails | `saveToStorage` / `loadFromStorage` may now reject due to auth checks on `/api/v1/data`; POST write-rights check may block snapshot saves for some roles |
+| **Simulate broken** | Simulation mode fails to activate or is ignored | `/api/sim-data` POST/DELETE may conflict with new auth middleware or write-rights gate |
 
 ---
 
