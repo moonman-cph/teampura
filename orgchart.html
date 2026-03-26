@@ -4338,6 +4338,8 @@ async function init() {
     applyViewOnly();
     applyMatrixMode();
     applyDragDrop();
+    // Re-enforce permission constraints — server settings may have overwritten them
+    if (window.__currentUser) applyRoleConstraints(window.__currentUser);
     render();
     setTimeout(() => document.body.classList.add('page-ready'), 700);
     overlay.style.display = 'none';
