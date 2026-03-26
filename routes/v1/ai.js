@@ -175,7 +175,21 @@ function buildSystemPrompt(tier, personId, data) {
   const ctxJson = JSON.stringify(ctx, null, 2);
   const currency = ctx.organisation.currency;
 
-  const base = `You are Teampura AI, an HR analytics assistant. Answer questions clearly and concisely. Do not expose raw JSON structure or internal IDs in your responses. Refer to people by name and role. Currency: ${currency}.\n\nOrganisation data:\n${ctxJson}`;
+  // Build "you are" identity line for the current user
+  let identityLine = '';
+  if (personId) {
+    const { roleAssignments = [], roles = [], persons = [] } = data;
+    const person = persons.find(p => String(p.id) === String(personId));
+    const ra     = roleAssignments.find(a => String(a.personId) === String(personId));
+    const role   = ra ? roles.find(r => String(r.id) === String(ra.roleId)) : null;
+    if (person) {
+      identityLine = `\n\nThe user you are speaking with is: ${person.name}`;
+      if (role) identityLine += `, ${role.title} (${role.level || 'unknown level'})`;
+      identityLine += '. When they say "I", "me", "my team", "my reports", or "my manager", they are referring to this person. Always answer questions from their perspective using the org data above.';
+    }
+  }
+
+  const base = `You are Teampura AI, an HR analytics assistant. Answer questions clearly and concisely. Do not expose raw JSON structure or internal IDs in your responses. Refer to people by name and role. Currency: ${currency}.\n\nOrganisation data:\n${ctxJson}${identityLine}`;
 
   if (tier === 'employee') {
     return base + '\n\nIMPORTANT: You do not have access to salary or personal identifier data. If asked about compensation, salary, pay, or personal identifiers, politely explain you cannot access this information.';
