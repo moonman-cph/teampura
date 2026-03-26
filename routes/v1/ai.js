@@ -258,8 +258,10 @@ router.get('/whoami', async (req, res) => {
 // Body: { prompt, history, personId }
 router.post('/query', async (req, res) => {
   try {
-    const { prompt, history = [], personId } = req.body;
-    if (!prompt) return res.status(400).json({ error: 'prompt required' });
+    const { prompt, history, personId } = req.body || {};
+    if (!prompt || typeof prompt !== 'string') return res.status(400).json({ error: 'prompt must be a non-empty string.' });
+    if (typeof prompt === 'string' && prompt.length > 2000) return res.status(400).json({ error: 'prompt must be 2000 characters or fewer.' });
+    const safeHistory = Array.isArray(history) ? history.filter(m => m && typeof m.role === 'string' && typeof m.content === 'string') : [];
 
     if (!process.env.ANTHROPIC_API_KEY) {
       return res.status(503).json({ error: 'AI assistant is not configured. Set ANTHROPIC_API_KEY in your environment.' });
@@ -270,7 +272,7 @@ router.post('/query', async (req, res) => {
     const systemPrompt = buildSystemPrompt(tier, personId, data);
 
     const messages = [
-      ...history,
+      ...safeHistory,
       { role: 'user', content: prompt },
     ];
 
