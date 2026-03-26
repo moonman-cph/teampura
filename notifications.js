@@ -16,6 +16,13 @@
   //   detail — full description shown in the modal (plain text or simple HTML)
   const RELEASE_NOTES = [
     {
+      id: 'release-0.5.0-ai-assistant',
+      date: '26 Mar 2026',
+      title: 'AI Assistant (0.5.0)',
+      body: 'Teampura AI is now live — ask questions about your org in natural language, with role-scoped data access.',
+      detail: 'The AI Assistant page is now connected to Claude. Select who you are from the dropdown and start asking questions. Access is role-scoped: employees see org structure only, managers can query salary data for their reporting line, and HR Admins have full access — including the ability to ask the AI to suggest data changes, which you confirm before they are applied. Every query is logged to the audit trail.',
+    },
+    {
       id: 'release-0.4.1-logo',
       date: '26 Mar 2026',
       title: 'Brand logo (0.4.1)',

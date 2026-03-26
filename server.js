@@ -6,6 +6,7 @@ const express      = require('express');
 const db           = require('./db');
 const v1Data       = require('./routes/v1/data');
 const v1Changelog  = require('./routes/v1/changelog');
+const v1Ai         = require('./routes/v1/ai');
 
 const app  = express();
 const PORT = parseInt(process.env.PORT || '3000', 10);
@@ -37,6 +38,7 @@ app.delete('/api/sim-data', (req, res) => {
 
 app.use('/api/v1/data',      v1Data);
 app.use('/api/v1/changelog', v1Changelog);
+app.use('/api/v1/ai',        v1Ai);
 
 app.use('/api/data',      v1Data);
 app.use('/api/changelog', v1Changelog);
