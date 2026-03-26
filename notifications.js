@@ -16,6 +16,13 @@
   //   detail — full description shown in the modal (plain text or simple HTML)
   const RELEASE_NOTES = [
     {
+      id:     'release-0.8.3-directory-rights',
+      date:   '26 Mar 2026',
+      title:  'Directory rights enforcement (0.8.3)',
+      body:   'The employee directory now respects your role permissions — salary data and edit controls are hidden for users without the appropriate rights.',
+      detail: 'Users without the <em>view_salaries</em> right no longer see salary columns in the table or grid, the compensation tab in person profiles, or the salary field when adding a person. Users without the <em>edit_directory</em> right no longer see the Edit button in person profiles or the + Person button. These checks are applied on top of the existing "hide salaries" setting.',
+    },
+    {
       id:     'release-0.8.2-impersonation',
       date:   '26 Mar 2026',
       title:  'Super-admin user switching (0.8.2)',
