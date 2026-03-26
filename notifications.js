@@ -16,6 +16,13 @@
   //   detail — full description shown in the modal (plain text or simple HTML)
   const RELEASE_NOTES = [
     {
+      id:     'release-0.9.1-permissions-driven-preview',
+      date:   '26 Mar 2026',
+      title:  'Permissions-driven user preview (0.9.1)',
+      body:   'Switch user now previews any person using their org chart job title — rights are determined entirely by the permissions page rules, with no manual role selection.',
+      detail: 'The Switch User modal no longer shows a role dropdown. Every person in the org chart can now be previewed simply by clicking "Log in as" — their effective rights come from the assignment policies and permission groups configured on the Permissions page, exactly as they would in production. The impersonation banner now shows the person\'s real name instead of a synthesised email address.',
+    },
+    {
       id:     'release-0.9.0-impersonate-by-person',
       date:   '26 Mar 2026',
       title:  'Impersonate any person (0.9.0)',
