@@ -10,6 +10,7 @@ const v1Auth       = require('./routes/v1/auth');
 const v1Data       = require('./routes/v1/data');
 const v1Changelog  = require('./routes/v1/changelog');
 const v1Ai         = require('./routes/v1/ai');
+const v1Users      = require('./routes/v1/users');
 
 const app  = express();
 const PORT = parseInt(process.env.PORT || '3000', 10);
@@ -22,7 +23,8 @@ app.use(express.static(__dirname));
 
 // ── Public routes (no auth) ───────────────────────────────────────────────────
 
-app.use('/api/v1/auth', v1Auth);
+app.use('/api/v1/auth',  v1Auth);
+app.use('/api/v1/users', requireAuth, v1Users);
 
 // GET /api/v1/health — public; used as uptime monitor and operator status light
 app.get('/api/v1/health', async (req, res) => {

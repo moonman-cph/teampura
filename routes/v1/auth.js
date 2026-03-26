@@ -54,24 +54,85 @@ router.get('/me', requireAuth, async (req, res) => {
     const data   = await db.getData(req.user.orgId);
     const rights = getEffectiveRights(req.user, data);
     res.json({
-      userId:   req.user.userId,
-      orgId:    req.user.orgId,
-      email:    req.user.email,
-      role:     req.user.role,
-      personId: req.user.personId || null,
+      userId:          req.user.userId,
+      orgId:           req.user.orgId,
+      email:           req.user.email,
+      role:            req.user.role,
+      personId:        req.user.personId || null,
       rights,
+      impersonating:   req.user.impersonating   || false,
+      originalEmail:   req.user.originalEmail   || null,
+      originalActorId: req.user.originalActorId || null,
     });
   } catch (e) {
-    // Fallback: return user without rights rather than failing auth check
     console.error('[auth/me] rights computation failed:', e.message);
     res.json({
-      userId:   req.user.userId,
-      orgId:    req.user.orgId,
-      email:    req.user.email,
-      role:     req.user.role,
-      personId: req.user.personId || null,
-      rights:   [],
+      userId:          req.user.userId,
+      orgId:           req.user.orgId,
+      email:           req.user.email,
+      role:            req.user.role,
+      personId:        req.user.personId || null,
+      rights:          [],
+      impersonating:   req.user.impersonating   || false,
+      originalEmail:   req.user.originalEmail   || null,
+      originalActorId: req.user.originalActorId || null,
     });
+  }
+});
+
+// POST /api/v1/auth/impersonate  (super_admin only)
+router.post('/impersonate', requireAuth, async (req, res) => {
+  try {
+    if (req.user.role !== 'super_admin') return res.status(403).json({ error: 'Forbidden.' });
+    if (req.user.impersonating) return res.status(400).json({ error: 'Already impersonating. End current session first.' });
+
+    const { userId } = req.body || {};
+    if (!userId) return res.status(400).json({ error: 'userId is required.' });
+
+    const target = await db.getUserById(userId);
+    if (!target) return res.status(404).json({ error: 'User not found.' });
+    if (target.org_id !== req.user.orgId) return res.status(403).json({ error: 'User belongs to a different org.' });
+
+    const token = signToken({
+      userId:          target.id,
+      orgId:           target.org_id,
+      email:           target.email,
+      role:            target.role,
+      personId:        target.person_id || null,
+      impersonating:   true,
+      originalActorId: req.user.userId,
+      originalEmail:   req.user.email,
+    });
+
+    setCookie(res, token);
+    res.json({ ok: true, user: { email: target.email, role: target.role } });
+  } catch (e) {
+    console.error('[auth/impersonate]', e);
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// POST /api/v1/auth/impersonate-end
+router.post('/impersonate-end', requireAuth, async (req, res) => {
+  try {
+    if (!req.user.impersonating) return res.status(400).json({ error: 'Not currently impersonating.' });
+
+    const original = await db.getUserById(req.user.originalActorId);
+    if (!original) return res.status(404).json({ error: 'Original user not found.' });
+
+    const token = signToken({
+      userId:   original.id,
+      orgId:    original.org_id,
+      email:    original.email,
+      role:     original.role,
+      personId: original.person_id || null,
+    });
+
+    setCookie(res, token);
+    res.json({ ok: true, user: { email: original.email, role: original.role } });
+  } catch (e) {
+    console.error('[auth/impersonate-end]', e);
+    res.status(500).json({ error: e.message });
   }
 });
 

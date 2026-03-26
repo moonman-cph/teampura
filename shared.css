@@ -218,6 +218,112 @@ body {
 .npm-action:hover { background: rgba(255,255,255,0.07); color: rgba(255,255,255,0.95); }
 .npm-action--danger:hover { background: rgba(220,60,60,0.15); color: #f87171; }
 
+/* ── Impersonation banner ─────────────────────────────────────── */
+#impersonation-banner {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 8px 20px;
+  background: #fef3c7;
+  border-bottom: 2px solid #f59e0b;
+  font-size: 13px;
+  color: #78350f;
+  font-weight: 500;
+}
+#impersonation-banner strong { color: #92400e; }
+#impersonation-end-btn {
+  padding: 3px 12px;
+  border-radius: 6px;
+  border: 1.5px solid #d97706;
+  background: #fff;
+  color: #92400e;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+}
+#impersonation-end-btn:hover { background: #fef9ee; }
+
+/* ── Switch-user modal ────────────────────────────────────────── */
+#switch-user-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 9000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0,0,0,0.45);
+  backdrop-filter: blur(2px);
+}
+.sum-box {
+  background: var(--surface);
+  border-radius: 14px;
+  box-shadow: var(--shadow-md);
+  width: 560px;
+  max-width: calc(100vw - 32px);
+  max-height: 80vh;
+  overflow-y: auto;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.sum-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.sum-title { font-size: 16px; font-weight: 700; color: var(--text-primary); }
+.sum-close {
+  border: none; background: none; cursor: pointer;
+  font-size: 16px; color: var(--text-muted); padding: 4px 8px; border-radius: 6px;
+}
+.sum-close:hover { background: var(--border); }
+.sum-loading { font-size: 13px; color: var(--text-muted); }
+.sum-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.sum-table th { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); padding: 0 8px 8px; text-align: left; }
+.sum-table td { padding: 8px; border-top: 1px solid var(--border); vertical-align: middle; }
+.sum-table tr:hover td { background: var(--bg, #f5f4f0); }
+.sum-login-btn {
+  padding: 4px 12px; border-radius: 6px;
+  border: 1.5px solid var(--accent-border); background: var(--accent-light);
+  color: var(--accent); font-size: 12px; font-weight: 600; cursor: pointer;
+  font-family: inherit; white-space: nowrap;
+}
+.sum-login-btn:hover { background: var(--accent); color: #fff; }
+.sum-login-btn:disabled { opacity: 0.5; cursor: default; }
+.sum-section-toggle {
+  font-size: 13px; font-weight: 600; color: var(--accent);
+  cursor: pointer; padding: 8px 0; border-top: 1px solid var(--border);
+}
+.sum-section-toggle:hover { text-decoration: underline; }
+.sum-new-form { display: flex; flex-direction: column; gap: 10px; padding-top: 4px; }
+.sum-form-row { display: flex; gap: 10px; }
+.sum-input {
+  flex: 1; padding: 8px 10px; border: 1.5px solid var(--border); border-radius: 8px;
+  font-size: 13px; font-family: inherit; background: var(--bg, #f5f4f0);
+  color: var(--text-primary);
+}
+.sum-input:focus { outline: none; border-color: var(--accent); background: #fff; }
+.sum-person-matches {
+  border: 1.5px solid var(--border); border-radius: 8px; background: #fff;
+  max-height: 140px; overflow-y: auto; box-shadow: var(--shadow-sm);
+}
+.sum-person-match { padding: 8px 12px; font-size: 13px; cursor: pointer; }
+.sum-person-match:hover { background: var(--accent-light); }
+.sum-create-btn {
+  align-self: flex-start; padding: 8px 18px;
+  border-radius: 8px; border: none;
+  background: var(--accent); color: #fff;
+  font-size: 13px; font-weight: 600; cursor: pointer; font-family: inherit;
+}
+.sum-create-btn:hover { opacity: 0.9; }
+.sum-error { font-size: 12px; color: #dc2626; background: #fef2f2; border: 1px solid #fecaca; border-radius: 6px; padding: 8px 12px; }
+
 /* ── Shared Header Utilities ──────────────────────────────────── */
 .header-spacer { flex: 1; }
 .header-divider { width: 1px; height: 18px; background: var(--border); margin: 0 4px; }

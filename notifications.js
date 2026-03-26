@@ -16,6 +16,13 @@
   //   detail — full description shown in the modal (plain text or simple HTML)
   const RELEASE_NOTES = [
     {
+      id:     'release-0.8.2-impersonation',
+      date:   '26 Mar 2026',
+      title:  'Super-admin user switching (0.8.2)',
+      body:   'Super admins can now switch into any user\'s session to test permissions, without logging out.',
+      detail: 'A new "Switch user…" option appears in the profile menu for super_admin accounts. Clicking it opens a modal that lists all user accounts in the org. Click "Log in as" on any row to enter that user\'s session — a yellow banner across the top of every page shows who you are viewing as and a "Return to admin" button restores your original session instantly.\n\nThe modal also includes a "+ Create new user" form for quickly adding test accounts (email, password, role, optional person link) without needing to use the command line.',
+    },
+    {
       id:     'release-0.8.1-permissions-toggles',
       date:   '26 Mar 2026',
       title:  'Permission group editor — toggle UI (0.8.1)',

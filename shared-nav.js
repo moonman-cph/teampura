@@ -108,6 +108,7 @@
       <div class="npm-role-badge" id="npm-role-badge"></div>
     </div>
     <div class="npm-divider"></div>
+    <button class="npm-action" id="npm-switch-user" style="display:none;">Switch user…</button>
     <button class="npm-action npm-action--danger" id="npm-signout">Sign out</button>
   </div>
   <div id="nav-footer">
@@ -153,6 +154,31 @@
     var badgeEl = document.getElementById('npm-role-badge');
     if (emailEl) emailEl.textContent = user.email;
     if (badgeEl) badgeEl.textContent = ROLE_LABELS[user.role] || user.role;
+
+    // Show "Switch user" only for super_admin not currently impersonating
+    var switchBtn = document.getElementById('npm-switch-user');
+    if (switchBtn) switchBtn.style.display = (user.role === 'super_admin' && !user.impersonating) ? '' : 'none';
+
+    // Impersonation banner
+    if (user.impersonating) {
+      applyImpersonationBanner(user);
+    }
+  }
+
+  function applyImpersonationBanner(user) {
+    if (document.getElementById('impersonation-banner')) return; // already injected
+    var banner = document.createElement('div');
+    banner.id = 'impersonation-banner';
+    banner.innerHTML =
+      'Viewing as <strong>' + user.email + '</strong> (' + (ROLE_LABELS[user.role] || user.role) + ')' +
+      ' &nbsp;—&nbsp; ' +
+      '<button id="impersonation-end-btn">Return to ' + (user.originalEmail || 'admin') + '</button>';
+    document.body.insertBefore(banner, document.body.firstChild);
+
+    document.getElementById('impersonation-end-btn').addEventListener('click', function() {
+      fetch('/api/v1/auth/impersonate-end', { method: 'POST', credentials: 'same-origin' })
+        .then(function() { location.reload(); });
+    });
   }
 
   // If shared-auth.js already resolved (fast network), window.__currentUser is set
@@ -201,19 +227,213 @@
       return;
     }
 
+    // Switch user
+    if (e.target && e.target.id === 'npm-switch-user') {
+      closeMenu();
+      openSwitchUserModal();
+      return;
+    }
+
     // Toggle on footer click
     if (footer.contains(e.target)) {
       menu.classList.contains('npm--open') ? closeMenu() : openMenu();
       return;
     }
 
-    // Close on outside click
+    // Close on outside click — but not if modal is open
+    var modal = document.getElementById('switch-user-modal');
+    if (modal && modal.contains(e.target)) return;
     if (!menu.contains(e.target)) {
       closeMenu();
     }
   });
 
   document.addEventListener('keydown', function(e) {
-    if (e.key === 'Escape') closeMenu();
+    if (e.key === 'Escape') {
+      closeMenu();
+      closeSwitchUserModal();
+    }
   });
+
+  // ── Switch-user modal ──────────────────────────────────────────────────────
+
+  function openSwitchUserModal() {
+    if (document.getElementById('switch-user-modal')) {
+      document.getElementById('switch-user-modal').style.display = 'flex';
+      loadUsers();
+      return;
+    }
+
+    var modal = document.createElement('div');
+    modal.id = 'switch-user-modal';
+    modal.innerHTML = [
+      '<div class="sum-box">',
+      '  <div class="sum-header">',
+      '    <span class="sum-title">Switch user</span>',
+      '    <button class="sum-close" id="sum-close-btn">✕</button>',
+      '  </div>',
+      '  <div id="sum-user-list"><p class="sum-loading">Loading…</p></div>',
+      '  <div class="sum-section-toggle" id="sum-new-toggle">＋ Create new user</div>',
+      '  <div class="sum-new-form" id="sum-new-form" style="display:none;">',
+      '    <div class="sum-form-row">',
+      '      <input class="sum-input" id="sum-email" type="email" placeholder="Email address">',
+      '      <input class="sum-input" id="sum-password" type="password" placeholder="Password (min 8 chars)">',
+      '    </div>',
+      '    <div class="sum-form-row">',
+      '      <select class="sum-input" id="sum-role">',
+      '        <option value="employee">Employee</option>',
+      '        <option value="manager">Manager</option>',
+      '        <option value="hr">HR Admin</option>',
+      '        <option value="org_admin">Org Admin</option>',
+      '        <option value="super_admin">Super Admin</option>',
+      '      </select>',
+      '      <input class="sum-input" id="sum-person" type="text" placeholder="Person name (optional)">',
+      '    </div>',
+      '    <div id="sum-person-matches" class="sum-person-matches" style="display:none;"></div>',
+      '    <div id="sum-create-error" class="sum-error" style="display:none;"></div>',
+      '    <button class="sum-create-btn" id="sum-create-btn">Create user</button>',
+      '  </div>',
+      '</div>',
+    ].join('');
+    document.body.appendChild(modal);
+
+    // Close button
+    document.getElementById('sum-close-btn').addEventListener('click', closeSwitchUserModal);
+    modal.addEventListener('click', function(e) { if (e.target === modal) closeSwitchUserModal(); });
+
+    // Toggle new-user form
+    var newToggle = document.getElementById('sum-new-toggle');
+    var newForm   = document.getElementById('sum-new-form');
+    newToggle.addEventListener('click', function() {
+      var open = newForm.style.display !== 'none';
+      newForm.style.display = open ? 'none' : 'block';
+      newToggle.textContent = open ? '＋ Create new user' : '− Create new user';
+    });
+
+    // Person name autocomplete
+    var personInput   = document.getElementById('sum-person');
+    var personMatches = document.getElementById('sum-person-matches');
+    var selectedPersonId = null;
+
+    personInput.addEventListener('input', function() {
+      selectedPersonId = null;
+      var q = personInput.value.trim().toLowerCase();
+      if (!q || !window.__orgPersons) { personMatches.style.display = 'none'; return; }
+      var hits = window.__orgPersons.filter(function(p) {
+        return p.name && p.name.toLowerCase().includes(q);
+      }).slice(0, 8);
+      if (!hits.length) { personMatches.style.display = 'none'; return; }
+      personMatches.innerHTML = hits.map(function(p) {
+        return '<div class="sum-person-match" data-id="' + p.id + '">' + p.name + '</div>';
+      }).join('');
+      personMatches.style.display = 'block';
+    });
+
+    personMatches.addEventListener('click', function(e) {
+      var row = e.target.closest('.sum-person-match');
+      if (!row) return;
+      selectedPersonId = row.dataset.id;
+      personInput.value = row.textContent;
+      personMatches.style.display = 'none';
+    });
+
+    // Pre-fetch persons for autocomplete
+    if (!window.__orgPersons) {
+      fetch('/api/v1/data', { credentials: 'same-origin' })
+        .then(function(r) { return r.json(); })
+        .then(function(d) { window.__orgPersons = d.persons || []; })
+        .catch(function() {});
+    }
+
+    // Create user
+    document.getElementById('sum-create-btn').addEventListener('click', function() {
+      var email    = document.getElementById('sum-email').value.trim();
+      var password = document.getElementById('sum-password').value;
+      var role     = document.getElementById('sum-role').value;
+      var errEl    = document.getElementById('sum-create-error');
+      errEl.style.display = 'none';
+
+      if (!email || !password) {
+        errEl.textContent = 'Email and password are required.';
+        errEl.style.display = 'block';
+        return;
+      }
+
+      fetch('/api/v1/users', {
+        method: 'POST',
+        credentials: 'same-origin',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: email, password: password, role: role, personId: selectedPersonId }),
+      })
+        .then(function(r) { return r.json().then(function(b) { return { ok: r.ok, body: b }; }); })
+        .then(function(res) {
+          if (!res.ok) { errEl.textContent = res.body.error || 'Failed to create user.'; errEl.style.display = 'block'; return; }
+          // Reset form
+          document.getElementById('sum-email').value = '';
+          document.getElementById('sum-password').value = '';
+          document.getElementById('sum-person').value = '';
+          selectedPersonId = null;
+          newForm.style.display = 'none';
+          newToggle.textContent = '＋ Create new user';
+          loadUsers();
+        })
+        .catch(function(err) { errEl.textContent = err.message; errEl.style.display = 'block'; });
+    });
+
+    loadUsers();
+  }
+
+  function closeSwitchUserModal() {
+    var modal = document.getElementById('switch-user-modal');
+    if (modal) modal.style.display = 'none';
+  }
+
+  var ROLE_BADGE_COLORS = {
+    super_admin: '#7c3aed', org_admin: '#2563eb', hr: '#0891b2',
+    manager: '#16a34a', employee: '#78716c',
+  };
+
+  function loadUsers() {
+    var listEl = document.getElementById('sum-user-list');
+    if (!listEl) return;
+    listEl.innerHTML = '<p class="sum-loading">Loading…</p>';
+
+    fetch('/api/v1/users', { credentials: 'same-origin' })
+      .then(function(r) { return r.json(); })
+      .then(function(users) {
+        if (!users.length) { listEl.innerHTML = '<p class="sum-loading">No other users yet.</p>'; return; }
+        var myId = window.__currentUser && window.__currentUser.userId;
+        listEl.innerHTML = '<table class="sum-table"><thead><tr><th>Email</th><th>Role</th><th></th></tr></thead><tbody>' +
+          users.map(function(u) {
+            var badgeColor = ROLE_BADGE_COLORS[u.role] || '#78716c';
+            var badge = '<span style="background:' + badgeColor + ';color:#fff;font-size:10px;font-weight:600;padding:2px 7px;border-radius:10px;white-space:nowrap;">' + (ROLE_LABELS[u.role] || u.role) + '</span>';
+            var btn = u.id === myId
+              ? '<span style="font-size:11px;color:var(--text-muted);">Current</span>'
+              : '<button class="sum-login-btn" data-uid="' + u.id + '">Log in as</button>';
+            return '<tr><td style="font-size:13px;">' + u.email + '</td><td>' + badge + '</td><td>' + btn + '</td></tr>';
+          }).join('') +
+          '</tbody></table>';
+
+        listEl.querySelectorAll('.sum-login-btn').forEach(function(btn) {
+          btn.addEventListener('click', function() {
+            btn.disabled = true;
+            btn.textContent = '…';
+            fetch('/api/v1/auth/impersonate', {
+              method: 'POST',
+              credentials: 'same-origin',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ userId: btn.dataset.uid }),
+            })
+              .then(function(r) { return r.json(); })
+              .then(function(res) {
+                if (res.ok) { location.reload(); }
+                else { btn.disabled = false; btn.textContent = 'Log in as'; alert(res.error || 'Failed.'); }
+              })
+              .catch(function() { btn.disabled = false; btn.textContent = 'Log in as'; });
+          });
+        });
+      })
+      .catch(function() { listEl.innerHTML = '<p class="sum-loading">Failed to load users.</p>'; });
+  }
+
 })();
