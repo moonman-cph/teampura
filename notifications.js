@@ -16,6 +16,13 @@
   //   detail — full description shown in the modal (plain text or simple HTML)
   const RELEASE_NOTES = [
     {
+      id:     'release-0.9.3-ai-auth-permissions',
+      date:   '26 Mar 2026',
+      title:  'AI assistant uses live session & permissions (0.9.3)',
+      body:   'The AI assistant now uses your active login session — no more "You are" selector. Apply access is gated on your actual permission rights.',
+      detail: 'The AI assistant page no longer shows a person selector. Your identity is taken directly from your authenticated session, so previewing as any person via Switch User automatically gives the AI the right context. The "Apply change" button on AI suggestions is now gated on edit rights from the Permissions page (edit_org_chart, edit_directory, edit_salaries) rather than a hard-coded role list. The M1 notice on the Permissions page has also been removed.',
+    },
+    {
       id:     'release-0.9.2-preview-data-scope',
       date:   '26 Mar 2026',
       title:  'Fix data scoping for user preview (0.9.2)',

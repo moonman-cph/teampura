@@ -33,19 +33,6 @@
       <p class="ai-subtitle">Ask anything about your organisation</p>
       <p class="ai-subtitle" style="margin-top:2px;opacity:0.75;">Powered by Claude &middot; Your data stays private</p>
 
-      <!-- Identity card — prominent, required before chatting -->
-      <div id="ai-identity-card">
-        <div class="ai-identity-card-row">
-          <span class="ai-identity-label">You are:</span>
-          <select id="ai-person-select" class="ai-person-select">
-            <option value="">— select yourself —</option>
-          </select>
-        </div>
-        <div id="ai-tier-badge-wrap" style="display:none">
-          <span id="ai-tier-badge" class="ai-tier-badge"></span>
-        </div>
-      </div>
-
       <div id="ai-chips-wrap">
         <div class="ai-chips">
           <button class="ai-chip" data-prompt="Who has the highest salary?">
@@ -67,7 +54,7 @@
         </div>
         <div class="ai-input-area">
           <div class="ai-input-wrap" id="empty-input-wrap">
-            <input class="ai-input" id="empty-input" type="text" placeholder="Select who you are above to start chatting…" autocomplete="off" disabled>
+            <input class="ai-input" id="empty-input" type="text" placeholder="Ask a question about your org…" autocomplete="off" disabled>
             <button class="ai-send-btn" id="empty-send-btn" disabled title="Send">
               <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <line x1="8" y1="13" x2="8" y2="3"/>
@@ -81,12 +68,6 @@
 
     <!-- Chat state (hidden until first message) -->
     <div id="ai-chat" style="display:none;">
-      <!-- Subtle identity bar shown during chat -->
-      <div id="ai-chat-identity">
-        <span id="ai-chat-identity-name"></span>
-        <span id="ai-chat-identity-badge" class="ai-tier-badge"></span>
-        <button id="ai-chat-change-btn">Change</button>
-      </div>
       <div class="ai-messages" id="ai-messages"></div>
       <div class="ai-input-area">
         <div class="ai-input-wrap" id="chat-input-wrap">
@@ -108,29 +89,19 @@
 (function () {
   'use strict';
 
-  const LS_KEY_PERSON = 'aiCurrentPersonId';
-
   // ── DOM refs ───────────────────────────────────────────────────────────────
-  const emptyState         = document.getElementById('ai-empty');
-  const chatState          = document.getElementById('ai-chat');
-  const messagesEl         = document.getElementById('ai-messages');
-  const emptyInput         = document.getElementById('empty-input');
-  const emptySendBtn       = document.getElementById('empty-send-btn');
-  const chatInput          = document.getElementById('chat-input');
-  const chatSendBtn        = document.getElementById('chat-send-btn');
-  const personSelect       = document.getElementById('ai-person-select');
-  const tierBadge          = document.getElementById('ai-tier-badge');
-  const tierBadgeWrap      = document.getElementById('ai-tier-badge-wrap');
-  const chipsWrap          = document.getElementById('ai-chips-wrap');
-  const chatIdentityName   = document.getElementById('ai-chat-identity-name');
-  const chatIdentityBadge  = document.getElementById('ai-chat-identity-badge');
-  const chatChangeBtn      = document.getElementById('ai-chat-change-btn');
+  const emptyState   = document.getElementById('ai-empty');
+  const chatState    = document.getElementById('ai-chat');
+  const messagesEl   = document.getElementById('ai-messages');
+  const emptyInput   = document.getElementById('empty-input');
+  const emptySendBtn = document.getElementById('empty-send-btn');
+  const chatInput    = document.getElementById('chat-input');
+  const chatSendBtn  = document.getElementById('chat-send-btn');
+  const chipsWrap    = document.getElementById('ai-chips-wrap');
 
   // ── State ──────────────────────────────────────────────────────────────────
   let busy = false;
-  let currentPersonId   = localStorage.getItem(LS_KEY_PERSON) || '';
-  let currentTier       = 'employee';
-  let currentPersonName = '';
+  let currentPersonId   = null;
   let conversationHistory = [];
 
   // ── Markdown renderer ──────────────────────────────────────────────────────
@@ -179,94 +150,23 @@
     return output.join('<br>').replace(/(<br>\s*){3,}/g, '<br><br>');
   }
 
-  // ── Person selector / tier ─────────────────────────────────────────────────
-  async function loadPersons() {
-    try {
-      const data = await fetch('/api/data').then(r => r.json());
-      const persons = (data.persons || []).slice().sort((a, b) => a.name.localeCompare(b.name));
-      persons.forEach(p => {
-        const opt = document.createElement('option');
-        opt.value = String(p.id);
-        opt.textContent = p.employeeId ? `${p.name} (${p.employeeId})` : p.name;
-        if (String(p.id) === currentPersonId) opt.selected = true;
-        personSelect.appendChild(opt);
-      });
-      if (currentPersonId) {
-        const p = persons.find(p => String(p.id) === currentPersonId);
-        if (p) currentPersonName = p.name;
-        await refreshTier();
-      }
-      updateLockedState();
-    } catch (e) {
-      console.error('[ai] Failed to load persons:', e);
-    }
+  // ── Auth-driven identity ───────────────────────────────────────────────────
+  // Identity comes from the authenticated session, not a person selector.
+  function applyAuth(user) {
+    currentPersonId = user.personId || null;
+    chipsWrap.classList.remove('locked');
+    emptyInput.disabled = false;
   }
 
-  async function refreshTier() {
-    if (!currentPersonId) {
-      tierBadgeWrap.style.display = 'none';
-      currentTier = 'employee';
-      return;
-    }
-    try {
-      const info = await fetch('/api/v1/ai/whoami?personId=' + encodeURIComponent(currentPersonId)).then(r => r.json());
-      currentTier = info.tier || 'employee';
-      currentPersonName = info.personName || currentPersonName;
-      const labels = { admin: 'HR Admin · Full access', manager: 'Manager', employee: 'Employee' };
-      const label  = labels[currentTier] || currentTier;
-
-      // Empty state badge
-      tierBadge.textContent = label;
-      tierBadge.className   = 'ai-tier-badge tier-' + currentTier;
-      tierBadgeWrap.style.display = '';
-
-      // Chat state badge
-      chatIdentityName.textContent  = currentPersonName;
-      chatIdentityBadge.textContent = label;
-      chatIdentityBadge.className   = 'ai-tier-badge tier-' + currentTier;
-    } catch (e) {
-      console.error('[ai] whoami failed:', e);
-    }
+  if (window.__currentUser) {
+    applyAuth(window.__currentUser);
+  } else {
+    document.addEventListener('auth:ready', e => applyAuth(e.detail));
   }
-
-  function updateLockedState() {
-    const locked = !currentPersonId;
-    chipsWrap.classList.toggle('locked', locked);
-    emptyInput.disabled = locked;
-    emptyInput.placeholder = locked
-      ? 'Select who you are above to start chatting…'
-      : 'Ask a question about your org…';
-    // Only enable send when there's also text
-    if (locked) emptySendBtn.disabled = true;
-  }
-
-  personSelect.addEventListener('change', async function () {
-    currentPersonId = this.value;
-    currentPersonName = this.options[this.selectedIndex]?.text || '';
-    if (currentPersonId) {
-      localStorage.setItem(LS_KEY_PERSON, currentPersonId);
-    } else {
-      localStorage.removeItem(LS_KEY_PERSON);
-    }
-    conversationHistory = [];
-    messagesEl.innerHTML = '';
-    emptyState.style.display = '';
-    chatState.style.display  = 'none';
-    await refreshTier();
-    updateLockedState();
-  });
-
-  // "Change" button in chat state → back to empty state
-  chatChangeBtn.addEventListener('click', function () {
-    conversationHistory = [];
-    messagesEl.innerHTML = '';
-    emptyState.style.display = '';
-    chatState.style.display  = 'none';
-  });
 
   // ── Input enable/disable ───────────────────────────────────────────────────
   emptyInput.addEventListener('input', function () {
-    emptySendBtn.disabled = !this.value.trim() || !currentPersonId;
+    emptySendBtn.disabled = !this.value.trim();
   });
   chatInput.addEventListener('input', function () {
     chatSendBtn.disabled = !this.value.trim();
@@ -307,10 +207,10 @@
     scrollBottom();
   }
 
-  // Only hr / org_admin / super_admin may write data — mirrors server WRITE_ROLES.
-  const WRITE_ROLES = ['hr', 'org_admin', 'super_admin'];
+  // Gate AI suggested changes on the user's effective rights (from permissions page).
   function canApplyChanges() {
-    return WRITE_ROLES.includes(window.__currentUser && window.__currentUser.role);
+    const rights = (window.__currentUser && window.__currentUser.rights) || [];
+    return ['edit_org_chart', 'edit_directory', 'edit_salaries'].some(r => rights.includes(r));
   }
 
   function appendActionCard(action) {
@@ -359,16 +259,17 @@
   }
 
   async function applyAction(action) {
-    const data = await fetch('/api/data').then(r => r.json());
+    const data = await fetch('/api/v1/data', { credentials: 'same-origin' }).then(r => r.json());
     const key  = { person: 'persons', role: 'roles', department: 'departments' }[action.entityType];
     if (!key || !data[key]) throw new Error('Unknown entity type: ' + action.entityType);
     const entity = data[key].find(e => String(e.id) === String(action.entityId));
     if (!entity) throw new Error(action.entityName + ' not found');
     entity[action.field] = action.newValue;
-    const resp = await fetch('/api/data', {
+    const resp = await fetch('/api/v1/data', {
       method: 'POST',
+      credentials: 'same-origin',
       headers: {
-        'Content-Type':   'application/json',
+        'Content-Type':    'application/json',
         'X-Change-Reason': '[AI suggestion] ' + action.reason.slice(0, 480),
         'X-Source':        'ai',
       },
@@ -388,7 +289,7 @@
 
   // ── Submit ─────────────────────────────────────────────────────────────────
   async function submitQuery(text) {
-    if (!text || busy || !currentPersonId) return;
+    if (!text || busy) return;
     busy = true;
 
     emptyState.style.display = 'none';
@@ -447,9 +348,6 @@
   document.querySelectorAll('.ai-chip').forEach(chip => {
     chip.addEventListener('click', function () { submitQuery(this.dataset.prompt); });
   });
-
-  // ── Boot ───────────────────────────────────────────────────────────────────
-  loadPersons();
 
 }());
 </script>

@@ -309,12 +309,6 @@
   <div id="perm-main">
     <div id="perm-inner">
 
-      <!-- Notice -->
-      <div class="perm-notice">
-        <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="7"/><line x1="8" y1="5" x2="8" y2="8.5"/><circle cx="8" cy="11" r="0.6" fill="currentColor" stroke="none"/></svg>
-        <span><strong>M1 — Configuration only.</strong> Groups and policies are stored and previewed here but not enforced yet. Enforcement and Entra ID provisioning land in M3. <strong>Deny groups always override Allow groups</strong> — if an employee is in both, the denial wins.</span>
-      </div>
-
       <!-- ── Section 1: Permission Groups ─────────────────── -->
       <div class="perm-section" id="groups-section">
         <div class="perm-section-header">
@@ -364,7 +358,7 @@
               <div class="rights-list" id="group-rights-grid"></div>
             </div>
             <div class="editor-field full">
-              <div class="editor-label">Entra ID / Azure AD Group Names <span class="sub">(comma-separated — informational in M1, provisioned in M3)</span></div>
+              <div class="editor-label">Entra ID / Azure AD Group Names <span class="sub">(comma-separated)</span></div>
               <input class="editor-input" id="ed-g-azure" type="text" placeholder="e.g. AAD-HR-Readers, AAD-Salary-View">
             </div>
           </div>
