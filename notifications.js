@@ -16,6 +16,13 @@
   //   detail — full description shown in the modal (plain text or simple HTML)
   const RELEASE_NOTES = [
     {
+      id: 'release-0.6.0-m2-complete',
+      date: '26 Mar 2026',
+      title: 'Security & database hardening (0.6.0)',
+      body: 'M2 is complete: sensitive data (salaries, employee IDs, dates of birth) is now encrypted at rest in the database.',
+      detail: 'All sensitive fields — salaries, employee IDs, dates of birth, and salary band values — are now encrypted in the database using AES-256-GCM. The encryption is transparent: the app works exactly as before, but anyone with direct database access sees only ciphertext, not salary figures. The encryption key is held separately in Azure App Service settings, not in the database or codebase. M2 also includes: versioned REST API (/api/v1/), PostgreSQL on Azure, a full audit log, input validation on all data writes, and the AI Assistant (released in 0.5.0).',
+    },
+    {
       id: 'release-0.5.0-ai-assistant',
       date: '26 Mar 2026',
       title: 'AI Assistant (0.5.0)',

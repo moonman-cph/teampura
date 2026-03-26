@@ -20,7 +20,7 @@ Single user, single dummy organisation, flat JSON file persistence, single-file 
 
 ---
 
-## M2 — Database, API Layer & Multi-Tenancy Foundations (current — ~60% complete)
+## M2 — Database, API Layer & Multi-Tenancy Foundations ✓ Complete
 Replace the JSON file with **PostgreSQL on Azure**. The app is deployed on **Azure App Service** with a managed **Azure Database for PostgreSQL** instance (`teampura-demo.postgres.database.azure.com`). PostgreSQL is chosen because it natively supports schema-per-tenant isolation, row-level security (RLS), field-level encryption via extensions (`pgcrypto`), JSON columns for flexible config, and scales from single-server to fully managed cloud deployments.
 
 Introduce a versioned REST API: all routes move to `/api/v1/`. No route may be removed or changed in a breaking way once published — add new versions instead.
@@ -49,7 +49,7 @@ Security foundations introduced in this milestone:
 
 ---
 
-## M3 — Authentication & Role-Based Access Control
+## M3 — Authentication & Role-Based Access Control (current)
 Login, sessions, and JWT-based auth. Role-based access is enforced **server-side on every API response** — not just hidden in the UI.
 
 Five roles:
