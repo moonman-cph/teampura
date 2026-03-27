@@ -104,6 +104,14 @@
   let currentPersonId   = null;
   let conversationHistory = [];
 
+  // Serialise apply operations — only one runs at a time to avoid race conditions
+  // where two concurrent fetches both see the pre-change state and overwrite each other.
+  let _applyQueue = Promise.resolve();
+  function queueApply(fn) {
+    _applyQueue = _applyQueue.then(fn).catch(() => {});
+    return _applyQueue;
+  }
+
   // ── Markdown renderer ──────────────────────────────────────────────────────
   function renderMarkdown(text) {
     function inlineMd(s) {
@@ -288,22 +296,30 @@
       </div>
     `;
 
-    if (canApply) card.querySelector('.ai-action-apply-btn').addEventListener('click', async function () {
-      this.disabled = true;
-      this.textContent = 'Applying…';
-      try {
-        if (isOrgAction) {
-          await applyOrgAction(action);
-        } else {
-          await applyAction(action);
+    if (canApply) card.querySelector('.ai-action-apply-btn').addEventListener('click', function () {
+      const btn = this;
+      btn.disabled = true;
+      btn.textContent = 'Applying…';
+      // Disable all other pending apply buttons while this runs to prevent race conditions
+      document.querySelectorAll('.ai-action-apply-btn:not(:disabled)').forEach(b => { b.disabled = true; b.dataset.queued = '1'; });
+      queueApply(async () => {
+        try {
+          if (isOrgAction) {
+            await applyOrgAction(action);
+          } else {
+            await applyAction(action);
+          }
+          card.querySelector('.ai-action-btns').innerHTML = '<span class="ai-action-applied">✓ Applied</span>';
+        } catch (e) {
+          card.querySelector('.ai-action-btns').innerHTML =
+            '<span class="ai-action-error">Failed: ' + escHtml(e.message) + '</span>' +
+            '<button class="ai-action-dismiss-btn" style="margin-left:8px">Dismiss</button>';
+          card.querySelector('.ai-action-dismiss-btn').addEventListener('click', () => card.remove());
+        } finally {
+          // Re-enable any queued apply buttons
+          document.querySelectorAll('.ai-action-apply-btn[data-queued]').forEach(b => { b.disabled = false; delete b.dataset.queued; });
         }
-        card.querySelector('.ai-action-btns').innerHTML = '<span class="ai-action-applied">✓ Applied</span>';
-      } catch (e) {
-        card.querySelector('.ai-action-btns').innerHTML =
-          '<span class="ai-action-error">Failed: ' + escHtml(e.message) + '</span>' +
-          '<button class="ai-action-dismiss-btn" style="margin-left:8px">Dismiss</button>';
-        card.querySelector('.ai-action-dismiss-btn').addEventListener('click', () => card.remove());
-      }
+      });
     });
 
     card.querySelector('.ai-action-dismiss-btn').addEventListener('click', function () {
@@ -361,12 +377,22 @@
       }
       case 'create_role': {
         data.roles = data.roles || [];
+        // Resolve department: the AI should send an ID, but may send a name — handle both
+        let deptId = action.roleDepartmentId || null;
+        if (deptId) {
+          const byId = (data.departments || []).find(d => String(d.id) === String(deptId));
+          if (!byId) {
+            const byName = (data.departments || []).find(d => d.name.toLowerCase() === String(deptId).toLowerCase());
+            if (byName) deptId = String(byName.id);
+          }
+        }
+        if (!deptId) throw new Error('Could not resolve department for the new role. Please specify a valid department.');
         data.roles.push({
           id:            genId(),
           orgId:         'default',
           title:         action.roleTitle,
           level:         action.roleLevel || null,
-          departmentId:  action.roleDepartmentId,
+          departmentId:  deptId,
           managerRoleId: action.roleManagerRoleId || null,
           teamId:        null,
         });
@@ -382,7 +408,17 @@
       case 'move_role': {
         const role = (data.roles || []).find(r => String(r.id) === String(action.entityId));
         if (!role) throw new Error(action.entityName + ' not found');
-        if (action.newDepartmentId) role.departmentId = action.newDepartmentId;
+        if (action.newDepartmentId) {
+          // Resolve by ID first, fall back to name
+          const byId = (data.departments || []).find(d => String(d.id) === String(action.newDepartmentId));
+          if (byId) {
+            role.departmentId = String(byId.id);
+          } else {
+            const byName = (data.departments || []).find(d => d.name.toLowerCase() === String(action.newDepartmentId).toLowerCase());
+            if (byName) role.departmentId = String(byName.id);
+            else throw new Error('Could not resolve new department: ' + action.newDepartmentId);
+          }
+        }
         if ('newManagerRoleId' in action) role.managerRoleId = action.newManagerRoleId || null;
         break;
       }
@@ -398,7 +434,7 @@
         });
         if (action.personRoleId) {
           data.roleAssignments = data.roleAssignments || [];
-          data.roleAssignments.push({ roleId: action.personRoleId, personId: newId });
+          data.roleAssignments.push({ id: genId(), roleId: action.personRoleId, personId: newId });
         }
         break;
       }

@@ -16,6 +16,13 @@
   //   detail — full description shown in the modal (plain text or simple HTML)
   const RELEASE_NOTES = [
     {
+      id:     'release-0.9.8-ai-apply-fixes',
+      date:   '27 Mar 2026',
+      title:  'AI apply: race condition and ID resolution fixed (0.9.8)',
+      body:   'Applying multiple AI-suggested changes in quick succession no longer overwrites earlier ones, and department name/ID mismatches no longer crash the org chart.',
+      detail: 'Two bugs fixed in the AI action card flow. First, clicking Apply on several cards quickly could cause a race where each card fetched the same pre-change state and the last write won, losing earlier changes. Applies are now serialised — each waits for the previous to finish. Second, the AI sometimes passed a department name (e.g. "Sales") where a department ID was expected; the org chart then failed to find the department and threw inside init(), showing "Cannot connect to server". Apply logic now resolves names to IDs automatically as a fallback. Also fixed a missing id field on role assignments created via create_person.',
+    },
+    {
       id:     'release-0.9.7-ai-structural-actions',
       date:   '27 Mar 2026',
       title:  'AI can now create, move & delete (0.9.7)',

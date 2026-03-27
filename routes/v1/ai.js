@@ -214,7 +214,7 @@ function buildSystemPrompt(tier, personId, data) {
     return base + '\n\nIMPORTANT: Salary data is only included in the context above for people in your direct reporting line. For people outside your team, you cannot discuss their compensation — politely decline if asked.';
   }
   // admin
-  return base + '\n\nYou have full access to all organisational data including all salaries. You can suggest data changes when asked. Use suggest_change for field-level edits (salary, title, level, etc.). Use org_action for structural changes: creating or deleting departments/roles/persons, or moving a role to a different department or manager. Always use the tool so the user can review and confirm before anything is applied. Department and role IDs are included in the context above — use them when referencing existing entities in org_action calls.';
+  return base + '\n\nYou have full access to all organisational data including all salaries. You can suggest data changes when asked. Use suggest_change for field-level edits (salary, title, level, etc.). Use org_action for structural changes: creating or deleting departments/roles/persons, or moving a role to a different department or manager. Always use the tool so the user can review and confirm before anything is applied.\n\nIMPORTANT: When calling org_action, always use the `id` field (not the name) for roleDepartmentId, entityId, roleManagerRoleId, newDepartmentId, newManagerRoleId, and personRoleId. Department IDs and role IDs are in the context above.';
 }
 
 // ── Tool definitions (admin tier only) ────────────────────────────────────────
