@@ -45,9 +45,9 @@ git add orgchart.html && git commit -m "Your message here" && git push
 
 ### Release Notes (required before every push)
 
-The app uses **semver** (`MAJOR.MINOR.PATCH`). Current version: `0.4.1`. MAJOR stays `0` until the product has a stable public launch (post-M3). Bump rules:
+The app uses **semver** (`MAJOR.MINOR.PATCH`). Current version: `0.9.6`. MAJOR stays `0` until the product has a stable public launch (post-M3). Bump rules:
 - **MINOR** (`0.x.0`) — new user-visible feature (e.g. a new page, a new capability)
-- **PATCH** (`0.x.y`) — bug fix, UI improvement, or small change
+- **PATCH** (`0.x.y`) — bug fix, UI improvement, or small change — bump on **every push**, no matter how small, so the live version is always distinguishable from the previous one
 
 Before committing and pushing any meaningful change, prepend a new entry to the **top** of the `RELEASE_NOTES` array in `notifications.js` and update `package.json`:
 
