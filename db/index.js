@@ -490,8 +490,9 @@ async function getData(orgId = 'default') {
     personPermissionOverrides: cfg.personPermissionOverrides ?? [],
   };
 
-  // Return empty object (triggers client-side seed) if the DB has no data yet
-  if (result.departments.length === 0 && result.persons.length === 0) return {};
+  // Return empty object (triggers client-side seed) only on a truly fresh install.
+  // If _initialized is set, the org has been written to before — return real empty arrays.
+  if (result.departments.length === 0 && result.persons.length === 0 && !cfg._initialized) return {};
 
   return result;
 }
@@ -679,6 +680,13 @@ async function setData(data, orgId = 'default') {
         `, [orgId, key, JSON.stringify(data[key])]);
       }
     }
+
+    // Mark this org as initialised so getData can distinguish "explicitly cleared"
+    // from "never been written to" (the latter triggers client-side seed).
+    await client.query(`
+      INSERT INTO org_config (org_id, key, value) VALUES ($1, '_initialized', 'true')
+      ON CONFLICT (org_id, key) DO NOTHING
+    `, [orgId]);
 
     await client.query('COMMIT');
   } catch (err) {
