@@ -168,6 +168,7 @@ function buildContext(personId, tier, data) {
   return {
     organisation: { headcount: persons.length, currency },
     departments: departments.map(d => ({
+      id:        String(d.id),
       name:      d.name,
       headcount: headcountByDept[d.name] || 0,
     })),
@@ -213,7 +214,7 @@ function buildSystemPrompt(tier, personId, data) {
     return base + '\n\nIMPORTANT: Salary data is only included in the context above for people in your direct reporting line. For people outside your team, you cannot discuss their compensation — politely decline if asked.';
   }
   // admin
-  return base + '\n\nYou have full access to all organisational data including all salaries. You can also suggest data changes when asked. When you recommend a specific change (e.g. a salary update, role reassignment), use the suggest_change tool so the user can review and confirm before it is applied.';
+  return base + '\n\nYou have full access to all organisational data including all salaries. You can suggest data changes when asked. Use suggest_change for field-level edits (salary, title, level, etc.). Use org_action for structural changes: creating or deleting departments/roles/persons, or moving a role to a different department or manager. Always use the tool so the user can review and confirm before anything is applied. Department and role IDs are included in the context above — use them when referencing existing entities in org_action calls.';
 }
 
 // ── Tool definitions (admin tier only) ────────────────────────────────────────
@@ -233,6 +234,43 @@ const SUGGEST_CHANGE_TOOL = {
       reason:       { type: 'string', description: 'Brief justification for the change' },
     },
     required: ['entityType', 'entityId', 'entityName', 'field', 'newValue', 'reason'],
+  },
+};
+
+const ORG_ACTION_TOOL = {
+  name: 'org_action',
+  description: 'Propose a structural change to the organisation: create a new department or role, move a role to a different department or manager, or delete a department, role, or person. The user will review and confirm before anything is applied.',
+  input_schema: {
+    type: 'object',
+    properties: {
+      operation: {
+        type: 'string',
+        enum: ['create_department', 'delete_department', 'create_role', 'delete_role', 'move_role', 'create_person', 'delete_person'],
+        description: 'The type of structural change to propose',
+      },
+      reason: { type: 'string', description: 'Brief justification for the change' },
+      // Shared (existing entities)
+      entityId:   { type: 'string', description: 'ID of the existing entity (for delete/move operations)' },
+      entityName: { type: 'string', description: 'Human-readable name of the entity (for delete/move, shown in the confirm card)' },
+      // create_department
+      departmentName:  { type: 'string', description: 'Name of the new department' },
+      departmentColor: { type: 'string', description: 'Hex color for the department badge, e.g. #6366f1' },
+      // create_role
+      roleTitle:         { type: 'string', description: 'Title of the new role' },
+      roleLevel:         { type: 'string', description: 'Level of the role, e.g. L4' },
+      roleDepartmentId:  { type: 'string', description: 'Department ID for the new role (use id from the departments list in context)' },
+      roleManagerRoleId: { type: 'string', description: 'Role ID of the manager for the new role (optional — omit for a top-level role)' },
+      // move_role
+      newDepartmentId:    { type: 'string', description: 'New department ID when moving a role to a different department' },
+      newDepartmentName:  { type: 'string', description: 'New department name (for display in the confirm card)' },
+      newManagerRoleId:   { type: 'string', description: 'New manager role ID when changing reporting line. Pass null to make the role top-level.' },
+      newManagerRoleName: { type: 'string', description: 'New manager role name (for display in the confirm card)' },
+      // create_person
+      personName:   { type: 'string', description: 'Full name of the new person' },
+      personSalary: { type: 'number', description: 'Starting salary (optional)' },
+      personRoleId: { type: 'string', description: 'Role ID to assign to the new person (optional)' },
+    },
+    required: ['operation', 'reason'],
   },
 };
 
@@ -299,7 +337,7 @@ router.post('/query', async (req, res) => {
     };
 
     if (tier === 'admin') {
-      createParams.tools       = [SUGGEST_CHANGE_TOOL];
+      createParams.tools       = [SUGGEST_CHANGE_TOOL, ORG_ACTION_TOOL];
       createParams.tool_choice = { type: 'auto' };
     }
 
@@ -309,8 +347,9 @@ router.post('/query', async (req, res) => {
     let textContent = '';
     const actions   = [];
     for (const block of aiResponse.content) {
-      if (block.type === 'text')     textContent += block.text;
-      if (block.type === 'tool_use' && block.name === 'suggest_change') actions.push(block.input);
+      if (block.type === 'text') textContent += block.text;
+      if (block.type === 'tool_use' && block.name === 'suggest_change') actions.push({ ...block.input, _type: 'suggest_change' });
+      if (block.type === 'tool_use' && block.name === 'org_action')     actions.push({ ...block.input, _type: 'org_action' });
     }
 
     // Audit log (non-fatal)

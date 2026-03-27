@@ -207,21 +207,70 @@
     scrollBottom();
   }
 
-  // Gate AI suggested changes on the user's effective rights (from permissions page).
-  function canApplyChanges() {
+  // ── Helpers ────────────────────────────────────────────────────────────────
+  function genId() {
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
+      const r = Math.random() * 16 | 0;
+      return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
+    });
+  }
+
+  function canApplyAction(action) {
     const rights = (window.__currentUser && window.__currentUser.rights) || [];
+    if (action._type === 'org_action') {
+      const op = action.operation || '';
+      if (['create_person', 'delete_person'].includes(op)) return rights.includes('edit_directory');
+      return rights.includes('edit_org_chart');
+    }
     return ['edit_org_chart', 'edit_directory', 'edit_salaries'].some(r => rights.includes(r));
   }
 
+  function describeOrgAction(action) {
+    switch (action.operation) {
+      case 'create_department':
+        return `Create department <strong>${escHtml(action.departmentName)}</strong>`;
+      case 'delete_department':
+        return `Delete department <strong>${escHtml(action.entityName)}</strong>`;
+      case 'create_role': {
+        let s = `Create role <strong>${escHtml(action.roleTitle)}</strong>`;
+        if (action.roleLevel) s += ` (${escHtml(action.roleLevel)})`;
+        return s;
+      }
+      case 'delete_role':
+        return `Delete role <strong>${escHtml(action.entityName)}</strong>`;
+      case 'move_role': {
+        let s = `Move <strong>${escHtml(action.entityName)}</strong>`;
+        if (action.newDepartmentName) s += ` to <strong>${escHtml(action.newDepartmentName)}</strong> department`;
+        if (action.newManagerRoleName) s += ` to report to <strong>${escHtml(action.newManagerRoleName)}</strong>`;
+        else if (action.newManagerRoleId === null) s += `, make top-level (no manager)`;
+        return s;
+      }
+      case 'create_person':
+        return `Add new person <strong>${escHtml(action.personName)}</strong>`;
+      case 'delete_person':
+        return `Remove <strong>${escHtml(action.entityName)}</strong> from the organisation`;
+      default:
+        return `Structural change: ${escHtml(action.operation)}`;
+    }
+  }
+
   function appendActionCard(action) {
-    const fieldLabel = action.field.replace(/_/g, ' ');
-    const fmtVal = v => {
-      if (action.field === 'salary' && typeof v === 'number') return v.toLocaleString();
-      return String(v ?? '');
-    };
-    const detail = action.currentValue != null
-      ? `<strong>${escHtml(action.entityName)}</strong>'s ${fieldLabel}: ${fmtVal(action.currentValue)} → ${fmtVal(action.newValue)}`
-      : `Set <strong>${escHtml(action.entityName)}</strong>'s ${fieldLabel} to ${fmtVal(action.newValue)}`;
+    const isOrgAction = action._type === 'org_action';
+    const canApply    = canApplyAction(action);
+
+    let detail;
+    if (isOrgAction) {
+      detail = describeOrgAction(action);
+    } else {
+      const fieldLabel = action.field.replace(/_/g, ' ');
+      const fmtVal = v => {
+        if (action.field === 'salary' && typeof v === 'number') return v.toLocaleString();
+        return String(v ?? '');
+      };
+      detail = action.currentValue != null
+        ? `<strong>${escHtml(action.entityName)}</strong>'s ${fieldLabel}: ${fmtVal(action.currentValue)} → ${fmtVal(action.newValue)}`
+        : `Set <strong>${escHtml(action.entityName)}</strong>'s ${fieldLabel} to ${fmtVal(action.newValue)}`;
+    }
 
     const card = document.createElement('div');
     card.className = 'ai-action-card';
@@ -231,22 +280,29 @@
         <div class="ai-action-detail">${detail}</div>
         <div class="ai-action-reason">Reason: ${escHtml(action.reason)}</div>
         <div class="ai-action-btns">
-          ${canApplyChanges()
+          ${canApply
             ? '<button class="ai-action-apply-btn">Apply change</button>'
-            : '<span class="ai-action-no-perm" title="You do not have permission to apply data changes">View only</span>'}
+            : '<span class="ai-action-no-perm" title="You do not have permission to apply this change">View only</span>'}
           <button class="ai-action-dismiss-btn">Dismiss</button>
         </div>
       </div>
     `;
 
-    if (canApplyChanges()) card.querySelector('.ai-action-apply-btn').addEventListener('click', async function () {
+    if (canApply) card.querySelector('.ai-action-apply-btn').addEventListener('click', async function () {
       this.disabled = true;
       this.textContent = 'Applying…';
       try {
-        await applyAction(action);
+        if (isOrgAction) {
+          await applyOrgAction(action);
+        } else {
+          await applyAction(action);
+        }
         card.querySelector('.ai-action-btns').innerHTML = '<span class="ai-action-applied">✓ Applied</span>';
       } catch (e) {
-        card.querySelector('.ai-action-btns').innerHTML = '<span class="ai-action-error">Failed: ' + escHtml(e.message) + '</span>';
+        card.querySelector('.ai-action-btns').innerHTML =
+          '<span class="ai-action-error">Failed: ' + escHtml(e.message) + '</span>' +
+          '<button class="ai-action-dismiss-btn" style="margin-left:8px">Dismiss</button>';
+        card.querySelector('.ai-action-dismiss-btn').addEventListener('click', () => card.remove());
       }
     });
 
@@ -271,6 +327,96 @@
       headers: {
         'Content-Type':    'application/json',
         'X-Change-Reason': '[AI suggestion] ' + action.reason.slice(0, 480),
+        'X-Source':        'ai',
+      },
+      body: JSON.stringify(data),
+    });
+    if (!resp.ok) {
+      const err = await resp.json().catch(() => ({}));
+      throw new Error(err.error || resp.statusText);
+    }
+  }
+
+  async function applyOrgAction(action) {
+    const data = await fetch('/api/v1/data', { credentials: 'same-origin' }).then(r => r.json());
+
+    switch (action.operation) {
+      case 'create_department': {
+        data.departments = data.departments || [];
+        data.departments.push({
+          id:          genId(),
+          orgId:       'default',
+          name:        action.departmentName,
+          color:       action.departmentColor || '#6366f1',
+          description: '',
+          headRoleId:  null,
+        });
+        break;
+      }
+      case 'delete_department': {
+        const hasRoles = (data.roles || []).some(r => String(r.departmentId) === String(action.entityId));
+        if (hasRoles) throw new Error('This department still has roles. Move or delete them first.');
+        data.departments = (data.departments || []).filter(d => String(d.id) !== String(action.entityId));
+        break;
+      }
+      case 'create_role': {
+        data.roles = data.roles || [];
+        data.roles.push({
+          id:            genId(),
+          orgId:         'default',
+          title:         action.roleTitle,
+          level:         action.roleLevel || null,
+          departmentId:  action.roleDepartmentId,
+          managerRoleId: action.roleManagerRoleId || null,
+          teamId:        null,
+        });
+        break;
+      }
+      case 'delete_role': {
+        const hasReports = (data.roles || []).some(r => String(r.managerRoleId) === String(action.entityId));
+        if (hasReports) throw new Error('This role has direct reports. Reassign them first.');
+        data.roles = (data.roles || []).filter(r => String(r.id) !== String(action.entityId));
+        data.roleAssignments = (data.roleAssignments || []).filter(a => String(a.roleId) !== String(action.entityId));
+        break;
+      }
+      case 'move_role': {
+        const role = (data.roles || []).find(r => String(r.id) === String(action.entityId));
+        if (!role) throw new Error(action.entityName + ' not found');
+        if (action.newDepartmentId) role.departmentId = action.newDepartmentId;
+        if ('newManagerRoleId' in action) role.managerRoleId = action.newManagerRoleId || null;
+        break;
+      }
+      case 'create_person': {
+        const newId = genId();
+        data.persons = data.persons || [];
+        data.persons.push({
+          id:     newId,
+          orgId:  'default',
+          name:   action.personName,
+          salary: action.personSalary || null,
+          gender: null,
+        });
+        if (action.personRoleId) {
+          data.roleAssignments = data.roleAssignments || [];
+          data.roleAssignments.push({ roleId: action.personRoleId, personId: newId });
+        }
+        break;
+      }
+      case 'delete_person': {
+        data.persons = (data.persons || []).filter(p => String(p.id) !== String(action.entityId));
+        data.roleAssignments = (data.roleAssignments || []).filter(a => String(a.personId) !== String(action.entityId));
+        break;
+      }
+      default:
+        throw new Error('Unknown operation: ' + action.operation);
+    }
+
+    const resp = await fetch('/api/v1/data', {
+      method: 'POST',
+      credentials: 'same-origin',
+      headers: {
+        'Content-Type':    'application/json',
+        'X-Change-Reason': '[AI suggestion] ' + (action.reason || '').slice(0, 480),
         'X-Source':        'ai',
       },
       body: JSON.stringify(data),

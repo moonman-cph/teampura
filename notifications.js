@@ -16,6 +16,13 @@
   //   detail — full description shown in the modal (plain text or simple HTML)
   const RELEASE_NOTES = [
     {
+      id:     'release-0.9.7-ai-structural-actions',
+      date:   '27 Mar 2026',
+      title:  'AI can now create, move & delete (0.9.7)',
+      body:   'The AI assistant can now propose structural changes — create departments or roles, move roles, add or remove people — not just field edits.',
+      detail: 'The AI assistant previously could only suggest field-level edits (e.g. change a salary or job title). It can now propose structural changes: creating a new department or role, moving a role to a different department or manager, and deleting empty departments, roles, or people. As before, every proposal appears as a confirm card — nothing changes until you click Apply. Changes are gated on your permissions: org chart operations require edit_org_chart, people operations require edit_directory.',
+    },
+    {
       id:     'release-0.9.6-clear-data-fix',
       date:   '27 Mar 2026',
       title:  'Clear Data now persists correctly (0.9.6)',
