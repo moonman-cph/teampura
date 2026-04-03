@@ -16,6 +16,13 @@
   //   detail — full description shown in the modal (plain text or simple HTML)
   const RELEASE_NOTES = [
     {
+      id:     'release-0.9.16-dashboard-grid',
+      date:   '3 Apr 2026',
+      title:  'Dashboard: 6-column layout + responsive (0.9.16)',
+      body:   'The dashboard now uses a denser 6-column grid so cards are less stretched, plus responsive breakpoints for tablet and mobile.',
+      detail: 'The dashboard previously used a 4-column grid with no width cap, causing cards to look stretched on wide monitors. It now uses 6 columns: KPI cards and donut charts share the top row, chart cards sit 3-per-row beneath, and the Org Health summary takes a clean full-width row at the bottom. Responsive breakpoints collapse the layout to 4 columns at ≤1100px, 2 columns at ≤720px, and 1 column on mobile.',
+    },
+    {
       id:     'release-0.9.15-ai-changelog',
       date:   '3 Apr 2026',
       title:  'AI changes now tracked in changelog (0.9.15)',
