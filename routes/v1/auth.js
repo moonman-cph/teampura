@@ -24,6 +24,14 @@ router.post('/login', async (req, res) => {
     if (user.status === 'suspended') return res.status(403).json({ error: 'This account has been suspended. Contact your administrator.' });
     if (user.status === 'locked')    return res.status(403).json({ error: 'This account is locked. Contact your administrator.' });
 
+    // Org-level suspension check (after bcrypt to avoid timing attacks that reveal valid org IDs)
+    if (process.env.DATABASE_URL && user.org_id) {
+      const org = await db.getOrgById(user.org_id);
+      if (org && org.status === 'suspended') {
+        return res.status(403).json({ error: 'This organisation has been suspended. Contact support.' });
+      }
+    }
+
     await db.updateUserLastLogin(user.id);
 
     const token = signToken({

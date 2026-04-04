@@ -12,6 +12,8 @@ const v1Changelog  = require('./routes/v1/changelog');
 const v1Ai         = require('./routes/v1/ai');
 const v1Users      = require('./routes/v1/users');
 const v1Jobs       = require('./routes/v1/jobs');
+const v1Orgs       = require('./routes/v1/orgs');
+const v1AdminUsers = require('./routes/v1/admin-users');
 const scheduler    = require('./lib/scheduler');
 
 const app  = express();
@@ -98,7 +100,9 @@ app.delete('/api/sim-data', requireAuth, (req, res) => { simData = null; res.jso
 app.use('/api/v1/data',      requireAuth, v1Data);
 app.use('/api/v1/changelog', requireAuth, v1Changelog);
 app.use('/api/v1/ai',        requireAuth, v1Ai);
-app.use('/api/v1/jobs',      requireAuth, v1Jobs);
+app.use('/api/v1/jobs',        requireAuth, v1Jobs);
+app.use('/api/v1/orgs',        requireAuth, v1Orgs);
+app.use('/api/v1/admin/users', requireAuth, v1AdminUsers);
 
 // M1 backward-compatible aliases (also authenticated)
 app.use('/api/data',      requireAuth, v1Data);

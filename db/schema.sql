@@ -125,23 +125,50 @@ CREATE TABLE IF NOT EXISTS org_config (
   PRIMARY KEY (org_id, key)
 );
 
+-- ── Organisations ─────────────────────────────────────────────────────────────
+-- Authoritative registry of all tenant org IDs.
+-- status: active | suspended
+-- plan_tier: trial | starter | pro | enterprise  (column exists; no enforcement until M5)
+-- id and slug hold the same value — the org_id used on all other tables.
+
+CREATE TABLE IF NOT EXISTS organisations (
+  id               TEXT        NOT NULL,
+  name             TEXT        NOT NULL,
+  slug             TEXT        NOT NULL,
+  plan_tier        TEXT        NOT NULL DEFAULT 'trial',
+  status           TEXT        NOT NULL DEFAULT 'active',
+  trial_expires_at TIMESTAMPTZ,
+  created_at       TIMESTAMPTZ NOT NULL DEFAULT now(),
+  updated_at       TIMESTAMPTZ NOT NULL DEFAULT now(),
+  created_by       TEXT,
+  PRIMARY KEY (id),
+  UNIQUE (slug)
+);
+
+CREATE INDEX IF NOT EXISTS organisations_status ON organisations (status);
+
 -- ── Users ─────────────────────────────────────────────────────────────────────
 -- Roles: super_admin | org_admin | hr | manager | employee
 -- person_id optionally links a user account to an entry in the persons table.
+-- force_logout_at: when set, any JWT issued before this timestamp is rejected.
 
 CREATE TABLE IF NOT EXISTS users (
-  id            TEXT        NOT NULL DEFAULT gen_random_uuid()::text,
-  org_id        TEXT        NOT NULL DEFAULT 'default',
-  email         TEXT        NOT NULL,
-  password_hash TEXT        NOT NULL,
-  role          TEXT        NOT NULL DEFAULT 'employee',
-  person_id     TEXT,
-  status        TEXT        NOT NULL DEFAULT 'active',
-  created_at    TIMESTAMPTZ NOT NULL DEFAULT now(),
-  last_login    TIMESTAMPTZ,
+  id              TEXT        NOT NULL DEFAULT gen_random_uuid()::text,
+  org_id          TEXT        NOT NULL DEFAULT 'default',
+  email           TEXT        NOT NULL,
+  password_hash   TEXT        NOT NULL,
+  role            TEXT        NOT NULL DEFAULT 'employee',
+  person_id       TEXT,
+  status          TEXT        NOT NULL DEFAULT 'active',
+  created_at      TIMESTAMPTZ NOT NULL DEFAULT now(),
+  last_login      TIMESTAMPTZ,
+  force_logout_at TIMESTAMPTZ,
   PRIMARY KEY (id),
   UNIQUE (email)
 );
+
+-- Add force_logout_at to existing deployments that created the table before this column
+ALTER TABLE users ADD COLUMN IF NOT EXISTS force_logout_at TIMESTAMPTZ;
 
 -- ── Audit Log ─────────────────────────────────────────────────────────────────
 -- Append-only. Application role: INSERT + SELECT only (no UPDATE, no DELETE).
