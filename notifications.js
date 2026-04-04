@@ -16,6 +16,13 @@
   //   detail — full description shown in the modal (plain text or simple HTML)
   const RELEASE_NOTES = [
     {
+      id:     'release-0.9.19-scheduler',
+      date:   '4 Apr 2026',
+      title:  'Server-side scheduler & planned changes (0.9.19)',
+      body:   'Planned org changes now execute reliably on the server, even when no browser is open.',
+      detail: 'A background scheduler runs on the server every 60 seconds. When you freeze a planned change with "Freeze as planned change", a scheduled job is registered in the database. The change will now fire at the exact time — whether or not anyone is logged in. The scheduler also captures a daily metrics snapshot (headcount, salary totals, vacancies, gender split, level distribution) which will power trend reports in a future release. Every automated change is recorded in the audit log with source "scheduled_job" so the trail is fully attributable. Snapshots and planned change state are now also properly persisted to the database (previously lost on server restart).',
+    },
+    {
       id:     'release-0.9.18-csv-full-fields',
       date:   '3 Apr 2026',
       title:  'CSV import: full field mapping (0.9.18)',

@@ -488,6 +488,8 @@ async function getData(orgId = 'default') {
     permissionGroups:          cfg.permissionGroups          ?? [],
     assignmentPolicies:        cfg.assignmentPolicies        ?? [],
     personPermissionOverrides: cfg.personPermissionOverrides ?? [],
+    snapshots:                 cfg.snapshots                 ?? [],
+    plannedChange:             cfg.plannedChange             ?? null,
   };
 
   // Return empty object (triggers client-side seed) only on a truly fresh install.
@@ -670,8 +672,8 @@ async function setData(data, orgId = 'default') {
         s.dragDropEnabled != null ? toBool(s.dragDropEnabled) : true,
         toBool(s.matrixMode), toBool(s.useLocationMultipliers)]);
 
-    // ── org_config (titles, levelOrder, permissionGroups, etc.) ──────────────
-    const configKeys = ['titles', 'levelOrder', 'permissionGroups', 'assignmentPolicies', 'personPermissionOverrides'];
+    // ── org_config (titles, levelOrder, permissionGroups, snapshots, plannedChange, etc.) ──
+    const configKeys = ['titles', 'levelOrder', 'permissionGroups', 'assignmentPolicies', 'personPermissionOverrides', 'snapshots', 'plannedChange'];
     for (const key of configKeys) {
       if (data[key] != null) {
         await client.query(`
@@ -827,8 +829,192 @@ async function syncDemoUser() {
   await _seedDemoUser(getPool());        // upsert with current DEMO_PASSWORD
 }
 
+// ── Scheduled Jobs ────────────────────────────────────────────────────────────
+
+async function createScheduledJob({ orgId = 'default', jobType, label, payload, scheduledAt, createdBy }) {
+  if (!process.env.DATABASE_URL) throw new Error('Database required for scheduled jobs.');
+  await ensureSchema();
+  const r = await getPool().query(
+    `INSERT INTO scheduled_jobs (org_id, job_type, label, payload, scheduled_at, created_by)
+     VALUES ($1,$2,$3,$4,$5,$6) RETURNING *`,
+    [orgId, jobType, label ?? null, JSON.stringify(payload ?? {}), scheduledAt, createdBy ?? null]
+  );
+  return r.rows[0];
+}
+
+async function getDueJobs() {
+  if (!process.env.DATABASE_URL) return [];
+  await ensureSchema();
+  const r = await getPool().query(
+    `SELECT * FROM scheduled_jobs WHERE status = 'pending' AND scheduled_at <= now() ORDER BY scheduled_at ASC LIMIT 20`
+  );
+  return r.rows;
+}
+
+async function markJobRunning(jobId) {
+  if (!process.env.DATABASE_URL) return;
+  await getPool().query(
+    `UPDATE scheduled_jobs SET status = 'running', started_at = now() WHERE id = $1`,
+    [jobId]
+  );
+}
+
+async function markJobCompleted(jobId) {
+  if (!process.env.DATABASE_URL) return;
+  await getPool().query(
+    `UPDATE scheduled_jobs SET status = 'completed', completed_at = now() WHERE id = $1`,
+    [jobId]
+  );
+}
+
+async function markJobFailed(jobId, error) {
+  if (!process.env.DATABASE_URL) return;
+  await getPool().query(
+    `UPDATE scheduled_jobs SET status = 'failed', completed_at = now(), error = $2 WHERE id = $1`,
+    [jobId, String(error).slice(0, 1000)]
+  );
+}
+
+async function cancelScheduledJob(jobId, orgId) {
+  if (!process.env.DATABASE_URL) return;
+  await ensureSchema();
+  await getPool().query(
+    `UPDATE scheduled_jobs SET status = 'cancelled', completed_at = now() WHERE id = $1 AND org_id = $2 AND status = 'pending'`,
+    [jobId, orgId]
+  );
+}
+
+async function listPendingJobs(orgId = 'default') {
+  if (!process.env.DATABASE_URL) return [];
+  await ensureSchema();
+  const r = await getPool().query(
+    `SELECT * FROM scheduled_jobs WHERE org_id = $1 AND status IN ('pending','running') ORDER BY scheduled_at ASC`,
+    [orgId]
+  );
+  return r.rows;
+}
+
+// ── Daily Metrics ─────────────────────────────────────────────────────────────
+
+async function hasDailyMetricsForToday(orgId = 'default') {
+  if (!process.env.DATABASE_URL) return true; // file mode — skip
+  await ensureSchema();
+  const r = await getPool().query(
+    `SELECT id FROM daily_metrics WHERE org_id = $1 AND recorded_at = CURRENT_DATE`,
+    [orgId]
+  );
+  return r.rows.length > 0;
+}
+
+async function captureDailyMetrics(orgId = 'default') {
+  if (!process.env.DATABASE_URL) return;
+  await ensureSchema();
+
+  const data = await getData(orgId);
+  if (!data || !data.persons) return; // empty org — skip
+
+  const { departments, roles, persons, roleAssignments } = data;
+
+  // Build role→dept map
+  const roleDept = {};
+  for (const r of (roles ?? [])) roleDept[r.id] = r.departmentId;
+
+  // Person set (persons assigned to at least one role)
+  const assignedPersonIds = new Set((roleAssignments ?? []).map(a => a.personId));
+
+  // Headcount = all persons in the system (includes unassigned)
+  const headcount = (persons ?? []).length;
+
+  // Headcount by department (via roleAssignments → roles → departments)
+  const headcountByDept = {};
+  const personDeptSeen = {}; // personId → Set of deptIds (avoid double-counting)
+  for (const ra of (roleAssignments ?? [])) {
+    const deptId = roleDept[ra.roleId];
+    if (!deptId) continue;
+    if (!personDeptSeen[ra.personId]) personDeptSeen[ra.personId] = new Set();
+    if (personDeptSeen[ra.personId].has(deptId)) continue;
+    personDeptSeen[ra.personId].add(deptId);
+    headcountByDept[deptId] = (headcountByDept[deptId] ?? 0) + 1;
+  }
+  // Map dept IDs to names
+  const deptNameById = {};
+  for (const d of (departments ?? [])) deptNameById[d.id] = d.name;
+  const headcountByDeptNamed = {};
+  for (const [id, count] of Object.entries(headcountByDept)) {
+    headcountByDeptNamed[deptNameById[id] ?? id] = count;
+  }
+
+  // Headcount by gender
+  const headcountByGender = {};
+  for (const p of (persons ?? [])) {
+    const g = p.gender || 'unspecified';
+    headcountByGender[g] = (headcountByGender[g] ?? 0) + 1;
+  }
+
+  // Headcount by level (via roleAssignments → roles)
+  const roleLevel = {};
+  for (const r of (roles ?? [])) roleLevel[r.id] = r.level;
+  const headcountByLevel = {};
+  const personLevelSeen = {};
+  for (const ra of (roleAssignments ?? [])) {
+    const level = roleLevel[ra.roleId];
+    if (!level) continue;
+    if (!personLevelSeen[ra.personId]) personLevelSeen[ra.personId] = new Set();
+    if (personLevelSeen[ra.personId].has(level)) continue;
+    personLevelSeen[ra.personId].add(level);
+    headcountByLevel[level] = (headcountByLevel[level] ?? 0) + 1;
+  }
+
+  // Vacant roles (roles with no assignment)
+  const assignedRoleIds = new Set((roleAssignments ?? []).map(a => a.roleId));
+  const vacantRoles = (roles ?? []).filter(r => !assignedRoleIds.has(r.id)).length;
+
+  // Salary metrics (persons who have a salary)
+  const salaries = (persons ?? []).map(p => p.salary).filter(s => typeof s === 'number' && s > 0);
+  const totalSalaryBudget = salaries.reduce((sum, s) => sum + s, 0);
+  const avgSalary = salaries.length > 0 ? Math.round(totalSalaryBudget / salaries.length) : 0;
+  const sortedSalaries = [...salaries].sort((a, b) => a - b);
+  const medianSalary = sortedSalaries.length > 0
+    ? sortedSalaries[Math.floor(sortedSalaries.length / 2)]
+    : 0;
+
+  // Contract type breakdown
+  const contractTypes = {};
+  for (const p of (persons ?? [])) {
+    const ct = p.contractType || 'unspecified';
+    contractTypes[ct] = (contractTypes[ct] ?? 0) + 1;
+  }
+
+  const metrics = {
+    headcount,
+    headcountAssigned: assignedPersonIds.size,
+    headcountUnassigned: headcount - assignedPersonIds.size,
+    headcountByDept: headcountByDeptNamed,
+    headcountByGender,
+    headcountByLevel,
+    totalRoles:      (roles ?? []).length,
+    vacantRoles,
+    filledRoles:     (roles ?? []).length - vacantRoles,
+    personsWithSalary: salaries.length,
+    totalSalaryBudget,
+    avgSalary,
+    medianSalary,
+    departmentCount: (departments ?? []).length,
+    contractTypes,
+  };
+
+  await getPool().query(
+    `INSERT INTO daily_metrics (org_id, recorded_at, metrics)
+     VALUES ($1, CURRENT_DATE, $2)
+     ON CONFLICT (org_id, recorded_at) DO UPDATE SET metrics = EXCLUDED.metrics, created_at = now()`,
+    [orgId, JSON.stringify(metrics)]
+  );
+}
+
 module.exports = {
   getData, setData, getChangelog, appendChangelogEntries, DATA_FILE, CHANGELOG_FILE,
   getUserByEmail, getUserById, createUser, updateUserLastLogin, updateUserPassword, listUsers,
   syncDemoUser,
+  createScheduledJob, getDueJobs, markJobRunning, markJobCompleted, markJobFailed,
+  cancelScheduledJob, listPendingJobs, hasDailyMetricsForToday, captureDailyMetrics,
 };

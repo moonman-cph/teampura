@@ -3019,8 +3019,9 @@ function freezeAsPlannedChange() {
   if (!val) { document.getElementById('freeze-modal-warn').textContent = 'Please choose a date and time.'; return; }
   const effectiveAt = new Date(val).toISOString();
   if (new Date(effectiveAt) <= new Date()) { document.getElementById('freeze-modal-warn').textContent = 'Effective date must be in the future.'; return; }
+  const label = simLabel || 'Planned Change';
   plannedChange = {
-    label: simLabel || 'Planned Change',
+    label,
     effectiveAt,
     frozenAt: new Date().toISOString(),
     data: JSON.parse(JSON.stringify({ departments, roles, persons, roleAssignments, teams }))
@@ -3030,13 +3031,37 @@ function freezeAsPlannedChange() {
   closeFreezeModal();
   updatePlannedChangeBanner();
   startPlannedChangeTimer();
+
+  // Register a server-side scheduled job so the change fires even if no browser is open.
+  fetch('/api/v1/jobs', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      jobType:     'PLANNED_CHANGE',
+      label,
+      scheduledAt: effectiveAt,
+      payload:     { label, data: plannedChange.data },
+    }),
+  })
+    .then(r => r.json())
+    .then(job => {
+      if (job && job.id) {
+        plannedChange.jobId = job.id;
+        saveToStorage({ flush: true }); // persist jobId into plannedChange in DB
+      }
+    })
+    .catch(e => console.warn('[scheduler] Could not register server-side job:', e));
 }
 
 function unfreezeToEdit() {
   if (!plannedChange) return;
   if (!confirm(`Edit the planned change "${plannedChange.label}"? It will re-enter simulation mode.`)) return;
+  const jobId = plannedChange.jobId; // capture before clearing
   const liveBackup = JSON.parse(JSON.stringify({ departments, roles, persons, roleAssignments, teams }));
   simBackup = liveBackup;
+
+  // Cancel the server-side job — a new one will be registered when the user re-freezes
+  if (jobId) fetch(`/api/v1/jobs/${jobId}`, { method: 'DELETE' }).catch(() => {});
 
   // ── Clear plannedChange from /api/data BEFORE entering sim mode ───────────
   // saveToStorage() routes to /api/sim-data when simMode=true, so we must
@@ -3069,15 +3094,19 @@ function unfreezeToEdit() {
 function cancelPlannedChange() {
   if (!plannedChange) return;
   if (!confirm(`Cancel the planned change "${plannedChange.label}"? This cannot be undone.`)) return;
+  const jobId = plannedChange.jobId;
   plannedChange = null;
   clearInterval(_pcCheckInterval); _pcCheckInterval = null;
   saveToStorage();
   updatePlannedChangeBanner();
   render();
+  // Cancel the server-side scheduled job (best-effort)
+  if (jobId) fetch(`/api/v1/jobs/${jobId}`, { method: 'DELETE' }).catch(() => {});
 }
 
 function applyPlannedChange(silent = false) {
   if (!plannedChange) return;
+  const jobId = plannedChange.jobId; // capture before clearing
   // Auto-snapshot the current live state before applying
   snapshots.push({
     id: Date.now(),
@@ -3095,6 +3124,8 @@ function applyPlannedChange(silent = false) {
   saveToStorage();
   updatePlannedChangeBanner();
   render();
+  // Cancel the server-side job so the scheduler doesn't double-apply (best-effort)
+  if (jobId) fetch(`/api/v1/jobs/${jobId}`, { method: 'DELETE' }).catch(() => {});
   if (!silent) {
     const bar = document.getElementById('status-bar');
     if (bar) { bar.textContent = 'Planned change applied.'; bar.classList.add('visible'); setTimeout(() => bar.classList.remove('visible'), 3000); }

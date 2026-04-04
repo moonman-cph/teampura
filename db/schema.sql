@@ -173,3 +173,44 @@ CREATE TABLE IF NOT EXISTS audit_log (
 CREATE INDEX IF NOT EXISTS audit_log_org_ts ON audit_log (org_id, timestamp DESC);
 CREATE INDEX IF NOT EXISTS audit_log_corr   ON audit_log (correlation_id);
 CREATE INDEX IF NOT EXISTS audit_log_entity ON audit_log (org_id, entity_type, entity_id);
+
+-- ── Scheduled Jobs ────────────────────────────────────────────────────────────
+-- Stores user-created jobs (planned changes, future workflow triggers, etc.).
+-- status: pending | running | completed | failed | cancelled
+-- job_type: PLANNED_CHANGE | DAILY_METRICS (future: NOTIFICATION, PROCESS_TRIGGER)
+
+CREATE TABLE IF NOT EXISTS scheduled_jobs (
+  id           UUID        NOT NULL DEFAULT gen_random_uuid(),
+  org_id       TEXT        NOT NULL DEFAULT 'default',
+  job_type     TEXT        NOT NULL,
+  label        TEXT,
+  payload      JSONB       NOT NULL DEFAULT '{}',
+  scheduled_at TIMESTAMPTZ NOT NULL,
+  created_at   TIMESTAMPTZ NOT NULL DEFAULT now(),
+  created_by   TEXT,
+  status       TEXT        NOT NULL DEFAULT 'pending',
+  started_at   TIMESTAMPTZ,
+  completed_at TIMESTAMPTZ,
+  error        TEXT,
+  PRIMARY KEY (id)
+);
+
+-- Partial index: fast lookup of due pending jobs
+CREATE INDEX IF NOT EXISTS scheduled_jobs_pending
+  ON scheduled_jobs (org_id, scheduled_at)
+  WHERE status = 'pending';
+
+-- ── Daily Metrics ─────────────────────────────────────────────────────────────
+-- One row per org per day. Captures all org metrics as a JSONB blob so any
+-- report can be built later without schema changes.
+-- recorded_at is the DATE (not timestamp) the snapshot represents.
+
+CREATE TABLE IF NOT EXISTS daily_metrics (
+  id          UUID        NOT NULL DEFAULT gen_random_uuid(),
+  org_id      TEXT        NOT NULL DEFAULT 'default',
+  recorded_at DATE        NOT NULL,
+  metrics     JSONB       NOT NULL DEFAULT '{}',
+  created_at  TIMESTAMPTZ NOT NULL DEFAULT now(),
+  PRIMARY KEY (id),
+  UNIQUE (org_id, recorded_at)
+);

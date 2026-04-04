@@ -144,6 +144,38 @@ Trial orgs auto-suspend on expiry (30 days). Warning emails sent at T-7 and T-1.
 
 ---
 
+## M4.5 — Background Jobs, Scheduled Execution & Daily Metrics (current)
+Server-side infrastructure for running tasks reliably without a browser — the foundation for all future workflow automation.
+
+**Problem solved:** The existing "Planned Change" (org freeze) feature relied on a browser-side `setInterval` timer. If no user was on the page at the scheduled time, the change never fired. Snapshots and planned change state were also not being persisted to PostgreSQL.
+
+**What shipped in M4.5:**
+| Component | Status | Notes |
+|-----------|--------|-------|
+| `scheduled_jobs` table | ✓ Done | Stores pending/running/completed/failed/cancelled jobs with type, payload, schedule |
+| `daily_metrics` table | ✓ Done | One row per org per day — comprehensive JSONB metrics blob for future trend reports |
+| `lib/scheduler.js` | ✓ Done | Polls every 60s; executes due jobs; captures daily metrics if not yet done today |
+| `routes/v1/jobs.js` | ✓ Done | `POST/GET/DELETE /api/v1/jobs` — UI registers and cancels jobs |
+| Planned change server-side execution | ✓ Done | `PLANNED_CHANGE` job type: applies org state, auto-snapshots pre-change state, writes full audit log with `source: scheduled_job` |
+| `plannedChange` + `snapshots` DB persistence | ✓ Done | Both now saved to `org_config` via `configKeys`; previously lost on server restart |
+| `orgchart.html` integration | ✓ Done | Freeze registers job → gets jobId; cancel/apply/unfreezeToEdit cancel the server-side job |
+
+**Architectural rules this milestone establishes:**
+- All scheduled actions are stored in `scheduled_jobs` before execution — no fire-and-forget timers in application code.
+- The scheduler is the sole executor of scheduled jobs. The browser-side timer is a best-effort UX convenience only; it cancels the server-side job on apply to prevent double-execution.
+- Every automated data change is attributed with `source: 'scheduled_job'` in the audit log. Actor fields are `null` / `'system'` for machine-initiated changes.
+- `daily_metrics` captures all org metrics (headcount, salary totals, vacancies, gender split, level distribution, contract types) as a JSONB blob daily — schema-free so future reports can query any dimension without a migration.
+
+**Future job types (M7+):**
+- `NOTIFICATION` — send in-app or email notifications to users
+- `PROCESS_TRIGGER` — start an HR workflow (onboarding, performance review cycle, etc.)
+- `REPORT_GENERATE` — generate and cache a scheduled report
+- Event-based triggers (headcount threshold, salary band breach) will be added in M7
+
+**Workflows UI** — A `/jobs.html` page where admins can create, view, and cancel scheduled workflows is planned for M7. For now, jobs are created programmatically by the UI (e.g., the Freeze modal).
+
+---
+
 ## M5 — Salary Bands & EU Pay Transparency
 Full salary band management: define bands per role/level, flag employees outside their band, document rationale for individual salary decisions. Pay gap reporting across gender, department, and level.
 

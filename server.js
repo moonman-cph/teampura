@@ -11,6 +11,8 @@ const v1Data       = require('./routes/v1/data');
 const v1Changelog  = require('./routes/v1/changelog');
 const v1Ai         = require('./routes/v1/ai');
 const v1Users      = require('./routes/v1/users');
+const v1Jobs       = require('./routes/v1/jobs');
+const scheduler    = require('./lib/scheduler');
 
 const app  = express();
 const PORT = parseInt(process.env.PORT || '3000', 10);
@@ -96,6 +98,7 @@ app.delete('/api/sim-data', requireAuth, (req, res) => { simData = null; res.jso
 app.use('/api/v1/data',      requireAuth, v1Data);
 app.use('/api/v1/changelog', requireAuth, v1Changelog);
 app.use('/api/v1/ai',        requireAuth, v1Ai);
+app.use('/api/v1/jobs',      requireAuth, v1Jobs);
 
 // M1 backward-compatible aliases (also authenticated)
 app.use('/api/data',      requireAuth, v1Data);
@@ -114,4 +117,8 @@ app.listen(PORT, () => {
   // This ensures Azure env var changes take effect immediately after restart
   // without waiting for the first authenticated request to trigger ensureSchema().
   db.syncDemoUser().catch(e => console.error('[startup] demo user sync failed:', e.message));
+
+  // Start background scheduler — executes planned changes and captures daily metrics.
+  // Polls every 60s. Safe to call even if DATABASE_URL is unset (no-op in file mode).
+  scheduler.start();
 });
