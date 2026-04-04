@@ -96,6 +96,22 @@ async function _initSchema() {
     console.log('[db] Migration v4 complete.');
   }
 
+  // ── Migration v5: organisations table + bootstrap 'default' org ──────────────
+  if (migrationVersion < 5) {
+    console.log('[db] Running migration v5 (organisations table)...');
+    await pg.query(`
+      INSERT INTO organisations (id, slug, name, plan_tier, status)
+      VALUES ('default', 'default', 'Default Organisation', 'trial', 'active')
+      ON CONFLICT (id) DO NOTHING
+    `);
+    await pg.query(`
+      INSERT INTO org_config (org_id, key, value) VALUES ('default', '_migration_version', '5')
+      ON CONFLICT (org_id, key) DO UPDATE SET value = '5'
+    `);
+    console.log('[db] Migration v5 complete.');
+    migrationVersion = 5;
+  }
+
   // ── Idempotent: re-seed demo user whenever DEMO_EMAIL / DEMO_PASSWORD change ─
   // (runs every boot so Azure env var changes take effect without a migration bump)
   if (process.env.DATABASE_URL) {
@@ -1011,10 +1027,301 @@ async function captureDailyMetrics(orgId = 'default') {
   );
 }
 
+// ── Organisation CRUD ─────────────────────────────────────────────────────────
+
+function _rowToOrg(row) {
+  return {
+    id:             row.id,
+    name:           row.name,
+    slug:           row.slug,
+    planTier:       row.plan_tier,
+    status:         row.status,
+    trialExpiresAt: row.trial_expires_at ? new Date(row.trial_expires_at).toISOString() : null,
+    createdAt:      new Date(row.created_at).toISOString(),
+    updatedAt:      new Date(row.updated_at).toISOString(),
+    createdBy:      row.created_by,
+  };
+}
+
+async function createOrg({ id, slug, name, planTier = 'trial', createdBy = null }) {
+  if (!process.env.DATABASE_URL) throw new Error('Database required for org management.');
+  await ensureSchema();
+  const client = await getPool().connect();
+  try {
+    await client.query('BEGIN');
+    const r = await client.query(
+      `INSERT INTO organisations (id, slug, name, plan_tier, created_by)
+       VALUES ($1,$2,$3,$4,$5) RETURNING *`,
+      [id, slug, name, planTier, createdBy]
+    );
+    // Seed default settings so the org is immediately functional
+    await client.query(
+      `INSERT INTO settings (org_id, currency) VALUES ($1, 'USD') ON CONFLICT (org_id) DO NOTHING`,
+      [id]
+    );
+    await client.query('COMMIT');
+    return _rowToOrg(r.rows[0]);
+  } catch (err) {
+    await client.query('ROLLBACK');
+    throw err;
+  } finally {
+    client.release();
+  }
+}
+
+async function listOrgs() {
+  if (!process.env.DATABASE_URL) throw new Error('Database required for org management.');
+  await ensureSchema();
+  const r = await getPool().query(`
+    SELECT
+      o.*,
+      COALESCE(p.headcount, 0)::int  AS headcount,
+      COALESCE(u.user_count, 0)::int AS user_count,
+      u.last_login
+    FROM organisations o
+    LEFT JOIN (
+      SELECT org_id, COUNT(*) AS headcount FROM persons GROUP BY org_id
+    ) p ON p.org_id = o.id
+    LEFT JOIN (
+      SELECT org_id, COUNT(*) AS user_count, MAX(last_login) AS last_login FROM users GROUP BY org_id
+    ) u ON u.org_id = o.id
+    ORDER BY o.created_at ASC
+  `);
+  return r.rows.map(row => ({
+    ..._rowToOrg(row),
+    headcount:  Number(row.headcount),
+    userCount:  Number(row.user_count),
+    lastLogin:  row.last_login ? new Date(row.last_login).toISOString() : null,
+  }));
+}
+
+async function getOrgById(orgId) {
+  if (!process.env.DATABASE_URL) return null;
+  await ensureSchema();
+  const r = await getPool().query(
+    `SELECT
+       o.*,
+       COALESCE(p.headcount, 0)::int  AS headcount,
+       COALESCE(u.user_count, 0)::int AS user_count,
+       u.last_login,
+       al.last_data_write
+     FROM organisations o
+     LEFT JOIN (
+       SELECT org_id, COUNT(*) AS headcount FROM persons GROUP BY org_id
+     ) p ON p.org_id = o.id
+     LEFT JOIN (
+       SELECT org_id, COUNT(*) AS user_count, MAX(last_login) AS last_login FROM users GROUP BY org_id
+     ) u ON u.org_id = o.id
+     LEFT JOIN (
+       SELECT org_id, MAX(timestamp) AS last_data_write
+       FROM audit_log
+       WHERE operation IN ('CREATE','UPDATE','DELETE')
+       GROUP BY org_id
+     ) al ON al.org_id = o.id
+     WHERE o.id = $1`,
+    [orgId]
+  );
+  if (!r.rows[0]) return null;
+  const row = r.rows[0];
+  return {
+    ..._rowToOrg(row),
+    headcount:     Number(row.headcount),
+    userCount:     Number(row.user_count),
+    lastLogin:     row.last_login      ? new Date(row.last_login).toISOString()      : null,
+    lastDataWrite: row.last_data_write ? new Date(row.last_data_write).toISOString() : null,
+  };
+}
+
+async function updateOrg(orgId, { name, planTier, trialExpiresAt }) {
+  if (!process.env.DATABASE_URL) throw new Error('Database required for org management.');
+  await ensureSchema();
+  const sets = [];
+  const vals = [];
+  let i = 1;
+  if (name          !== undefined) { sets.push(`name = $${i++}`);             vals.push(name); }
+  if (planTier      !== undefined) { sets.push(`plan_tier = $${i++}`);        vals.push(planTier); }
+  if (trialExpiresAt !== undefined) { sets.push(`trial_expires_at = $${i++}`); vals.push(trialExpiresAt); }
+  if (!sets.length) throw new Error('No fields to update.');
+  sets.push(`updated_at = now()`);
+  vals.push(orgId);
+  const r = await getPool().query(
+    `UPDATE organisations SET ${sets.join(', ')} WHERE id = $${i} RETURNING *`,
+    vals
+  );
+  if (!r.rows[0]) return null;
+  return _rowToOrg(r.rows[0]);
+}
+
+async function setOrgStatus(orgId, status) {
+  if (!process.env.DATABASE_URL) throw new Error('Database required for org management.');
+  await ensureSchema();
+  const r = await getPool().query(
+    `UPDATE organisations SET status = $1, updated_at = now() WHERE id = $2 RETURNING *`,
+    [status, orgId]
+  );
+  if (!r.rows[0]) return null;
+  return _rowToOrg(r.rows[0]);
+}
+
+// offboardOrg: exports all org data as JSON, then permanently deletes all rows
+// for that org_id in a single transaction. This is irreversible.
+// The caller must audit-log this action on the operator's own org BEFORE calling.
+async function offboardOrg(orgId) {
+  if (!process.env.DATABASE_URL) throw new Error('Database required for org management.');
+  await ensureSchema();
+
+  // 1. Export all org data first (before deletion)
+  const exportData = await getData(orgId);
+
+  const client = await getPool().connect();
+  try {
+    await client.query('BEGIN');
+
+    // 2. Delete in dependency order (child tables first)
+    await client.query(`DELETE FROM role_assignments      WHERE org_id = $1`, [orgId]);
+    await client.query(`DELETE FROM persons               WHERE org_id = $1`, [orgId]);
+    await client.query(`DELETE FROM roles                 WHERE org_id = $1`, [orgId]);
+    await client.query(`DELETE FROM teams                 WHERE org_id = $1`, [orgId]);
+    await client.query(`DELETE FROM departments           WHERE org_id = $1`, [orgId]);
+    await client.query(`DELETE FROM salary_bands          WHERE org_id = $1`, [orgId]);
+    await client.query(`DELETE FROM location_multipliers  WHERE org_id = $1`, [orgId]);
+    await client.query(`DELETE FROM settings              WHERE org_id = $1`, [orgId]);
+    await client.query(`DELETE FROM org_config            WHERE org_id = $1`, [orgId]);
+    await client.query(`DELETE FROM scheduled_jobs        WHERE org_id = $1`, [orgId]);
+    await client.query(`DELETE FROM daily_metrics         WHERE org_id = $1`, [orgId]);
+    // audit_log is append-only by policy; offboard is the one permitted exception
+    await client.query(`DELETE FROM audit_log             WHERE org_id = $1`, [orgId]);
+    await client.query(`DELETE FROM users                 WHERE org_id = $1`, [orgId]);
+    await client.query(`DELETE FROM organisations         WHERE id = $1`,     [orgId]);
+
+    await client.query('COMMIT');
+  } catch (err) {
+    await client.query('ROLLBACK');
+    throw err;
+  } finally {
+    client.release();
+  }
+
+  return exportData;
+}
+
+// ── Admin User Management ─────────────────────────────────────────────────────
+
+function _rowToSafeUser(row) {
+  return {
+    id:           row.id,
+    orgId:        row.org_id,
+    email:        row.email,
+    role:         row.role,
+    personId:     row.person_id,
+    status:       row.status,
+    createdAt:    row.created_at ? new Date(row.created_at).toISOString() : null,
+    lastLogin:    row.last_login ? new Date(row.last_login).toISOString() : null,
+    orgName:      row.org_name ?? null,
+  };
+}
+
+async function searchUsers({ q = '', orgId = null, status = null, limit = 100 } = {}) {
+  if (!process.env.DATABASE_URL) return [];
+  await ensureSchema();
+  const conditions = [];
+  const vals = [];
+  let i = 1;
+  if (q)      { conditions.push(`u.email ILIKE $${i++}`); vals.push(`%${q}%`); }
+  if (orgId)  { conditions.push(`u.org_id = $${i++}`);    vals.push(orgId); }
+  if (status) { conditions.push(`u.status = $${i++}`);    vals.push(status); }
+  const where = conditions.length ? `WHERE ${conditions.join(' AND ')}` : '';
+  vals.push(limit);
+  const r = await getPool().query(`
+    SELECT u.*, o.name AS org_name
+    FROM users u
+    LEFT JOIN organisations o ON o.id = u.org_id
+    ${where}
+    ORDER BY u.created_at DESC
+    LIMIT $${i}
+  `, vals);
+  return r.rows.map(_rowToSafeUser);
+}
+
+async function getUserByIdAdmin(userId) {
+  if (!process.env.DATABASE_URL) return null;
+  await ensureSchema();
+  const [userRes, auditRes] = await Promise.all([
+    getPool().query(`
+      SELECT u.*, o.name AS org_name
+      FROM users u
+      LEFT JOIN organisations o ON o.id = u.org_id
+      WHERE u.id = $1
+    `, [userId]),
+    getPool().query(`
+      SELECT id, timestamp, operation, entity_type, entity_label, field, old_value, new_value, source
+      FROM audit_log
+      WHERE actor_id = $1
+      ORDER BY timestamp DESC
+      LIMIT 10
+    `, [userId]),
+  ]);
+  if (!userRes.rows[0]) return null;
+  return {
+    ..._rowToSafeUser(userRes.rows[0]),
+    recentAuditEntries: auditRes.rows.map(rowToEntry),
+  };
+}
+
+async function adminResetPassword(userId, passwordHash) {
+  if (!process.env.DATABASE_URL) throw new Error('Database required.');
+  await ensureSchema();
+  // Also force logout existing sessions so the old password can't be reused
+  await getPool().query(
+    `UPDATE users SET password_hash = $1, force_logout_at = now() WHERE id = $2`,
+    [passwordHash, userId]
+  );
+}
+
+async function setUserStatus(userId, status) {
+  if (!process.env.DATABASE_URL) throw new Error('Database required.');
+  await ensureSchema();
+  const r = await getPool().query(
+    `UPDATE users SET status = $1 WHERE id = $2 RETURNING *`,
+    [status, userId]
+  );
+  return r.rows[0] ? _rowToSafeUser(r.rows[0]) : null;
+}
+
+async function forceLogoutUser(userId) {
+  if (!process.env.DATABASE_URL) throw new Error('Database required.');
+  await ensureSchema();
+  await getPool().query(
+    `UPDATE users SET force_logout_at = now() WHERE id = $1`,
+    [userId]
+  );
+}
+
+async function deleteUser(userId) {
+  if (!process.env.DATABASE_URL) throw new Error('Database required.');
+  await ensureSchema();
+  await getPool().query(`DELETE FROM users WHERE id = $1`, [userId]);
+}
+
+async function updateUserRole(userId, role) {
+  if (!process.env.DATABASE_URL) throw new Error('Database required.');
+  await ensureSchema();
+  const r = await getPool().query(
+    `UPDATE users SET role = $1 WHERE id = $2 RETURNING *`,
+    [role, userId]
+  );
+  return r.rows[0] ? _rowToSafeUser(r.rows[0]) : null;
+}
+
 module.exports = {
   getData, setData, getChangelog, appendChangelogEntries, DATA_FILE, CHANGELOG_FILE,
   getUserByEmail, getUserById, createUser, updateUserLastLogin, updateUserPassword, listUsers,
   syncDemoUser,
   createScheduledJob, getDueJobs, markJobRunning, markJobCompleted, markJobFailed,
   cancelScheduledJob, listPendingJobs, hasDailyMetricsForToday, captureDailyMetrics,
+  // M4: Org management
+  createOrg, listOrgs, getOrgById, updateOrg, setOrgStatus, offboardOrg,
+  // M4: Admin user management
+  searchUsers, getUserByIdAdmin, adminResetPassword, setUserStatus,
+  forceLogoutUser, deleteUser, updateUserRole,
 };
