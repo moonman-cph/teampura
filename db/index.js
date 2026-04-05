@@ -818,10 +818,10 @@ async function createUser({ orgId = 'default', email, passwordHash, role = 'empl
   return r.rows[0];
 }
 
-async function updateUserLastLogin(userId) {
+async function updateUserLastLogin(userId, ip) {
   if (!process.env.DATABASE_URL) return;
   await ensureSchema();
-  await getPool().query(`UPDATE users SET last_login = now() WHERE id = $1`, [userId]);
+  await getPool().query(`UPDATE users SET last_login = now(), last_ip = $2 WHERE id = $1`, [userId, ip || null]);
 }
 
 async function updateUserPassword(userId, hash) {
@@ -1220,6 +1220,7 @@ function _rowToSafeUser(row) {
     status:       row.status,
     createdAt:    row.created_at ? new Date(row.created_at).toISOString() : null,
     lastLogin:    row.last_login ? new Date(row.last_login).toISOString() : null,
+    lastIp:       row.last_ip ?? null,
     orgName:      row.org_name ?? null,
   };
 }

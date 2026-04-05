@@ -313,6 +313,7 @@
       <div class="detail-item"><label>Role</label><span id="ud-role"></span></div>
       <div class="detail-item"><label>Status</label><span id="ud-status"></span></div>
       <div class="detail-item"><label>Last login</label><span id="ud-last-login"></span></div>
+      <div class="detail-item"><label>Last IP</label><span id="ud-last-ip" style="font-size:12px;font-family:monospace"></span></div>
       <div class="detail-item"><label>Created</label><span id="ud-created"></span></div>
       <div class="detail-item"><label>User ID</label><span id="ud-id" style="font-size:11px;word-break:break-all"></span></div>
     </div>
@@ -612,7 +613,7 @@ function renderUsers(users) {
       <td style="color:var(--text-secondary)">${escHtml(u.orgName || u.orgId || '—')}</td>
       <td>${badge(u.role, u.role)}</td>
       <td>${badge(u.status, u.status)}</td>
-      <td style="color:var(--text-muted)">${fmtDateTime(u.lastLogin)}</td>
+      <td style="color:var(--text-muted)">${fmtDateTime(u.lastLogin)}${u.lastIp ? `<br><span style="font-size:11px">${escHtml(u.lastIp)}</span>` : ''}</td>
       <td><button class="btn-icon" onclick="openUserDetail('${escHtml(u.id)}')">View</button></td>
     </tr>`;
   }).join('');
@@ -628,6 +629,7 @@ async function openUserDetail(userId) {
     document.getElementById('ud-role').innerHTML        = badge(u.role, u.role);
     document.getElementById('ud-status').innerHTML      = badge(u.status, u.status);
     document.getElementById('ud-last-login').textContent = fmtDateTime(u.lastLogin);
+    document.getElementById('ud-last-ip').textContent    = u.lastIp || '—';
     document.getElementById('ud-created').textContent   = fmtDateTime(u.createdAt);
     document.getElementById('ud-id').textContent        = u.id;
     document.getElementById('ud-pw-section').style.display = 'none';

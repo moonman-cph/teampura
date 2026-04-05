@@ -162,6 +162,7 @@ CREATE TABLE IF NOT EXISTS users (
   status          TEXT        NOT NULL DEFAULT 'active',
   created_at      TIMESTAMPTZ NOT NULL DEFAULT now(),
   last_login      TIMESTAMPTZ,
+  last_ip         TEXT,
   force_logout_at TIMESTAMPTZ,
   PRIMARY KEY (id),
   UNIQUE (email)
@@ -169,6 +170,8 @@ CREATE TABLE IF NOT EXISTS users (
 
 -- Add force_logout_at to existing deployments that created the table before this column
 ALTER TABLE users ADD COLUMN IF NOT EXISTS force_logout_at TIMESTAMPTZ;
+-- Add last_ip to existing deployments
+ALTER TABLE users ADD COLUMN IF NOT EXISTS last_ip TEXT;
 
 -- ── Audit Log ─────────────────────────────────────────────────────────────────
 -- Append-only. Application role: INSERT + SELECT only (no UPDATE, no DELETE).
