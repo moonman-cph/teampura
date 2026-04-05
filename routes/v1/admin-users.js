@@ -40,6 +40,46 @@ function auditUserAction(req, operation, userId, userEmail, field, oldValue, new
   }]).catch(err => console.error('[admin-users/audit]', err));
 }
 
+// ── POST /api/v1/admin/users — create a user for a specific org ──────────────
+// Body: { orgId, email, password, role }
+
+router.post('/', async (req, res) => {
+  try {
+    const { orgId, email, password, role = 'org_admin' } = req.body || {};
+
+    if (!orgId || typeof orgId !== 'string')
+      return res.status(400).json({ error: 'orgId is required.' });
+    if (!email || typeof email !== 'string' || !email.includes('@'))
+      return res.status(400).json({ error: 'Valid email is required.' });
+    if (!password || typeof password !== 'string' || password.length < 8)
+      return res.status(400).json({ error: 'Password must be at least 8 characters.' });
+
+    const VALID_ROLES = ['super_admin', 'org_admin', 'hr', 'manager', 'employee'];
+    if (!VALID_ROLES.includes(role))
+      return res.status(400).json({ error: `role must be one of: ${VALID_ROLES.join(', ')}` });
+
+    const org = await db.getOrgById(orgId);
+    if (!org) return res.status(404).json({ error: 'Organisation not found.' });
+
+    const hash = await bcrypt.hash(password, 12);
+    const user = await db.createUser({ orgId, email: email.trim(), passwordHash: hash, role });
+
+    auditUserAction(req, 'CREATE', user.id, user.email, null, null, { orgId, email: user.email, role });
+    res.status(201).json({
+      id:         user.id,
+      org_id:     user.org_id,
+      email:      user.email,
+      role:       user.role,
+      status:     user.status || 'active',
+      created_at: user.created_at,
+    });
+  } catch (e) {
+    if (e.code === '23505') return res.status(409).json({ error: 'A user with that email already exists.' });
+    console.error('[admin-users/create]', e);
+    res.status(500).json({ error: e.message });
+  }
+});
+
 // ── GET /api/v1/admin/users — search users across all orgs ───────────────────
 // Query params: q (email substring), orgId, status, limit (max 100)
 

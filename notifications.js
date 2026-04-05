@@ -16,6 +16,13 @@
   //   detail — full description shown in the modal (plain text or simple HTML)
   const RELEASE_NOTES = [
     {
+      id:     'release-0.9.25-create-org-user',
+      date:   '5 Apr 2026',
+      title:  'Create users per organisation (0.9.25)',
+      body:   'Super admins can now create the first user for any organisation directly from the Operator Console.',
+      detail: 'Each organisation row in the Operator Console now has a "+ User" button. Clicking it opens a form to create a user for that specific org — choose their email, password, and role (Org Admin, HR Admin, Manager, or Employee). The user can then log in immediately at the normal sign-in page.',
+    },
+    {
       id:     'release-0.9.24-admin-autofill-fix',
       date:   '5 Apr 2026',
       title:  'Operator Console org list fix (0.9.24)',

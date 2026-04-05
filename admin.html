@@ -269,6 +269,38 @@
   </div>
 </div>
 
+<!-- ── Create User Modal ────────────────────────────────────────────────────── -->
+<div class="modal-backdrop" id="create-user-modal">
+  <div class="modal-box">
+    <div class="modal-header">
+      <span class="modal-title" id="cu-title">Create User</span>
+      <button class="modal-close" onclick="closeModal('create-user-modal')">&#x2715;</button>
+    </div>
+    <div class="form-row">
+      <label class="form-label">Email address</label>
+      <input class="form-input" id="cu-email" type="email" placeholder="admin@company.com">
+    </div>
+    <div class="form-row">
+      <label class="form-label">Password</label>
+      <input class="form-input" id="cu-password" type="password" placeholder="Minimum 8 characters">
+    </div>
+    <div class="form-row">
+      <label class="form-label">Role</label>
+      <select class="form-select" id="cu-role">
+        <option value="org_admin">Org Admin</option>
+        <option value="hr">HR Admin</option>
+        <option value="manager">Manager</option>
+        <option value="employee">Employee</option>
+      </select>
+    </div>
+    <div class="form-error" id="cu-error"></div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('create-user-modal')">Cancel</button>
+      <button class="btn btn-primary" onclick="createUser()">Create user</button>
+    </div>
+  </div>
+</div>
+
 <!-- ── User Detail Modal ────────────────────────────────────────────────────── -->
 <div class="modal-backdrop" id="user-detail-modal">
   <div class="modal-box wide">
@@ -398,6 +430,7 @@ function renderOrgs() {
       <td>
         <div class="row-actions">
           <button class="btn-icon" onclick="openEditOrg('${escHtml(o.id)}')">Edit</button>
+          <button class="btn-icon" onclick="openCreateUser('${escHtml(o.id)}','${escHtml(o.name)}')">+ User</button>
           ${(o.status === 'active')
             ? `<button class="btn-icon danger" onclick="suspendOrg('${escHtml(o.id)}','${escHtml(o.name)}')">Suspend</button>`
             : `<button class="btn-icon" onclick="reactivateOrg('${escHtml(o.id)}','${escHtml(o.name)}')">Reactivate</button>`}
@@ -652,6 +685,37 @@ async function deleteUser(userId, email) {
     toast('User deleted.');
     searchUsers();
   } catch (e) { toast(e.message, true); }
+}
+
+// ── Create User ───────────────────────────────────────────────────────────────
+let createUserOrgId = null;
+
+function openCreateUser(orgId, orgName) {
+  createUserOrgId = orgId;
+  document.getElementById('cu-title').textContent = 'Create User — ' + orgName;
+  document.getElementById('cu-email').value    = '';
+  document.getElementById('cu-password').value = '';
+  document.getElementById('cu-role').value     = 'org_admin';
+  document.getElementById('cu-error').textContent = '';
+  openModal('create-user-modal');
+  setTimeout(() => document.getElementById('cu-email').focus(), 50);
+}
+
+async function createUser() {
+  const email    = document.getElementById('cu-email').value.trim();
+  const password = document.getElementById('cu-password').value;
+  const role     = document.getElementById('cu-role').value;
+  const errEl    = document.getElementById('cu-error');
+  errEl.textContent = '';
+  if (!email) { errEl.textContent = 'Email is required.'; return; }
+  if (password.length < 8) { errEl.textContent = 'Password must be at least 8 characters.'; return; }
+  try {
+    await api('POST', '/admin/users', { orgId: createUserOrgId, email, password, role });
+    closeModal('create-user-modal');
+    toast('User created. They can now log in at the sign-in page.');
+  } catch (e) {
+    errEl.textContent = e.message;
+  }
 }
 
 // ── Init ─────────────────────────────────────────────────────────────────────
