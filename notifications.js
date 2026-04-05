@@ -16,6 +16,13 @@
   //   detail — full description shown in the modal (plain text or simple HTML)
   const RELEASE_NOTES = [
     {
+      id:     'release-0.9.30-changelog-improvements',
+      date:   '5 Apr 2026',
+      title:  'Changelog improvements (0.9.30)',
+      body:   'Changelog now filters by organisation, shows employee IDs on person changes, and has consistent column alignment.',
+      detail: 'Three improvements to the Audit Log: (1) Changelog entries are now filtered to only show the current organisation — both in database and file-storage mode. (2) Person-related changes now show the employee ID below the person\'s name, making it easier to identify exactly who was affected. (3) Column widths are now fixed across all save-event groups, so Op / Type / Entity / Field / Old / New always align consistently.',
+    },
+    {
       id:     'release-0.9.29-users-tab-fixes',
       date:   '5 Apr 2026',
       title:  'Operator Console Users tab fixes (0.9.29)',

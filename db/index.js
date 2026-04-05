@@ -379,8 +379,11 @@ function _fileGetData() {
 function _fileSetData(data) {
   fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2), 'utf8');
 }
-function _fileGetChangelog() {
-  try { return JSON.parse(fs.readFileSync(CHANGELOG_FILE, 'utf8')); } catch { return []; }
+function _fileGetChangelog(orgId) {
+  try {
+    const all = JSON.parse(fs.readFileSync(CHANGELOG_FILE, 'utf8'));
+    return orgId ? all.filter(e => !e.orgId || e.orgId === orgId) : all;
+  } catch { return []; }
 }
 function _fileAppend(entries) {
   const log = _fileGetChangelog();
@@ -729,7 +732,7 @@ async function setData(data, orgId = 'default') {
 // ── getChangelog ──────────────────────────────────────────────────────────────
 
 async function getChangelog(orgId = 'default') {
-  if (!process.env.DATABASE_URL) return _fileGetChangelog();
+  if (!process.env.DATABASE_URL) return _fileGetChangelog(orgId);
   await ensureSchema();
   const r = await getPool().query(
     `SELECT * FROM audit_log WHERE org_id = $1 ORDER BY timestamp ASC`, [orgId]

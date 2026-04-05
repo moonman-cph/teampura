@@ -249,7 +249,13 @@
   width: 100%;
   border-collapse: collapse;
   font-size: 12px;
+  table-layout: fixed;
 }
+.cl-table colgroup .col-op    { width: 68px;  }
+.cl-table colgroup .col-type  { width: 118px; }
+.cl-table colgroup .col-entity{ width: 180px; }
+.cl-table colgroup .col-field { width: 130px; }
+.cl-table colgroup .col-val   { width: auto;  }
 .cl-table th {
   text-align: left;
   padding: 8px 12px;
@@ -262,15 +268,23 @@
   border-bottom: 1px solid var(--border);
   position: sticky;
   top: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 }
 .cl-table td {
   padding: 8px 12px;
   border-bottom: 1px solid var(--border);
   vertical-align: top;
   color: var(--text-primary);
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 }
+.cl-table td.cl-td-entity { white-space: normal; }
 .cl-table tr:last-child td { border-bottom: none; }
 .cl-table tr:hover td { background: #fafaf9; }
+.cl-emp-id { font-size: 10px; color: var(--text-muted); margin-top: 1px; }
 
 .op-badge {
   display: inline-block;
@@ -453,6 +467,7 @@
 let allBatches    = [];  // [{correlationId, timestamp, source, bulkId, changeReason, hasSensitive, entries:[]}]
 let filteredBatches = [];
 let currency      = 'USD';
+let personMap     = {};  // personId → person object (for employee ID lookup)
 
 const PAGE_SIZE   = 25;
 let page          = 0;
@@ -518,6 +533,9 @@ async function loadData() {
     if (r.ok) {
       const d = await r.json();
       if (d.settings && d.settings.currency) currency = d.settings.currency;
+      if (Array.isArray(d.persons)) {
+        personMap = Object.fromEntries(d.persons.map(p => [p.id, p]));
+      }
     }
   } catch (e) {}
 
@@ -713,10 +731,15 @@ function renderEntries(entries) {
       newCell = `<span class="val-new">${fmtValue(e.newValue, e.field, e.entityType)}</span>`;
     }
 
+    const empId = e.entityType === 'person' && personMap[e.entityId]?.employeeId
+      ? personMap[e.entityId].employeeId : null;
+    const entityCell = `<div>${escHtml(e.entityLabel || e.entityId || '—')}</div>`
+      + (empId ? `<div class="cl-emp-id">${escHtml(empId)}</div>` : '');
+
     return `<tr>
       <td><span class="op-badge ${opClass}">${opLabel}</span></td>
       <td>${escHtml(e.entityType || '—')}</td>
-      <td>${escHtml(e.entityLabel || e.entityId || '—')}</td>
+      <td class="cl-td-entity">${entityCell}</td>
       <td>${e.field ? escHtml(e.field) + sensitiveIndicator : '<span class="val-null">—</span>'}</td>
       <td>${oldCell}</td>
       <td>${newCell}</td>
@@ -724,6 +747,10 @@ function renderEntries(entries) {
   }).join('');
 
   return `<table class="cl-table">
+    <colgroup>
+      <col class="col-op"><col class="col-type"><col class="col-entity">
+      <col class="col-field"><col class="col-val"><col class="col-val">
+    </colgroup>
     <thead><tr>
       <th>Op</th><th>Type</th><th>Entity</th><th>Field</th><th>Old Value</th><th>New Value</th>
     </tr></thead>
