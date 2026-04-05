@@ -16,6 +16,13 @@
   //   detail — full description shown in the modal (plain text or simple HTML)
   const RELEASE_NOTES = [
     {
+      id:     'release-0.10.4-plannedchange-nullclear',
+      date:   '6 Apr 2026',
+      title:  'Bug fix: planned change re-applied on every page load (0.10.4)',
+      body:   'After a planned change was applied, changes to the org chart were silently overwritten on every page reload.',
+      detail: 'When a planned change was applied (either by the browser timer or the server scheduler), the code set plannedChange = null and saved to the database. However, the PostgreSQL org_config upsert loop skipped null values entirely — so the old plannedChange row was never deleted. On every subsequent page load the stale planned change was re-read, re-applied immediately via startPlannedChangeTimer(), and saved — overwriting any edits the user had just made. Fixed by explicitly deleting the org_config row when a key is set to null in the POST body.',
+    },
+    {
       id:     'release-0.10.3-save-on-navigate',
       date:   '6 Apr 2026',
       title:  'Bug fix: unsaved changes when navigating away quickly (0.10.3)',

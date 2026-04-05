@@ -694,7 +694,16 @@ async function setData(data, orgId = 'default') {
     // ── org_config (titles, levelOrder, permissionGroups, snapshots, plannedChange, etc.) ──
     const configKeys = ['titles', 'levelOrder', 'permissionGroups', 'assignmentPolicies', 'personPermissionOverrides', 'snapshots', 'plannedChange'];
     for (const key of configKeys) {
-      if (data[key] != null) {
+      if (data[key] === undefined) {
+        // Key not included in this POST body — leave the existing DB row untouched.
+      } else if (data[key] === null) {
+        // Explicitly cleared (e.g. plannedChange applied) — delete the row so it
+        // is not re-read on the next page load and re-applied indefinitely.
+        await client.query(
+          `DELETE FROM org_config WHERE org_id = $1 AND key = $2`,
+          [orgId, key]
+        );
+      } else {
         await client.query(`
           INSERT INTO org_config (org_id, key, value) VALUES ($1,$2,$3)
           ON CONFLICT (org_id, key) DO UPDATE SET value = EXCLUDED.value
