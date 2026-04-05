@@ -353,7 +353,10 @@ let currentUserId = null;
 function switchTab(name) {
   document.querySelectorAll('.tab-btn').forEach((b, i) => b.classList.toggle('active', ['orgs','users'][i] === name));
   document.querySelectorAll('.tab-panel').forEach(p => p.classList.toggle('active', p.id === 'tab-' + name));
-  if (name === 'users' && allOrgs.length) populateOrgFilter();
+  if (name === 'users') {
+    if (allOrgs.length) populateOrgFilter();
+    _doSearch();
+  }
 }
 
 // ── Toast ─────────────────────────────────────────────────────────────────────
@@ -603,11 +606,10 @@ function renderUsers(users) {
     return;
   }
   tbody.innerHTML = users.map(u => {
-    const org = allOrgs.find(o => o.id === u.org_id);
     return `
     <tr>
       <td>${escHtml(u.email)}</td>
-      <td style="color:var(--text-secondary)">${escHtml(org ? org.name : u.org_id)}</td>
+      <td style="color:var(--text-secondary)">${escHtml(u.orgName || u.orgId || '—')}</td>
       <td>${badge(u.role, u.role)}</td>
       <td>${badge(u.status, u.status)}</td>
       <td style="color:var(--text-muted)">${fmtDateTime(u.last_login)}</td>

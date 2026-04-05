@@ -16,6 +16,13 @@
   //   detail — full description shown in the modal (plain text or simple HTML)
   const RELEASE_NOTES = [
     {
+      id:     'release-0.9.29-users-tab-fixes',
+      date:   '5 Apr 2026',
+      title:  'Operator Console Users tab fixes (0.9.29)',
+      body:   'Users now load automatically on the Users tab, and the organisation column now shows correctly.',
+      detail: 'Two bugs fixed in the Operator Console Users tab: (1) The user list was intentionally deferred to first search, but now loads automatically when you switch to the tab. (2) The Organisation column was always blank due to a camelCase/snake_case mismatch — the API returns orgName directly, which is now used instead of a client-side lookup.',
+    },
+    {
       id:     'release-0.9.28-autofill-readonly-fix',
       date:   '5 Apr 2026',
       title:  'Operator Console autofill fix (0.9.28)',
