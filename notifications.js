@@ -16,6 +16,13 @@
   //   detail — full description shown in the modal (plain text or simple HTML)
   const RELEASE_NOTES = [
     {
+      id:     'release-0.10.3-save-on-navigate',
+      date:   '6 Apr 2026',
+      title:  'Bug fix: unsaved changes when navigating away quickly (0.10.3)',
+      body:   'Changes made within 300ms of clicking a nav link were silently lost. Fixed by flushing the save on page hide/unload.',
+      detail: 'The org chart debounces saves by 300ms to avoid hammering the server on rapid drag-drop operations. If you made a change and immediately clicked a navigation link, the page would unload before that timer fired and the change would be lost. The fix adds visibilitychange and pagehide event listeners that flush any pending save immediately when leaving the page — using navigator.sendBeacon() on pagehide so the request survives the navigation.',
+    },
+    {
       id:     'release-0.10.2-planned-change-banner',
       date:   '5 Apr 2026',
       title:  'Bug fix: stale planned-change banner on dashboard/reports (0.10.2)',

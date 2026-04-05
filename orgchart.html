@@ -3644,6 +3644,24 @@ function saveToStorage(opts = {}) {
   if (opts.flush) { doSave(); } else { _saveTimer = setTimeout(doSave, 300); }
 }
 
+// Flush any pending debounced save when the page is hidden or unloaded.
+// Without this, a change made within 300ms of navigating away is silently lost.
+window.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'hidden' && _saveTimer !== null) {
+    saveToStorage({ flush: true });
+  }
+});
+window.addEventListener('pagehide', () => {
+  if (_saveTimer !== null) {
+    clearTimeout(_saveTimer);
+    // sendBeacon is fire-and-forget and survives page unload; no custom headers needed
+    // (auth cookie is sent automatically; source defaults to 'ui' server-side)
+    const endpoint = simMode ? '/api/sim-data' : '/api/data';
+    const body = JSON.stringify({ departments, roles, persons, roleAssignments, titles: TITLES, teams, settings, salaryBands: SALARY_BANDS, levelOrder: LEVELS.map(l => l.id), locationMultipliers, permissionGroups, assignmentPolicies, personPermissionOverrides, snapshots, _simLabel: simLabel, plannedChange });
+    navigator.sendBeacon(endpoint, new Blob([body], { type: 'application/json' }));
+  }
+});
+
 async function loadFromStorage() {
   try {
     const res = await fetch('/api/data');
