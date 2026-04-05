@@ -44,6 +44,7 @@
     clearData: `<svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="3,4 13,4"/><path d="M5 4V3a1 1 0 011-1h4a1 1 0 011 1v1"/><path d="M6 7v5M10 7v5"/><rect x="4" y="4" width="8" height="10" rx="1"/></svg>`,
     reset:       `<svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M1 1l14 14M1 8a7 7 0 0 1 12-4.9M15 8a7 7 0 0 1-12 4.9"/></svg>`,
     permissions: `<svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M8 1l5 2v4c0 3-2.2 5.5-5 6.5C5.2 12.5 3 10 3 7V3z"/><path d="M6 8l1.5 1.5L10 6" stroke-width="1.4"/></svg>`,
+    operator:    `<svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="14" height="10" rx="1.5"/><line x1="5" y1="7" x2="5" y2="9"/><line x1="8" y1="6" x2="8" y2="10"/><line x1="11" y1="7" x2="11" y2="9"/></svg>`,
   };
 
   // ── Admin section: hrefs differ on orgchart vs other pages ────────────────
@@ -74,6 +75,7 @@
       hasRight('manage_permissions') ? item('permissions.html', 'Permissions', ico.permissions)     : '',
       hasRight('view_changelog')     ? item('changelog.html', 'Changelog', ico.changelog)           : '',
       hasRight('manage_settings')    ? item(settingsHref,  'Settings',  ico.settings,  settingsId)  : '',
+      (window.__currentUser && window.__currentUser.role === 'super_admin') ? item('admin.html', 'Operator Console', ico.operator) : '',
     ].filter(Boolean);
 
     // Destructive items — shown on all pages for manage_settings users
