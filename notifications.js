@@ -16,6 +16,13 @@
   //   detail — full description shown in the modal (plain text or simple HTML)
   const RELEASE_NOTES = [
     {
+      id:     'release-0.9.24-admin-autofill-fix',
+      date:   '5 Apr 2026',
+      title:  'Operator Console org list fix (0.9.24)',
+      body:   'Fixed a bug where the organisation list disappeared on any click due to browser autofill.',
+      detail: 'Chrome was autofilling the organisation search input with the logged-in user\'s email address on first interaction, causing the search filter to activate and show "No organisations found". The fix detects browser autofill (which fires input events with no inputType) and clears the field instead of applying the filter. Also fixed the missing flex layout on the Operator Console page header.',
+    },
+    {
       id:     'release-0.9.23-admin-console',
       date:   '5 Apr 2026',
       title:  'Operator Console (0.9.23)',

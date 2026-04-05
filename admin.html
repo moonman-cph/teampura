@@ -131,7 +131,7 @@
     <!-- ── Organisations Tab ─────────────────────────────────────────────── -->
     <div id="tab-orgs" class="tab-panel active">
       <div class="toolbar">
-        <input class="search-input" id="org-search" type="search" placeholder="Filter by name or slug…" autocomplete="off" oninput="renderOrgs()">
+        <input class="search-input" id="org-search" type="search" placeholder="Filter by name or slug…" autocomplete="off" oninput="if(event.inputType){renderOrgs()}else{this.value=''}">
         <div class="toolbar-spacer"></div>
         <button class="btn btn-primary" onclick="openCreateOrg()">+ New Organisation</button>
       </div>
@@ -366,15 +366,12 @@ function badge(text, cls) { return `<span class="badge badge-${escHtml(cls)}">${
 
 // ── Organisations ─────────────────────────────────────────────────────────────
 async function loadOrgs() {
-  console.log('[admin] loadOrgs() called', new Error().stack);
   try {
     const result = await api('GET', '/orgs');
-    console.log('[admin] loadOrgs() result:', result);
     allOrgs = Array.isArray(result) ? result : [];
     renderOrgs();
     populateOrgFilter();
   } catch (e) {
-    console.error('[admin] loadOrgs() error:', e);
     toast('Failed to load organisations: ' + e.message, true);
   }
 }
@@ -386,9 +383,6 @@ function renderOrgs() {
     (o.name  || '').toLowerCase().includes(q) ||
     (o.slug  || '').toLowerCase().includes(q)
   ) : allOrgs;
-  if (!orgs.length) {
-    console.warn('[admin] renderOrgs: empty list. allOrgs.length=', allOrgs.length, 'q=', JSON.stringify(q), new Error().stack);
-  }
   const tbody = document.getElementById('orgs-tbody');
   if (!orgs.length) {
     tbody.innerHTML = '<tr class="empty-row"><td colspan="6">No organisations found.</td></tr>';
@@ -662,7 +656,6 @@ async function deleteUser(userId, email) {
 
 // ── Init ─────────────────────────────────────────────────────────────────────
 document.addEventListener('auth:ready', function (e) {
-  console.log('[admin] auth:ready fired, user:', e.detail && e.detail.email, new Error().stack);
   const user = e.detail;
   // This page is super_admin only
   if (!user || user.role !== 'super_admin') {
