@@ -147,15 +147,20 @@ async function init() {
     document.body.classList.add('sim-mode');
   }
 
-  // Show planned-change banner if one is scheduled
+  // Show planned-change banner if one is scheduled and hasn't fired yet
   if (saved.plannedChange) {
     const pc = saved.plannedChange;
     const d = new Date(pc.effectiveAt);
-    const dateStr = d.toLocaleDateString(undefined, { year:'numeric', month:'short', day:'numeric' })
-      + ' at ' + d.toLocaleTimeString(undefined, { hour:'2-digit', minute:'2-digit' });
-    document.getElementById('pc-banner-label').textContent =
-      `Planned change scheduled: "${pc.label || 'Untitled'}" — effective ${dateStr}`;
-    document.body.classList.add('planned-change-mode');
+    const msUntil = d - Date.now();
+    if (msUntil > 0) {
+      const dateStr = d.toLocaleDateString(undefined, { year:'numeric', month:'short', day:'numeric' })
+        + ' at ' + d.toLocaleTimeString(undefined, { hour:'2-digit', minute:'2-digit' });
+      document.getElementById('pc-banner-label').textContent =
+        `Planned change scheduled: "${pc.label || 'Untitled'}" — effective ${dateStr}`;
+      document.body.classList.add('planned-change-mode');
+      // Reload when the change takes effect so the banner disappears and data refreshes
+      setTimeout(() => location.reload(), msUntil + 1000);
+    }
   }
   setInterval(async () => {
     try {

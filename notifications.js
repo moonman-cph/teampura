@@ -16,6 +16,13 @@
   //   detail — full description shown in the modal (plain text or simple HTML)
   const RELEASE_NOTES = [
     {
+      id:     'release-0.10.2-planned-change-banner',
+      date:   '5 Apr 2026',
+      title:  'Bug fix: stale planned-change banner on dashboard/reports (0.10.2)',
+      body:   'The planned-change banner no longer appears on Dashboard and Reports after the change has already been applied.',
+      detail: 'Dashboard and Reports were showing the planned-change banner whenever the data contained a plannedChange object, without checking whether its effective date had already passed. Now both pages suppress the banner if the effective date is in the past. As a bonus, if you have the Dashboard or Reports page open when a planned change fires, the page automatically reloads one second after the effective time so the banner disappears and the data refreshes.',
+    },
+    {
       id:     'release-0.10.1-planned-change-crash',
       date:   '5 Apr 2026',
       title:  'Bug fix: planned-change crash on load (0.10.1)',
