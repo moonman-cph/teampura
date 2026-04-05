@@ -131,7 +131,7 @@
     <!-- ── Organisations Tab ─────────────────────────────────────────────── -->
     <div id="tab-orgs" class="tab-panel active">
       <div class="toolbar">
-        <input class="search-input" id="org-search" type="search" placeholder="Filter by name or slug…" autocomplete="new-password" oninput="renderOrgs()">
+        <input class="search-input" id="org-search" type="search" placeholder="Filter by name or slug…" autocomplete="off" readonly onfocus="this.removeAttribute('readonly')" oninput="renderOrgs()">
         <div class="toolbar-spacer"></div>
         <button class="btn btn-primary" onclick="openCreateOrg()">+ New Organisation</button>
       </div>
@@ -155,7 +155,7 @@
     <!-- ── Users Tab ─────────────────────────────────────────────────────── -->
     <div id="tab-users" class="tab-panel">
       <div class="toolbar">
-        <input class="search-input" id="user-search" type="search" placeholder="Search by email…" autocomplete="new-password" oninput="searchUsers()">
+        <input class="search-input" id="user-search" type="search" placeholder="Search by email…" autocomplete="off" readonly onfocus="this.removeAttribute('readonly')" oninput="searchUsers()">
         <select class="form-select" id="user-org-filter" onchange="searchUsers()" style="width:160px;height:34px;">
           <option value="">All orgs</option>
         </select>
